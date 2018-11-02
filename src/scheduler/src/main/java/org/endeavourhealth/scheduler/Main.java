@@ -1,13 +1,12 @@
 package org.endeavourhealth.scheduler;
 
+import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
-import org.endeavourhealth.scheduler.org.endeavourhealth.scheduler.job.*;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Main {

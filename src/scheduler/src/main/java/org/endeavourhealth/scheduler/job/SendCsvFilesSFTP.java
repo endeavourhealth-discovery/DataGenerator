@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.org.endeavourhealth.scheduler.job;
+package org.endeavourhealth.scheduler.job;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
