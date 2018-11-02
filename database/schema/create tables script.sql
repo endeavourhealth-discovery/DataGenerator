@@ -7,6 +7,7 @@ drop table if exists data_generator.cohort_results;
 
 create table data_generator.extract (
 	extract_id int not null comment 'The extract that this patient is related to',
+    extract_name varchar(50) not null comment 'The name of the extract',
     cohort_id int not null comment 'The cohort to be used for this extract',
     code_set_id int not null comment 'The code set to be used for this extract',
     dataset_id int not null comment 'The dataset to be used for this extract',

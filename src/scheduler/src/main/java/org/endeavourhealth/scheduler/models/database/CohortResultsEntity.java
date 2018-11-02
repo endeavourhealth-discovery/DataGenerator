@@ -1,9 +1,10 @@
-package org.endeavourhealth.scheduler.database;
+package org.endeavourhealth.scheduler.models.database;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Table(name = "cohort_results", schema = "data_generator")
+@Table(name = "cohort_results", schema = "data_generator", catalog = "")
 public class CohortResultsEntity {
     private int extractId;
     private long patientId;
@@ -43,21 +44,15 @@ public class CohortResultsEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         CohortResultsEntity that = (CohortResultsEntity) o;
-
-        if (extractId != that.extractId) return false;
-        if (patientId != that.patientId) return false;
-        if (organisationId != that.organisationId) return false;
-
-        return true;
+        return extractId == that.extractId &&
+                patientId == that.patientId &&
+                organisationId == that.organisationId;
     }
 
     @Override
     public int hashCode() {
-        int result = extractId;
-        result = 31 * result + (int) (patientId ^ (patientId >>> 32));
-        result = 31 * result + (int) (organisationId ^ (organisationId >>> 32));
-        return result;
+
+        return Objects.hash(extractId, patientId, organisationId);
     }
 }
