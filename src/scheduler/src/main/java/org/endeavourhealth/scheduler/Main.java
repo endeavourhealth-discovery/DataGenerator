@@ -20,8 +20,24 @@ public class Main {
 
         String step = args[0];
 
-        if (step.equals("BuildCohort")) {
+        if (step.equals("buildCohort")) {
             buildCohort();
+        }
+
+        if (step.equals("getData")) {
+            getData();
+        }
+
+        if (step.equals("extractSQL")) {
+            extractSQLtoCSV();
+        }
+
+        if (step.equals("encryptCSV")) {
+            encryptCSVFiles();
+        }
+
+        if (step.equals("moveCSV")) {
+            moveCSVtoSFTP();
         }
 
         LOG.info("Checking for extractions");
@@ -38,7 +54,12 @@ public class Main {
     }
 
     private static void generateData() throws Exception {
+        System.out.println("Running full process");
         buildCohort();
+        getData();
+        extractSQLtoCSV();
+        encryptCSVFiles();
+        moveCSVtoSFTP();
     }
 
     public static void buildCohort() throws Exception {
@@ -54,8 +75,22 @@ public class Main {
             System.out.println("Calling Darren's cohort generator code");
             // Call the Cohort Generator code
         }
+    }
 
+    private static void getData() throws Exception {
+        System.out.println("Running the extracts of the data into new SQL tables");
+    }
 
+    private static void extractSQLtoCSV() throws Exception {
+        System.out.println("Extracting the new SQL files to CSV");
+    }
+
+    private static void encryptCSVFiles() throws Exception {
+        System.out.println("Encrypting the CSV files");
+    }
+
+    private static void moveCSVtoSFTP() throws Exception {
+        System.out.println("Moving the csv files into SFTP");
     }
 
 }
