@@ -20,7 +20,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        // test comment
+        // test comments
         if (args.length == 0) {
             // Run the whole process
             generateData();
