@@ -24,6 +24,7 @@ public class Main {
             // Run the whole process
             generateData();
             return;
+
         }
 
         String step = args[0];
