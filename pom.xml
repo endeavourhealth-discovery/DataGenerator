@@ -18,6 +18,7 @@
 		<quartz.version>2.2.3</quartz.version>
         <bouncycastle.version>1.60</bouncycastle.version>
         <commons.io.version>2.6</commons.io.version>
+        <commons.net.version>3.6</commons.net.version>
     </properties>
 
     <modules>
