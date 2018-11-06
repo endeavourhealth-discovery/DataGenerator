@@ -48,7 +48,7 @@ public class SendCsvFilesSFTP implements Job {
         // upload a directory all in one hit?
         // List<File> files = new ArrayList<>();
         // files.add(Files.walkFileTree(sourcePath, new SimpleFileVisitor<>())); - doesn't work
-
+        //
         System.out.println("CSV files sent");
     }
     catch (IOException e){
