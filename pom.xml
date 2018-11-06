@@ -19,6 +19,8 @@
         <bouncycastle.version>1.60</bouncycastle.version>
         <commons.io.version>2.6</commons.io.version>
         <commons.net.version>3.6</commons.net.version>
+        <commons-lang3.version>3.5</commons-lang3.version>
+        <jsch.version>0.1.54</jsch.version>
     </properties>
 
     <modules>
