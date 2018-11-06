@@ -4,6 +4,7 @@
     <persistence-unit name="data_generator">
         <class>org.endeavourhealth.scheduler.models.database.CohortResultsEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.ExtractEntity</class>
+        <class>org.endeavourhealth.scheduler.models.database.DatasetEntity</class>
         <properties>
             <property name="toplink.jdbc.url" value="jdbc:mysql://localhost:3306/data_generator"/>
             <property name="toplink.jdbc.driver" value="com.mysql.jdbc.Driver"/>
