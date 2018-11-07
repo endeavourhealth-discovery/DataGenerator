@@ -34,7 +34,13 @@ public class Main {
         }
 
         if (step.equals("getData")) {
-            getData(false);
+            boolean limitCols = false;
+            if (args.length == 2) {
+                if (args[1].equals("limit")) {
+                    limitCols = true;
+                }
+            }
+            getData(false, limitCols);
         }
 
         if (step.equals("extractSQL")) {
@@ -65,7 +71,7 @@ public class Main {
     private static void generateData() throws Exception {
         System.out.println("Running full process");
         buildCohort(true);
-        getData(true);
+        getData(true, false);
         extractSQLtoCSV(true);
         encryptCSVFiles(true);
         moveCSVtoSFTP(true);
@@ -124,7 +130,7 @@ public class Main {
         }
     }
 
-    private static void getData(boolean isScheduled) throws Exception {
+    private static void getData(boolean isScheduled, boolean limitCols) throws Exception {
         System.out.println("Running the extracts of the data into new SQL tables");
         if (isScheduled) {
             JobDetail generateDataJob = JobBuilder.newJob(GenerateData.class).build();
@@ -141,6 +147,7 @@ public class Main {
 
         } else {
             GenerateData generateData = new GenerateData();
+            generateData.setLimitCols(limitCols);
             generateData.execute(null);
         }
     }

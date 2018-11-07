@@ -15,13 +15,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
     private static Map<Integer, DatasetConfig> datasetConfigMap = new HashMap<>();
+    private boolean limitCols = false;
+
+    public void setLimitCols(boolean limit) {
+        this.limitCols = limit;
+    }
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
@@ -33,7 +37,7 @@ public class GenerateData implements Job {
 
             DatasetConfig config = getDatasetConfig(1);
             System.out.println(config.getName());
-            processExtracts(config.getExtract());
+            processExtracts(config, limitCols);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -63,53 +67,107 @@ public class GenerateData implements Job {
         return config;
     }
 
-    private void processExtracts(List<DatasetConfigExtract> extracts) throws Exception {
+    private void processExtracts(DatasetConfig extractConfig, boolean limitCols) throws Exception {
 
-        for (DatasetConfigExtract extract : extracts) {
+        int extractId = extractConfig.getId();
+        for (DatasetConfigExtract extract : extractConfig.getExtract()) {
             System.out.println(extract.getType());
             switch (extract.getType()) {
                 case "patient" :
-                    runPatientExtract(extract);
+                    if (limitCols) {
+                        runGenericExtract(extract, extractId, "generate_patient");
+                    } else {
+                        runGenericExtractAll(extract, extractId, "generate_patient_all_col");
+                    }
                     break;
                 case "medication" :
-                    runMedicationExtract(extract);
+                    if (limitCols) {
+                        runGenericStatusExtract(extract, extractId, "generate_medication");
+                    } else {
+                        runGenericStatusExtractAll(extract, extractId, "generate_medication_all_col");
+                    }
                     break;
                 case "observation" :
-                    runObservationExtract(extract);
+                    if (limitCols) {
+                        runGenericExtract(extract, extractId, "generate_observation");
+                    } else {
+                        runGenericExtractAll(extract, extractId, "generate_observation_all_col");
+                    }
                     break;
                 case "allergy" :
-                    runAllergyExtract(extract);
+                    if (limitCols) {
+                        runGenericStatusExtract(extract, extractId, "generate_allergy");
+                    } else {
+                        runGenericStatusExtractAll(extract, extractId, "generate_allergy_all_col");
+                    }
                     break;
                 case "immunisation" :
-                    runImmunisationExtract(extract);
+                    if (limitCols) {
+                        runGenericExtract(extract, extractId, "generate_immunisation");
+                    } else {
+                        runGenericExtractAll(extract, extractId, "generate_immunisation_all_col");
+                    }
                     break;
             }
         }
 
     }
 
-    private void runPatientExtract(DatasetConfigExtract extract) throws Exception {
-        /*EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        Integer medStatus = 0;
-        String medicationStatus = extract.getParameters().get(0).getStatus();
-        if (medicationStatus.equals("activeOnly")) {
-            medStatus = 1;
-        }
-
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("generate_medication")
-                .registerStoredProcedureParameter("col_list", String.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("medication_status", Integer.class, ParameterMode.IN)
-                .setParameter("col_list", extract.getFields())
-                .setParameter("medication_status", medStatus);
-
-        query.execute();*/
-    }
-
-    private void runMedicationExtract(DatasetConfigExtract extract) throws Exception {
+    private void runGenericExtract(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
-        System.out.println("Running medication extract");
+        System.out.println("Running " + procedureName);
+
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
+                .registerStoredProcedureParameter("col_list", String.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
+                .setParameter("col_list", extract.getFields())
+                .setParameter("extractId", extractId);
+
+        query.execute();
+        System.out.println(procedureName + " executed");
+    }
+
+    private void runGenericExtractAll(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        System.out.println("Running " + procedureName);
+
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
+                .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
+                .setParameter("extractId", extractId);
+
+        query.execute();
+        System.out.println(procedureName + " executed");
+    }
+
+    private void runGenericStatusExtract(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        System.out.println("Running " + procedureName);
+
+        Integer statusCode = 0;
+        String medicationStatus = extract.getParameters().get(0).getStatus();
+        if (medicationStatus.equals("activeOnly")) {
+            statusCode = 1;
+        }
+
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
+                .registerStoredProcedureParameter("col_list", String.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
+                .setParameter("col_list", extract.getFields())
+                .setParameter("status_code", statusCode)
+                .setParameter("extractId", extractId);
+
+        query.execute();
+        System.out.println(procedureName + " executed");
+    }
+
+    private void runGenericStatusExtractAll(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        System.out.println("Running " + procedureName);
 
         Integer medStatus = 0;
         String medicationStatus = extract.getParameters().get(0).getStatus();
@@ -117,25 +175,13 @@ public class GenerateData implements Job {
             medStatus = 1;
         }
 
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("generate_medication")
-                .registerStoredProcedureParameter("col_list", String.class, ParameterMode.IN)
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
                 .registerStoredProcedureParameter("medication_status", Integer.class, ParameterMode.IN)
-                .setParameter("col_list", extract.getFields())
-                .setParameter("medication_status", medStatus);
+                .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
+                .setParameter("medication_status", medStatus)
+                .setParameter("extractId", extractId);
 
         query.execute();
-        System.out.println("Medication executed");
-    }
-
-    private void runObservationExtract(DatasetConfigExtract extract) throws Exception {
-
-    }
-
-    private void runAllergyExtract(DatasetConfigExtract extract) throws Exception {
-
-    }
-
-    private void runImmunisationExtract(DatasetConfigExtract extract) throws Exception {
-
+        System.out.println(procedureName + " executed");
     }
 }
