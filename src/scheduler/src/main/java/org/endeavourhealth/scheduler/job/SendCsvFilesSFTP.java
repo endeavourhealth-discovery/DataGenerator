@@ -25,7 +25,7 @@ public class SendCsvFilesSFTP implements Job {
 
     // This is the basic structure for connecting to an SFTP
 
-    try {
+  /*  try {
         // Try opening the connection to the SFTP
     }
     catch (Exception e){
@@ -34,7 +34,7 @@ public class SendCsvFilesSFTP implements Job {
     finally{
         // Close the connection to the SFTP
     }
-
+  */
     try {
         // Don't know where the files will be after encryption, or where
         // they are going to, so will need to use URIs rather hard-coded paths
