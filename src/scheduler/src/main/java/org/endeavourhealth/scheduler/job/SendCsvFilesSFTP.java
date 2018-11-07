@@ -22,6 +22,19 @@ public class SendCsvFilesSFTP implements Job {
     System.out.println("Sending Encrypted CSV files");
 
     //TODO Send encrypted CSV files via SFTP
+
+    // This is the basic structure for connecting to an SFTP
+
+    try {
+        // Try opening the connection to the SFTP
+    }
+    catch (Exception e){
+        // Catch if there is a problem connecting
+    }
+    finally{
+        // Close the connection to the SFTP
+    }
+
     try {
         // Don't know where the files will be after encryption, or where
         // they are going to, so will need to use URIs rather hard-coded paths
