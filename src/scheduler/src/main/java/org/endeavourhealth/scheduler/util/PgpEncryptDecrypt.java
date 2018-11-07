@@ -10,7 +10,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OutputEncryptor;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -20,8 +19,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PgpEncryptDecrypt {
 
@@ -65,29 +62,43 @@ public class PgpEncryptDecrypt {
 
     public static void main(String[] args) throws Exception {
 
-//        File file = new File("C://Temp//sample.csv");
-//        FileInputStream fis = new FileInputStream(file);
-//        String data = IOUtils.toString(fis, "UTF-8");
-//        System.out.println(data);
-//
-//        String provider = "BC";
-//        Security.addProvider(new BouncyCastleProvider());
-//        CertificateFactory certFactory= CertificateFactory.getInstance("X.509", provider);
-//
-//        X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(
-//                new FileInputStream("C://Temp//Baeldung.cer"));
-//
-//        PgpEncryptDecrypt.encryptFile(file, certificate, provider);
-//        fis = new FileInputStream(file);
-//        data = IOUtils.toString(fis, "UTF-8");
-//        System.out.println(data);
+        ClassLoader classLoader = PgpEncryptDecrypt.class.getClassLoader();
+        Path path = Paths.get(classLoader.getResource("sample.csv").toURI());
+        File file = path.toFile();
+        FileInputStream fis = new FileInputStream(file);
+        String data = IOUtils.toString(fis, "UTF-8");
+        System.out.println("Contents of csv file before encryption");
+        System.out.println("=====================");
+        System.out.println(data);
+        System.out.println("=====================");
 
+        String provider = "BC";
+        Security.addProvider(new BouncyCastleProvider());
+        CertificateFactory certFactory= CertificateFactory.getInstance("X.509", provider);
+        path = Paths.get(classLoader.getResource("sample.cer").toURI());
+        X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
+        PgpEncryptDecrypt.encryptFile(file, certificate, provider);
+        fis = new FileInputStream(file);
+        data = IOUtils.toString(fis, "UTF-8");
+        System.out.println();
+        System.out.println("Contents of csv file after encryption");
+        System.out.println("*********************");
+        System.out.println(data);
+        System.out.println("*********************");
 
-//        char[] keystorePassword = "password".toCharArray();
-//        char[] keyPassword = "password".toCharArray();
-//
-//        KeyStore keystore = KeyStore.getInstance("PKCS12");
-//        keystore.load(new FileInputStream("C://Temp//Baeldung.p12"), keystorePassword);
-//        PrivateKey key = (PrivateKey) keystore.getKey("baeldung", keyPassword);
+        char[] keystorePassword = "password".toCharArray();
+        char[] keyPassword = "password".toCharArray();
+        KeyStore keystore = KeyStore.getInstance("PKCS12");
+        path = Paths.get(classLoader.getResource("sample.p12").toURI());
+        keystore.load(new FileInputStream(path.toFile()), keystorePassword);
+        PrivateKey key = (PrivateKey) keystore.getKey("sample", keyPassword);
+        PgpEncryptDecrypt.decryptFile(file, key);
+        fis = new FileInputStream(file);
+        data = IOUtils.toString(fis, "UTF-8");
+        System.out.println();
+        System.out.println("Contents of csv file after decryption");
+        System.out.println("=====================");
+        System.out.println(data);
+        System.out.println("=====================");
     }
 }
