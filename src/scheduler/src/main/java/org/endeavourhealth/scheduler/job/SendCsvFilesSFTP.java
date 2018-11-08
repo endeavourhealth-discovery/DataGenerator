@@ -1,19 +1,21 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
 import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
 import org.endeavourhealth.sftpreader.sources.Connection;
-import org.endeavourhealth.sftpreader.sources.SftpConnection;
+import org.endeavourhealth.sftpreader.utilities.RemoteFile;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
+import java.util.List;
 
 public class SendCsvFilesSFTP implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendCsvFilesSFTP.class);
 
-    private final String readFile(String file) throws IOException {
+    private String readFile(String file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader (file));
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -38,10 +40,10 @@ public class SendCsvFilesSFTP implements Job {
 
         // This is the overall structure for connecting to an SFTP
 
-        // Hostname IP Address 35.176.117.37
+        // Hostname IP Address 35.176.117.37 (internet) 10.0.101.239 (vpn)
         // Hostname DNS ReverseLookup ec2-35-176-117-37.eu-west-2.compute.amazonaws.com
-        // Hostname (created by Sophie) https://devsftp.endeavourhealth.net/
-        String hostname = "devsftp.endeavourhealth.net";
+        // Hostname (created by Sophie) devsftp.endeavourhealth.net
+        String hostname = "10.0.101.239";
         int port = 22;
         // username = endeavour
         String username = "endeavour";
@@ -55,7 +57,7 @@ public class SendCsvFilesSFTP implements Job {
         String hostPublicKey = "";
 
         ConnectionDetails sftpConnectionDetails;
-        Connection sftpConnection;
+        Connection sftpConnection = null;
 
         sftpConnectionDetails = new ConnectionDetails();
         sftpConnectionDetails.setHostname(hostname);
@@ -65,16 +67,22 @@ public class SendCsvFilesSFTP implements Job {
         sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
         sftpConnectionDetails.setHostPublicKey(hostPublicKey);
 
-        sftpConnection = new SftpConnection(sftpConnectionDetails);
-
         try {
             // Try opening the connection to the SFTP and writing to it
+            sftpConnection = ConnectionActivator.createConnection(sftpConnectionDetails);
+            System.out.println("Opening " + sftpConnection.getClass().getName() + " to " + hostname +
+                    " on port " + port + " with user " + username);
             sftpConnection.open();
             System.out.println("Connected to the SFTP");
+            String knownHostsString = sftpConnection.getConnectionDetails()
+                    .getKnownHostsString();
+            System.out.println(knownHostsString);
+            List<RemoteFile> remoteFileList =
+                    sftpConnection.getFileList("/"); // This is the root remote path
+            System.out.println(remoteFileList);
             // String localPath = "C:/sftpupload";
-            // String destinationPath = sftpConnectionDetails.getKnownHostsString();
+            // String destinationPath = null; // Need to use remote path
             // sftpConnection.put(localPath, destinationPath);
-            // sftpConnection.getFile(destinationPath);
         }
         catch (Exception e) {
             // Catch if there is a problem connecting to it
