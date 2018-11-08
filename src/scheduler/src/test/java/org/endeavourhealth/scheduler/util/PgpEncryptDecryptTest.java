@@ -23,7 +23,7 @@ public class PgpEncryptDecryptTest {
     public void fullCycle()  {
 
         try {
-            ClassLoader classLoader = PgpEncryptDecrypt.class.getClassLoader();
+            ClassLoader classLoader = PgpEncryptDecryptTest.class.getClassLoader();
             Path path = Paths.get(classLoader.getResource("sample.csv").toURI());
             File file = path.toFile();
             FileInputStream fis = new FileInputStream(file);
