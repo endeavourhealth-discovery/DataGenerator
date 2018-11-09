@@ -2,6 +2,7 @@ package org.endeavourhealth.scheduler.util;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,39 +15,50 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 public class PgpEncryptDecryptTest {
+
+    private ClassLoader classLoader = null;
+    private X509Certificate certificate = null;
+    private final String provider = "BC";
+    private CertificateFactory certFactory = null;
+    private PrivateKey key = null;
+
+    @Before
+    public void setUp() throws Exception {
+        classLoader = PgpEncryptDecrypt.class.getClassLoader();
+        Security.addProvider(new BouncyCastleProvider());
+        Path path = Paths.get(classLoader.getResource("sample.cer").toURI());
+        certFactory = CertificateFactory.getInstance("X.509", provider);
+        certificate = (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
+
+        char[] keystorePassword = "password".toCharArray();
+        char[] keyPassword = "password".toCharArray();
+        KeyStore keystore = KeyStore.getInstance("PKCS12");
+        path = Paths.get(classLoader.getResource("sample.p12").toURI());
+        keystore.load(new FileInputStream(path.toFile()), keystorePassword);
+        key = (PrivateKey) keystore.getKey("sample", keyPassword);
+    }
 
     @Test()
     public void fullCycle()  {
 
         try {
-            ClassLoader classLoader = PgpEncryptDecryptTest.class.getClassLoader();
             Path path = Paths.get(classLoader.getResource("sample.csv").toURI());
             File file = path.toFile();
             FileInputStream fis = new FileInputStream(file);
             String originalData = IOUtils.toString(fis, "UTF-8");
 
-            String provider = "BC";
-            Security.addProvider(new BouncyCastleProvider());
-            CertificateFactory certFactory= CertificateFactory.getInstance("X.509", provider);
-            path = Paths.get(classLoader.getResource("sample.cer").toURI());
-            X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
-            PgpEncryptDecrypt.encryptFile(file, certificate, provider);
+            boolean value = PgpEncryptDecrypt.encryptFile(file, certificate, provider);
+            assertTrue(value);
             fis = new FileInputStream(file);
             String encryptedData = IOUtils.toString(fis, "UTF-8");
 
             assertNotEquals(originalData, encryptedData);
 
-            char[] keystorePassword = "password".toCharArray();
-            char[] keyPassword = "password".toCharArray();
-            KeyStore keystore = KeyStore.getInstance("PKCS12");
-            path = Paths.get(classLoader.getResource("sample.p12").toURI());
-            keystore.load(new FileInputStream(path.toFile()), keystorePassword);
-            PrivateKey key = (PrivateKey) keystore.getKey("sample", keyPassword);
-            PgpEncryptDecrypt.decryptFile(file, key);
+            value = PgpEncryptDecrypt.decryptFile(file, key);
+            assertTrue(value);
             fis = new FileInputStream(file);
             String decyptedData = IOUtils.toString(fis, "UTF-8");
 
@@ -55,4 +67,15 @@ public class PgpEncryptDecryptTest {
             e.printStackTrace();
         }
     }
+
+    @Test()
+    public void encryptFileNotFound() {
+        try {
+            File file = new File("does_not_exists.file");
+            PgpEncryptDecrypt.encryptFile(file, certificate, provider);
+        } catch (Exception e) {
+            assertTrue(e.getMessage().startsWith("Error encountered in file handling."));
+        }
+    }
+
 }

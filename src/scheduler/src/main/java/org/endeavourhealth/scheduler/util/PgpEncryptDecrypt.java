@@ -20,9 +20,9 @@ public class PgpEncryptDecrypt {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgpEncryptDecrypt.class);
 
-    public static void encryptFile(File file,
+    public static boolean encryptFile(File file,
                                       X509Certificate encryptionCertificate,
-                                      String provider) throws Exception {
+                                      String provider) {
 
         LOG.debug("File:" + file +
                 ", X509Certificate:" + encryptionCertificate +
@@ -46,25 +46,23 @@ public class PgpEncryptDecrypt {
                 output.close();
 
                 LOG.info("File encryption was successful.");
+                return true;
             }
         } catch (IOException e) {
             LOG.error("Error encountered in file handling. " + e.getMessage());
-            throw new Exception("Error encountered in file handling. " + e.getMessage());
         } catch (CertificateEncodingException e) {
             LOG.error("Error encountered in certificate handling. " + e.getMessage());
-            throw new Exception("Error encountered in certificate handling. " + e.getMessage());
         } catch (CMSException e) {
             LOG.error("Error encountered in encryption handling. " + e.getMessage());
-            throw new Exception("Error encountered in encryption handling. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Unknown error encountered in encryption handling. " + e.getMessage());
-            throw new Exception("Unknown error encountered in encryption handling. " + e.getMessage());
         }
 
         LOG.info("File encryption failed.");
+        return false;
     }
 
-    public static void decryptFile(File file, PrivateKey decryptionKey) throws Exception {
+    public static boolean decryptFile(File file, PrivateKey decryptionKey) {
 
         LOG.debug("File:" + file +
                 ", PrivateKey:" + decryptionKey);
@@ -84,18 +82,17 @@ public class PgpEncryptDecrypt {
                 output.close();
 
                 LOG.info("File decryption was successful.");
+                return true;
             }
         } catch (IOException e) {
             LOG.error("Error encountered in file handling. " + e.getMessage());
-            throw new Exception("Error encountered in file handling. " + e.getMessage());
         } catch (CMSException e) {
             LOG.error("Error encountered in decryption handling. " + e.getMessage());
-            throw new Exception("Error encountered in decryption handling. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Unknown error encountered in decryption handling. " + e.getMessage());
-            throw new Exception("Unknown error encountered in decryption handling. " + e.getMessage());
         }
 
         LOG.info("File decryption was successful.");
+        return false;
     }
 }
