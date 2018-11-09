@@ -195,7 +195,7 @@ public class Main {
     }
 
     private static void moveCSVtoSFTP(boolean isScheduled) throws Exception {
-        System.out.println("Moving the csv files into SFTP");
+        System.out.println("Moving the CSV files into SFTP");
         if (isScheduled) {
             JobDetail moveCSVtoSFTPJob = JobBuilder.newJob(SendCsvFilesSFTP.class).build();
 
