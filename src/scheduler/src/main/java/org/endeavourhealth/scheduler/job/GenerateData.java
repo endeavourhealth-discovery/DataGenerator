@@ -1,11 +1,9 @@
 package org.endeavourhealth.scheduler.job;
 
-import org.apache.commons.lang3.StringUtils;
-import org.endeavourhealth.common.cache.ObjectMapperPool;
+import org.endeavourhealth.scheduler.cache.DatasetCache;
 import org.endeavourhealth.scheduler.json.DatasetConfig;
 import org.endeavourhealth.scheduler.json.DatasetConfigExtract;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
-import org.endeavourhealth.scheduler.models.database.DatasetEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -14,13 +12,10 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
-    private static Map<Integer, DatasetConfig> datasetConfigMap = new HashMap<>();
     private boolean limitCols = false;
 
     public void setLimitCols(boolean limit) {
@@ -35,7 +30,7 @@ public class GenerateData implements Job {
 
         try {
 
-            DatasetConfig config = getDatasetConfig(1);
+            DatasetConfig config = DatasetCache.getDatasetConfig(1);
             System.out.println(config.getName());
             processExtracts(config, limitCols);
         } catch (Exception e) {
@@ -43,28 +38,6 @@ public class GenerateData implements Job {
         }
 
         System.out.println("End of Generate Data");
-    }
-
-    private DatasetConfig getDatasetConfig(int datasetId) throws Exception {
-
-        // Check if the config is already in the cache
-        DatasetConfig config = datasetConfigMap.get(datasetId);
-
-        if (config == null) {
-            // get the config from the DB
-            DatasetEntity dataset = DatasetEntity.getDatasetDefinition(1);
-
-            String definition = dataset.getDefinition();
-            if (!StringUtils.isEmpty(definition)) {
-
-                // Map config to the Java Class
-                config = ObjectMapperPool.getInstance().readValue(definition, DatasetConfig.class);
-
-                datasetConfigMap.put(datasetId, config);
-            }
-        }
-
-        return config;
     }
 
     private void processExtracts(DatasetConfig extractConfig, boolean limitCols) throws Exception {

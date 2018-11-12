@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "cohort_results", schema = "data_generator", catalog = "")
+@Table(name = "cohort_results", schema = "data_generator")
 public class CohortResultsEntity {
     private int extractId;
     private long patientId;
