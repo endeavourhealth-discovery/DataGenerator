@@ -185,9 +185,6 @@ public class ExtractSQLToCsv implements Job {
 
     @Transactional(readOnly = true)
     public void streamedCsv(File file, DatasetEntityRepository datasetEntityRepo, EntityManager entityManager ) {
-        Connection conn = entityManager.unwrap(Session.class).connection();
-
-
         try(Stream<DatasetEntity> datasetEntityStream = datasetEntityRepo.streamAll()) {
             PrintWriter out = new PrintWriter(new FileOutputStream(file));
             datasetEntityStream.forEach(rethrowConsumer(datasetEntity -> {
