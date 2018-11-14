@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "extract", schema = "data_generator", catalog = "")
+@Table(name = "extract", schema = "data_generator")
 public class ExtractEntity {
     private int extractId;
+    private String extractName;
     private int cohortId;
     private int codeSetId;
     private int datasetId;
-    private String extractName;
+    private String definition;
 
     @Id
     @Column(name = "extract_id")
@@ -26,6 +27,16 @@ public class ExtractEntity {
 
     public void setExtractId(int extractId) {
         this.extractId = extractId;
+    }
+
+    @Basic
+    @Column(name = "extract_name")
+    public String getExtractName() {
+        return extractName;
+    }
+
+    public void setExtractName(String extractName) {
+        this.extractName = extractName;
     }
 
     @Basic
@@ -58,6 +69,16 @@ public class ExtractEntity {
         this.datasetId = datasetId;
     }
 
+    @Basic
+    @Column(name = "definition")
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,23 +87,14 @@ public class ExtractEntity {
         return extractId == that.extractId &&
                 cohortId == that.cohortId &&
                 codeSetId == that.codeSetId &&
-                datasetId == that.datasetId;
+                datasetId == that.datasetId &&
+                Objects.equals(extractName, that.extractName) &&
+                Objects.equals(definition, that.definition);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(extractId, cohortId, codeSetId, datasetId);
-    }
-
-    @Basic
-    @Column(name = "extract_name")
-    public String getExtractName() {
-        return extractName;
-    }
-
-    public void setExtractName(String extractName) {
-        this.extractName = extractName;
+        return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition);
     }
 
     public static List<ExtractEntity> getAllExtracts() throws Exception {
@@ -98,6 +110,16 @@ public class ExtractEntity {
 
         TypedQuery<ExtractEntity> query = entityManager.createQuery(cq);
         List<ExtractEntity> ret = query.getResultList();
+
+        entityManager.close();
+
+        return ret;
+    }
+
+    public static ExtractEntity getExtract(int extractId) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        ExtractEntity ret = entityManager.find(ExtractEntity.class, extractId);
 
         entityManager.close();
 

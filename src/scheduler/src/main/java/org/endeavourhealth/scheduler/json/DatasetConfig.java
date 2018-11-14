@@ -15,7 +15,6 @@ public class DatasetConfig {
         this.extract = extract;
     }
 
-
     public String getName() {
         return name;
     }
