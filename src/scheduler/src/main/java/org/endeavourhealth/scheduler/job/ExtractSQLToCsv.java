@@ -3,28 +3,16 @@ package org.endeavourhealth.scheduler.job;
 import org.endeavourhealth.scheduler.cache.DatasetCache;
 import org.endeavourhealth.scheduler.json.DatasetConfig;
 import org.endeavourhealth.scheduler.json.DatasetConfigExtract;
-import org.endeavourhealth.scheduler.models.PersistenceJPAConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
-import org.endeavourhealth.scheduler.models.database.DatasetEntity;
-import org.endeavourhealth.scheduler.models.repository.DatasetEntityRepository;
-import org.hibernate.Session;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import java.io.*;
-import java.sql.Connection;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class ExtractSQLToCsv implements Job {
 
