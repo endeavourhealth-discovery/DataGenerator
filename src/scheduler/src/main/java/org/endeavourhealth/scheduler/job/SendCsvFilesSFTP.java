@@ -47,21 +47,26 @@ public class SendCsvFilesSFTP implements Job {
                 // Getting a file from the C drive and uploading it onto the SFTP
                 // String sourceLocalPath = "C:/sftpupload/test1oncdrive.csv";
                 // String uploadDestinationPath = "/endeavour/ftp/test1fromcdrive.csv";
-                String sourceLocalPath = config.getFileLocationDetails().getSource();
-                String uploadDestinationPath = config.getFileLocationDetails().getDestination();
-
-                this.uploadFileToSftp(sftpConnection, sourceLocalPath, uploadDestinationPath);
+                String sourceLocation = config.getFileLocationDetails().getSource();
+                File sourceFolder = new File(sourceLocation);
+                String[] folderFilenamesStringArray = sourceFolder.list();
+                for (String filename : folderFilenamesStringArray) {
+                    String sourcePath = sourceLocation + filename;
+                    String destinationPath = config.getFileLocationDetails().getDestination()
+                                                   + filename;
+                    this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                }
+                System.out.println("CSV files sent");
 
             } catch (Exception e) {
                 // Catch if there is a problem while connecting to, or using, the SFTP
-                // LOG.error("Exception occurred with using the SFTP." + e);
                 System.out.println("Exception occurred with using the SFTP. " + e);
+
             } finally {
                 // Close the connection to the SFTP
                 if (sftpConnection != null)
                     sftpConnection.close();
             }
-            System.out.println("CSV files sent");
         }
         catch (Exception e){
             System.out.println("Exception occurred with using the config database: " + e);
@@ -128,13 +133,13 @@ public class SendCsvFilesSFTP implements Job {
     }
 
     private void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
-        String sourceLocalPath = source;
-        String uploadDestinationPath = destination;
-        sftpConnection.put(sourceLocalPath, uploadDestinationPath);
-        System.out.println("Uploaded file to SFTP: " + uploadDestinationPath);
+        String sourcePath = source;
+        String destinationPath = destination;
+        sftpConnection.put(sourcePath, destinationPath);
+        System.out.println("Uploaded file to SFTP: " + destinationPath);
     }
 
-    private void downloadFileFromSftp(Connection sftpConnection) throws Exception {
+    /* private void downloadFileFromSftp(Connection sftpConnection) throws Exception {
         // Getting a file from the SFTP directory ...
         InputStream downloadInputStream = sftpConnection.getFile("/endeavour/ftp/test1onsftp.csv");
         System.out.println("Downloaded file from SFTP");
@@ -144,7 +149,7 @@ public class SendCsvFilesSFTP implements Job {
         File downloadDestination = new File(downloadDestinationString);
         Files.copy(downloadInputStream, downloadDestination.toPath());
         System.out.println("Downloaded file written to: " + downloadDestination);
-    }
+    } */
 
     /* private String readClientPrivateKeyFile(String file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader (file));
