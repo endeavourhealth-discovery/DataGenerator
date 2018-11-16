@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class ExtractCache {
     private static Map<Integer, ExtractConfig> extractConfigMap = new HashMap<>();
+    private static Map<Integer, ExtractEntity> extractMap = new HashMap<>();
 
     public static ExtractConfig getExtractConfig(int extractId) throws Exception {
 
@@ -18,7 +19,7 @@ public class ExtractCache {
 
         if (config == null) {
             // get the config from the DB
-            ExtractEntity extract = ExtractEntity.getExtract(1);
+            ExtractEntity extract = getExtract(1);
 
             String definition = extract.getDefinition();
             if (!StringUtils.isEmpty(definition)) {
@@ -31,5 +32,20 @@ public class ExtractCache {
         }
 
         return config;
+    }
+
+    public static ExtractEntity getExtract(int extractId) throws Exception {
+
+        // Check if the config is already in the cache
+        ExtractEntity extractEntity = extractMap.get(extractId);
+
+        if (extractEntity == null) {
+            // get the config from the DB
+            extractEntity = ExtractEntity.getExtract(1);
+
+            extractMap.put(extractId, extractEntity);
+        }
+
+        return extractEntity;
     }
 }

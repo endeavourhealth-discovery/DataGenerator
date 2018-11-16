@@ -20,6 +20,7 @@ create table data_generator.extract (
     code_set_id int not null comment 'The code set to be used for this extract',
     dataset_id int not null comment 'The dataset to be used for this extract',
     definition varchar(5000) not null comment 'The json definition of the extract',
+    transaction_id bigint not null comment 'The latest transaction Id that was extracted',
     
     constraint data_generator_extract_id_pk primary key (extract_id),
     foreign key data_generator_extract_dataset_id_fk (dataset_id) references data_generator.dataset(dataset_id) on delete cascade    
@@ -29,6 +30,7 @@ create table data_generator.cohort_results (
 	extract_id int not null comment 'The extract that this patient is related to',
     patient_id bigint not null comment 'The patient id to be extracted',
     organisation_id bigint not null comment 'The organisation Id the patient is related to',
+    bulked boolean not null default 0 comment 'Whether the patient has been bulked',
     
     constraint data_generator_cohort_results_patient_id_pk primary key (patient_id),
     foreign key data_generator_cohort_results_extract_id_fk (extract_id) references data_generator.extract(extract_id) on delete cascade
