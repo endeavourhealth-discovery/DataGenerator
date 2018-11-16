@@ -21,12 +21,28 @@
             <artifactId>core</artifactId>
             <version>${eds-core.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.endeavourhealth.sftpreader</groupId>
             <artifactId>sftpreader</artifactId>
             <version>${eds-sftp.version}</version>
         </dependency>
-
+        -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${google-guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${jsch.version}</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

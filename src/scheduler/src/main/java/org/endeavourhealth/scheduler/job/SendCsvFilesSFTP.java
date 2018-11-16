@@ -2,15 +2,17 @@ package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractConfig;
-import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
-import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
-import org.endeavourhealth.sftpreader.sources.Connection;
+// import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
+// import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
+// import org.endeavourhealth.sftpreader.sources.Connection;
+import org.endeavourhealth.scheduler.util.Connection;
+import org.endeavourhealth.scheduler.util.ConnectionActivator;
+import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
-import java.nio.file.Files;
 
 public class SendCsvFilesSFTP implements Job {
 
@@ -34,19 +36,12 @@ public class SendCsvFilesSFTP implements Job {
             Connection sftpConnection = null;
 
             try {
-                // Try opening the connection to the SFTP,
-                // (downloading a file from the SFTP and putting it onto the C drive,)
-                // and getting a file from the C drive and uploading it onto the SFTP
-
                 // Opening a connection to the SFTP
                 sftpConnection = this.openSftpConnection(sftpConnectionDetails);
 
-                // Downloading a file from the SFTP and putting it onto the C drive
-                // this.downloadFileFromSftp(sftpConnection);
-
-                // Getting a file from the C drive and uploading it onto the SFTP
-                // String sourceLocalPath = "C:/sftpupload/test1oncdrive.csv";
-                // String uploadDestinationPath = "/endeavour/ftp/test1fromcdrive.csv";
+                // Getting a set of files from the extract definition, file location details,
+                // specified source folder, and uploading them to the similarly specified
+                // SFTP destination folder
                 String sourceLocation = config.getFileLocationDetails().getSource();
                 File sourceFolder = new File(sourceLocation);
                 String[] folderFilenamesStringArray = sourceFolder.list();
@@ -57,12 +52,12 @@ public class SendCsvFilesSFTP implements Job {
                     this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
                 }
                 System.out.println("CSV files sent");
-
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 // Catch if there is a problem while connecting to, or using, the SFTP
                 System.out.println("Exception occurred with using the SFTP. " + e);
-
-            } finally {
+            }
+            finally {
                 // Close the connection to the SFTP
                 if (sftpConnection != null)
                     sftpConnection.close();
