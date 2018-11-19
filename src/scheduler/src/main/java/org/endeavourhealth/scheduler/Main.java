@@ -56,7 +56,7 @@ public class Main {
         }
 
         LOG.info("Checking for extractions");
-        System.out.println("generating cohorts");
+        System.out.println("Generating cohorts");
 
         // Get list of extracts that we need to run
         // Call Darren's code to generate the cohorts
@@ -195,9 +195,9 @@ public class Main {
     }
 
     private static void moveCSVtoSFTP(boolean isScheduled) throws Exception {
-        System.out.println("Moving the CSV files into SFTP");
+        System.out.println("Transferring encrypted files to SFTP");
         if (isScheduled) {
-            JobDetail moveCSVtoSFTPJob = JobBuilder.newJob(SendCsvFilesSFTP.class).build();
+            JobDetail moveCSVtoSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
 
             //TODO determine timing
             //TODO temporarily run job every 25 seconds
@@ -210,7 +210,7 @@ public class Main {
             moveCSVtoSFTPScheduler.scheduleJob(moveCSVtoSFTPJob, moveCSVtoSFTPTrigger);
 
         } else {
-            SendCsvFilesSFTP sendCsvFilesSFTP = new SendCsvFilesSFTP();
+            TransferEncryptedFilesToSftp sendCsvFilesSFTP = new TransferEncryptedFilesToSftp();
             sendCsvFilesSFTP.execute(null);
         }
     }

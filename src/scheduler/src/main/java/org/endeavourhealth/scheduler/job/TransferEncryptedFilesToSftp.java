@@ -2,9 +2,9 @@ package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractConfig;
+// import org.endeavourhealth.sftpreader.sources.Connection;
 // import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
 // import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
-// import org.endeavourhealth.sftpreader.sources.Connection;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionActivator;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
@@ -13,16 +13,16 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
+import java.util.Calendar;
 
-public class SendCsvFilesSFTP implements Job {
+public class TransferEncryptedFilesToSftp implements Job {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SendCsvFilesSFTP.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TransferEncryptedFilesToSftp.class);
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        System.out.println("Sending encrypted CSV files");
-
-        //TODO Send encrypted CSV files via SFTP
+        System.out.println("Transferring encrypted files");
+        LOG.info("Transferring encrypted files");
 
         try {
             // Calling the SFTP config from the database
@@ -51,11 +51,13 @@ public class SendCsvFilesSFTP implements Job {
                                                    + filename;
                     this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
                 }
-                System.out.println("CSV files sent");
+                System.out.println("All encrypted files transferred to SFTP");
+                LOG.info("All encrypted files transferred to SFTP");
             }
             catch (Exception e) {
                 // Catch if there is a problem while connecting to, or using, the SFTP
-                System.out.println("Exception occurred with using the SFTP. " + e);
+                System.out.println("Exception occurred with using the SFTP: " + e);
+                LOG.error("Exception occurred with using the SFTP: " + e);
             }
             finally {
                 // Close the connection to the SFTP
@@ -65,6 +67,7 @@ public class SendCsvFilesSFTP implements Job {
         }
         catch (Exception e){
             System.out.println("Exception occurred with using the config database: " + e);
+            LOG.error("Exception occurred with using the config database: " + e);
         }
     }
 
@@ -118,20 +121,32 @@ public class SendCsvFilesSFTP implements Job {
         // Opening a connection to the SFTP
         Connection sftpConnection = null;
         sftpConnection = ConnectionActivator.createConnection(sftpConnectionDetails);
-        System.out.println("Opening " + sftpConnection.getClass().getName()
+        System.out.println("Opening SFTP Connection" // + sftpConnection.getClass().getName()
+                + " to " + sftpConnectionDetails.getHostname()
+                + " on Port " + sftpConnectionDetails.getPort()
+                + " with Username " + sftpConnectionDetails.getUsername());
+        LOG.info("Opening SFTP Connection" // + sftpConnection.getClass().getName()
                 + " to " + sftpConnectionDetails.getHostname()
                 + " on port " + sftpConnectionDetails.getPort()
                 + " with username " + sftpConnectionDetails.getUsername());
         sftpConnection.open();
-        System.out.println("Connected to the SFTP");
+        System.out.println("Connected to this SFTP");
+        LOG.info("Connected to this SFTP");
         return sftpConnection;
     }
 
     private void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
         String sourcePath = source;
         String destinationPath = destination;
+        Calendar startCalendar = Calendar.getInstance();
+        System.out.println("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
+        LOG.info("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
+
         sftpConnection.put(sourcePath, destinationPath);
-        System.out.println("Uploaded file to SFTP: " + destinationPath);
+
+        Calendar endCalendar = Calendar.getInstance();
+        System.out.println("Finished uploading file " + sourcePath + " on " + endCalendar.getTime() + " to SFTP: " + destinationPath);
+        LOG.info("Finished uploading file " + sourcePath + " on " + endCalendar.getTime() + " to SFTP: " + destinationPath);
     }
 
     /* private void downloadFileFromSftp(Connection sftpConnection) throws Exception {
