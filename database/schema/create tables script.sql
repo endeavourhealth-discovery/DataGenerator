@@ -36,3 +36,14 @@ create table data_generator.cohort_results (
     foreign key data_generator_cohort_results_extract_id_fk (extract_id) references data_generator.extract(extract_id) on delete cascade
 );
 
+create table data_generator.file_transactions (
+  transaction_id bigint(20) not null comment 'Transaction ID',
+  filename varchar(50) not null comment 'Unique Filename',
+  extract_date datetime default null comment 'Date and time when the extract file was created',
+  encrypt_date datetime default null comment 'Date and time when the extract file was encrypted',
+  sftp_date datetime default null comment 'Date and time when the encrypted extract file was sent via sftp',
+  housekeeping_date datetime default null comment 'Date and time when the encrypted extract file was kept for storage',
+  primary key (transaction_id,filename),
+  unique key txn_id_unique (transaction_id),
+  unique key filename_unique (filename)
+);

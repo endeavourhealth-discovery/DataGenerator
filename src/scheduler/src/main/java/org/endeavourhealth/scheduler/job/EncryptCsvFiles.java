@@ -2,6 +2,7 @@ package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -18,8 +19,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class EncryptCsvFiles implements Job {
@@ -29,6 +29,7 @@ public class EncryptCsvFiles implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
+        List<FileTransactionsEntity> toProcess;
         String location = null;
         try {
             ExtractConfig config = ExtractCache.getExtractConfig(1);
@@ -36,43 +37,49 @@ public class EncryptCsvFiles implements Job {
             if (!location.endsWith(File.separator)) {
                 location += File.separator;
             }
+            //TODO remove test code
+            location = "D:\\Temp\\";
             LOG.debug("location:" + location);
+
+            //retrieve files for encryption
+            toProcess = FileTransactionsEntity.getFilesForEncryption();
+            if (toProcess == null || toProcess.size() == 0) {
+                LOG.info("No file/s ready for encryption.");
+                return;
+            }
+
         } catch (Exception e) {
-            LOG.error("Error encountered in extracting configuration. " + e.getMessage());
+            LOG.error("Error encountered in extracting data. " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
         try {
-            //TODO logic to determine which files are going to be encrypted
-            List<File> files = new ArrayList<File>();
 
-            //TODO remove test code
-            files.add(new File(location + "testEncrypt1.txt"));
-            files.add(new File(location + "testEncrypt2.txt"));
-
-            CertificateFactory certFactory =
-                    certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
-
-            HashMap<File, X509Certificate> sourceCertificateMap = new HashMap<File, X509Certificate>();
-
-            //TODO are we only going to use just one certificate/pk12 pair to encrypt/decrypt
-            // or do we handle this in a per client basis; assuming one only for now
+            //create certificate object
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
             Path path =
                     Paths.get(EncryptCsvFiles.class.getClassLoader().getResource("endeavour.cer").toURI());
             X509Certificate certificate =
                     (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
 
-            //TODO remove test code
-            for (File file : files) {
-                sourceCertificateMap.put(file, certificate);
-            }
+            for (FileTransactionsEntity entry : toProcess) {
 
-            for (File file : sourceCertificateMap.keySet()) {
-                boolean success = PgpEncryptDecrypt.encryptFile(file, sourceCertificateMap.get(file), PROVIDER);
+                File file = new File(location + entry.getFilename());
+                boolean success = PgpEncryptDecrypt.encryptFile(file, certificate, PROVIDER);
+
                 if (success) {
+
                     LOG.info("File:" + file.getName() + " encrypted.");
+
+                    //update the file's encryption date
+                    entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
+                    FileTransactionsEntity.update(entry);
+
+                    LOG.info("File:" + file.getName() + " record updated.");
+
                 } else {
-                    LOG.error("File:" + file.getName() + " encrypted.");
+                    LOG.error("File:" + file.getName() + " failed encryption.");
                 }
             }
         } catch (CertificateException e) {
@@ -83,6 +90,8 @@ public class EncryptCsvFiles implements Job {
             LOG.error("Certificate file not found. " + e.getMessage());
         } catch (FileNotFoundException e) {
             LOG.error("Certificate file not found. " + e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Unknown error encountered in encryption handling. " + e.getMessage());
         }
     }
 }
