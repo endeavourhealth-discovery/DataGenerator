@@ -43,6 +43,9 @@ BEGIN
 												and csc.code_set_id = codeSetId
                                                 and csc.extract_type = 2
   where oo.patient_id is null;
+  
+  
+  CREATE INDEX ix_latest_codes ON latest_codes (id);
                                                 
    /*                                             
   select max(o.effective_date) as effective_date, o.original_code, o.patient_id
@@ -67,6 +70,8 @@ BEGIN
 												and csc.code_set_id = codeSetId
                                                 and csc.extract_type = 1
   where oo.patient_id is null;
+  
+  CREATE INDEX ix_earliest_codes ON earliest_codes (id);
   
   /*
   select min(o.effective_date) as effective_date, o.original_code, o.patient_id

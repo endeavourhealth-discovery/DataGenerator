@@ -105,6 +105,8 @@ public class GenerateData implements Job {
     }
 
     private void runGenericExtract(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
+
+        long startTime = System.currentTimeMillis();
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         System.out.println("Running " + procedureName);
@@ -116,11 +118,13 @@ public class GenerateData implements Job {
                 .setParameter("extractId", extractId);
 
         query.execute();
-        System.out.println(procedureName + " executed");
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.println(procedureName + " executed, Time taken " + estimatedTime);
     }
 
     private void runGenericExtractAll(DatasetConfigExtract extract, int extractId, String procedureName,
                                       int codeSetId, int maxTransactionId) throws Exception {
+        long startTime = System.currentTimeMillis();
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         System.out.println("Running " + procedureName);
@@ -134,10 +138,13 @@ public class GenerateData implements Job {
                 .setParameter("maxTransactionId", maxTransactionId);
 
         query.execute();
-        System.out.println(procedureName + " executed");
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.println(procedureName + " executed, Time taken " + estimatedTime);
     }
 
     private void runGenericStatusExtract(DatasetConfigExtract extract, int extractId, String procedureName) throws Exception {
+        long startTime = System.currentTimeMillis();
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         System.out.println("Running " + procedureName);
@@ -157,11 +164,13 @@ public class GenerateData implements Job {
                 .setParameter("extractId", extractId);
 
         query.execute();
-        System.out.println(procedureName + " executed");
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.println(procedureName + " executed, Time taken " + estimatedTime);
     }
 
     private void runGenericStatusExtractAll(DatasetConfigExtract extract, int extractId, String procedureName,
                                             int codeSetId, int maxTransactionId) throws Exception {
+        long startTime = System.currentTimeMillis();
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         System.out.println("Running " + procedureName);
@@ -183,7 +192,8 @@ public class GenerateData implements Job {
                 .setParameter("maxTransactionId", maxTransactionId);
 
         query.execute();
-        System.out.println(procedureName + " executed");
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.println(procedureName + " executed, Time taken " + estimatedTime);
     }
 
     private int getMaxTransactionId() throws Exception {
