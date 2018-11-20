@@ -123,7 +123,7 @@ public class FileTransactionsEntity {
                 housekeeping_date);
     }
 
-    public static void save(FileTransactionsEntity entry) throws Exception {
+    public static void create(FileTransactionsEntity entry) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.persist(entry);
@@ -137,28 +137,40 @@ public class FileTransactionsEntity {
         entityManager.getTransaction().commit();
     }
 
+    public static void delete(FileTransactionsEntity entry) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.remove(entry);
+        entityManager.getTransaction().commit();
+    }
+
+    public static List<FileTransactionsEntity> getFilesForResending(long transaction_id) throws Exception {
+        return getFileTransactionsValues(transaction_id, true, true,
+                true, true, true);
+    }
+
     public static List<FileTransactionsEntity> getFilesForZip() throws Exception {
-        return getFileTransactionsValues(false, true,
+        return getFileTransactionsValues(null, false, true,
                 true, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForEncryption() throws Exception {
-        return getFileTransactionsValues(false, false,
+        return getFileTransactionsValues(null,false, false,
                 true, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForSftp() throws Exception {
-        return getFileTransactionsValues(false,false,
+        return getFileTransactionsValues(null, false,false,
                 false, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForHousekeeping() throws Exception {
-        return getFileTransactionsValues(false,false,
+        return getFileTransactionsValues(null, false,false,
                 false,false, true);
     }
 
-    private static List<FileTransactionsEntity> getFileTransactionsValues(
-            boolean extractisNull, boolean zipIsNull, boolean encryptIsNull,
+    private static List<FileTransactionsEntity> getFileTransactionsValues(Long transaction_id,
+            boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
             boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -168,7 +180,11 @@ public class FileTransactionsEntity {
         Root<FileTransactionsEntity> root = query.from(FileTransactionsEntity.class);
         List<Predicate> predicates = new ArrayList();
 
-        if (extractisNull) {
+        if (transaction_id != null) {
+            predicates.add(builder.equal(root.get("extractDate"), transaction_id));
+        }
+
+        if (extractIsNull) {
             predicates.add(builder.isNull(root.get("extractDate")));
         } else {
             predicates.add(builder.isNotNull(root.get("extractDate")));
