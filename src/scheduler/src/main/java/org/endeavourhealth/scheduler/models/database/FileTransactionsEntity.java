@@ -110,6 +110,13 @@ public class FileTransactionsEntity {
                 housekeeping_date);
     }
 
+    public static void save(FileTransactionsEntity entry) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.persist(entry);
+        entityManager.getTransaction().commit();
+    }
+
     public static void update(FileTransactionsEntity entry) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
