@@ -1,8 +1,10 @@
 package org.endeavourhealth.scheduler.json;
 
 public class FileLocationDetails {
+
     private String source = null;
     private String destination = null;
+    private String housekeep = null;
 
     /* private FileLocationDetails() {}
 
@@ -26,4 +28,13 @@ public class FileLocationDetails {
     public void setDestination(String destination) {
         this.destination = destination;
     }
+
+    public String getHousekeep() {
+        return housekeep;
+    }
+
+    public void setHousekeep(String housekeep) {
+        this.housekeep = housekeep;
+    }
+
 }

@@ -37,8 +37,6 @@ public class EncryptCsvFiles implements Job {
             if (!location.endsWith(File.separator)) {
                 location += File.separator;
             }
-            //TODO remove test code
-            location = "D:\\Temp\\";
             LOG.debug("location:" + location);
 
             //retrieve files for encryption

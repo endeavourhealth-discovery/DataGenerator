@@ -17,6 +17,7 @@ public class Main {
     private static Scheduler extractSQLtoCSVScheduler;
     private static Scheduler encryptCSVFilesScheduler;
     private static Scheduler moveCSVtoSFTPScheduler;
+    private static Scheduler housekeepFilesScheduler;
 
     public static void main(String[] args) throws Exception {
 
@@ -55,6 +56,10 @@ public class Main {
             moveCSVtoSFTP(false);
         }
 
+        if (step.equals("housekeepCSV")) {
+            housekeepCSV(false);
+        }
+
         LOG.info("Checking for extractions");
         System.out.println("Generating cohorts");
 
@@ -75,6 +80,7 @@ public class Main {
         extractSQLtoCSV(true);
         encryptCSVFiles(true);
         moveCSVtoSFTP(true);
+        housekeepCSV(true);
 
         //TODO implementation needed to determine if everything is done
         //TODO testing job scheduling for 100s
@@ -93,6 +99,9 @@ public class Main {
         }
         if (moveCSVtoSFTPScheduler != null) {
             moveCSVtoSFTPScheduler.shutdown();
+        }
+        if (housekeepFilesScheduler != null) {
+            housekeepFilesScheduler.shutdown();
         }
     }
 
@@ -215,4 +224,24 @@ public class Main {
         }
     }
 
+    private static void housekeepCSV(boolean isScheduled) throws Exception {
+        System.out.println("Housekeeping encrypted files");
+        if (isScheduled) {
+            JobDetail housekeepFilesJob = JobBuilder.newJob(HousekeepFiles.class).build();
+
+            //TODO determine timing
+            //TODO temporarily run job every 35 seconds
+            Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/35 * * * * ?"))
+                    .build();
+
+            housekeepFilesScheduler = new StdSchedulerFactory().getScheduler();
+            housekeepFilesScheduler.start();
+            housekeepFilesScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
+
+        } else {
+            HousekeepFiles housekeepFiles = new HousekeepFiles();
+            housekeepFiles.execute(null);
+        }
+    }
 }
