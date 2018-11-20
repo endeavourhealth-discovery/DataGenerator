@@ -44,6 +44,5 @@ create table data_generator.file_transactions (
   sftp_date datetime default null comment 'Date and time when the encrypted extract file was sent via sftp',
   housekeeping_date datetime default null comment 'Date and time when the encrypted extract file was kept for storage',
   primary key (transaction_id,filename),
-  unique key txn_id_unique (transaction_id),
   unique key filename_unique (filename)
 );
