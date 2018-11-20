@@ -145,8 +145,8 @@ public class FileTransactionsEntity {
     }
 
     public static List<FileTransactionsEntity> getFilesForResending(long transaction_id) throws Exception {
-        return getFileTransactionsValues(transaction_id, true, true,
-                true, true, true);
+        return getFileTransactionsValues(transaction_id, false, false,
+                false, false, false);
     }
 
     public static List<FileTransactionsEntity> getFilesForZip() throws Exception {
@@ -170,8 +170,8 @@ public class FileTransactionsEntity {
     }
 
     private static List<FileTransactionsEntity> getFileTransactionsValues(Long transaction_id,
-            boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
-            boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
+        boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
+        boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -181,7 +181,7 @@ public class FileTransactionsEntity {
         List<Predicate> predicates = new ArrayList();
 
         if (transaction_id != null) {
-            predicates.add(builder.equal(root.get("extractDate"), transaction_id));
+            predicates.add(builder.equal(root.get("transactionId"), transaction_id));
         }
 
         if (extractIsNull) {

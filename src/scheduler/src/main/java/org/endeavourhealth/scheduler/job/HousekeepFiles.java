@@ -37,7 +37,7 @@ public class HousekeepFiles implements Job  {
             LOG.debug("location:" + location);
             LOG.debug("housekeep:" + housekeep);
 
-            //retrieve files for encryption
+            //retrieve files for housekeeping
             List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForHousekeeping();
             if (toProcess == null || toProcess.size() == 0) {
                 LOG.info("No file/s for housekeeping.");
