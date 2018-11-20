@@ -15,6 +15,7 @@ public class Main {
     private static Scheduler buildCohortScheduler;
     private static Scheduler generateDataScheduler;
     private static Scheduler extractSQLtoCSVScheduler;
+    private static Scheduler zipCSVFilesScheduler;
     private static Scheduler encryptCSVFilesScheduler;
     private static Scheduler moveCSVtoSFTPScheduler;
     private static Scheduler housekeepFilesScheduler;
@@ -46,6 +47,10 @@ public class Main {
 
         if (step.equals("extractSQL")) {
             extractSQLtoCSV(false);
+        }
+
+        if (step.equals("zipCSV")){
+            zipCSVFiles(false);
         }
 
         if (step.equals("encryptCSV")) {
@@ -179,6 +184,27 @@ public class Main {
         } else {
             ExtractSQLToCsv extractSQLToCsv = new ExtractSQLToCsv();
             extractSQLToCsv.execute(null);
+        }
+    }
+
+    private static void zipCSVFiles(boolean isScheduled) throws Exception {
+        System.out.println("Zipping the CSV files");
+        if (isScheduled) {
+            JobDetail zipCSVFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
+
+            //TODO determine timing
+            //TODO temporarily run job every 20 seconds
+            Trigger zipCSVFilesTrigger = TriggerBuilder.newTrigger()
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
+                    .build();
+
+            zipCSVFilesScheduler = new StdSchedulerFactory().getScheduler();
+            zipCSVFilesScheduler.start();
+            zipCSVFilesScheduler.scheduleJob(zipCSVFilesJob, zipCSVFilesTrigger);
+
+        } else {
+            ZipCsvFiles zipCsvFiles = new ZipCsvFiles();
+            zipCsvFiles.execute(null);
         }
     }
 
