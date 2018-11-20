@@ -12,6 +12,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.Calendar;
 
@@ -23,69 +24,65 @@ public class TransferEncryptedFilesToSftp implements Job {
 
         System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
-
-        try {
-            // Calling the SFTP config from the database
-            ExtractConfig config = ExtractCache.getExtractConfig(1);
-            // System.out.println(config.getName());
-
-            // Setting up the connection details
-            ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
-
-            // Creating the sftpConnection object
-            Connection sftpConnection = null;
-
+        int[] extractIdArray = {1, 2};
+        for (int extractId : extractIdArray) {
             try {
-                // Opening a connection to the SFTP
-                sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+                // Calling the SFTP config from the database
+                ExtractConfig config = ExtractCache.getExtractConfig(extractId);
+                System.out.println(config.getName());
 
-                // Getting a set of files from the extract definition, file location details,
-                // specified source folder, and uploading them to the similarly specified
-                // SFTP destination folder
-                String sourceLocation = config.getFileLocationDetails().getSource();
-                File sourceFolder = new File(sourceLocation);
-                String[] folderFilenamesStringArray = sourceFolder.list();
-                for (String filename : folderFilenamesStringArray) {
-                    String sourcePath = sourceLocation + filename;
-                    String destinationPath = config.getFileLocationDetails().getDestination()
-                                                   + filename;
-                    this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                // Setting up the connection details
+                ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
+
+                // Creating the sftpConnection object
+                Connection sftpConnection = null;
+                try {
+                    // Opening a connection to the SFTP
+                    sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+
+                    // Getting a set of files from the extract definition, file location details,
+                    // specified source folder, and uploading them to the similarly specified
+                    // SFTP destination folder
+                    String sourceLocation = config.getFileLocationDetails().getSource();
+                    File sourceFolder = new File(sourceLocation);
+                    String[] folderFilenamesStringArray = sourceFolder.list();
+                    for (String filename : folderFilenamesStringArray) {
+                        String sourcePath = sourceLocation + filename;
+                        String destinationPath = config.getFileLocationDetails().getDestination()
+                                + filename;
+                        this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                    }
+                } catch (Exception e) {
+                    // Catch if there is a problem while connecting to, or using, the SFTP
+                    System.out.println("Exception occurred with using the SFTP: " + e);
+                    LOG.error("Exception occurred with using the SFTP: " + e);
+                } finally {
+                    // Close the connection to the SFTP
+                    if (sftpConnection != null)
+                        sftpConnection.close();
                 }
-                System.out.println("All encrypted files transferred to SFTP");
-                LOG.info("All encrypted files transferred to SFTP");
+            } catch (Exception e) {
+                System.out.println("Exception occurred with using the config database: " + e);
+                LOG.error("Exception occurred with using the config database: " + e);
             }
-            catch (Exception e) {
-                // Catch if there is a problem while connecting to, or using, the SFTP
-                System.out.println("Exception occurred with using the SFTP: " + e);
-                LOG.error("Exception occurred with using the SFTP: " + e);
-            }
-            finally {
-                // Close the connection to the SFTP
-                if (sftpConnection != null)
-                    sftpConnection.close();
-            }
-        }
-        catch (Exception e){
-            System.out.println("Exception occurred with using the config database: " + e);
-            LOG.error("Exception occurred with using the config database: " + e);
         }
     }
 
-    private ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config){
-            // Setting up the connection details
+    private ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
+        // Setting up the connection details
 
-            // Hostname IP Address 35.176.117.37 (internet) 10.0.101.239 (vpn)
-            // Hostname DNS ReverseLookup ec2-35-176-117-37.eu-west-2.compute.amazonaws.com
-            // Hostname (created by Sophie) devsftp.endeavourhealth.net
+        // Hostname IP Address 35.176.117.37 (internet) 10.0.101.239 (vpn)
+        // Hostname DNS ReverseLookup ec2-35-176-117-37.eu-west-2.compute.amazonaws.com
+        // Hostname (created by Sophie) devsftp.endeavourhealth.net
 
-            // String hostname = "10.0.101.239";
-            String hostname = config.getSftpConnectionDetails().getHostname();
+        // String hostname = "10.0.101.239";
+        String hostname = config.getSftpConnectionDetails().getHostname();
 
-            // int port = 22;
-            int port = config.getSftpConnectionDetails().getPort();
+        // int port = 22;
+        int port = config.getSftpConnectionDetails().getPort();
 
-            // String username = "endeavour";
-            String username = config.getSftpConnectionDetails().getUsername();
+        // String username = "endeavour";
+        String username = config.getSftpConnectionDetails().getUsername();
 
             /* String clientPrivateKey = null;
             try {
@@ -95,26 +92,26 @@ public class TransferEncryptedFilesToSftp implements Job {
                 System.out.println(
                         "Exception occurred while reading clientPrivateKey file. " + e);
             } */
-            // System.out.println(clientPrivateKey);
-            String clientPrivateKey = config.getSftpConnectionDetails()
-                    .getClientPrivateKey();
+        // System.out.println(clientPrivateKey);
+        String clientPrivateKey = config.getSftpConnectionDetails()
+                .getClientPrivateKey();
 
-            // String clientPrivateKeyPassword = "";
-            String clientPrivateKeyPassword = config.getSftpConnectionDetails()
-                    .getClientPrivateKeyPassword();
+        // String clientPrivateKeyPassword = "";
+        String clientPrivateKeyPassword = config.getSftpConnectionDetails()
+                .getClientPrivateKeyPassword();
 
-            // String hostPublicKey = "";
-            String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
+        // String hostPublicKey = "";
+        String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
 
-            ConnectionDetails sftpConnectionDetails;
-            sftpConnectionDetails = new ConnectionDetails();
-            sftpConnectionDetails.setHostname(hostname);
-            sftpConnectionDetails.setPort(port);
-            sftpConnectionDetails.setUsername(username);
-            sftpConnectionDetails.setClientPrivateKey(clientPrivateKey);
-            sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
-            sftpConnectionDetails.setHostPublicKey(hostPublicKey);
-            return sftpConnectionDetails;
+        ConnectionDetails sftpConnectionDetails;
+        sftpConnectionDetails = new ConnectionDetails();
+        sftpConnectionDetails.setHostname(hostname);
+        sftpConnectionDetails.setPort(port);
+        sftpConnectionDetails.setUsername(username);
+        sftpConnectionDetails.setClientPrivateKey(clientPrivateKey);
+        sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
+        sftpConnectionDetails.setHostPublicKey(hostPublicKey);
+        return sftpConnectionDetails;
     }
 
     private Connection openSftpConnection(ConnectionDetails sftpConnectionDetails) throws Exception {

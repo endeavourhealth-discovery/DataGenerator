@@ -19,7 +19,7 @@ public class ExtractCache {
 
         if (config == null) {
             // get the config from the DB
-            ExtractEntity extract = getExtract(1);
+            ExtractEntity extract = getExtract(extractId);
 
             String definition = extract.getDefinition();
             if (!StringUtils.isEmpty(definition)) {
@@ -41,7 +41,7 @@ public class ExtractCache {
 
         if (extractEntity == null) {
             // get the config from the DB
-            extractEntity = ExtractEntity.getExtract(1);
+            extractEntity = ExtractEntity.getExtract(extractId);
 
             extractMap.put(extractId, extractEntity);
         }
