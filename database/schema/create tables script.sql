@@ -40,6 +40,7 @@ create table data_generator.file_transactions (
   transaction_id bigint(20) not null comment 'Transaction ID',
   filename varchar(50) not null comment 'Unique Filename',
   extract_date datetime default null comment 'Date and time when the extract file was created',
+  zip_date datetime default null comment 'Date and time when the extract file was zipped',
   encrypt_date datetime default null comment 'Date and time when the extract file was encrypted',
   sftp_date datetime default null comment 'Date and time when the encrypted extract file was sent via sftp',
   housekeeping_date datetime default null comment 'Date and time when the encrypted extract file was kept for storage',

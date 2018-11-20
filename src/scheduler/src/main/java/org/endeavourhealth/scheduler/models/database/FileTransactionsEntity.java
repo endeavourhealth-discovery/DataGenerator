@@ -19,6 +19,7 @@ public class FileTransactionsEntity {
     private long transaction_id;
     private String filename;
     private Timestamp extract_date;
+    private Timestamp zip_date;
     private Timestamp encrypt_date;
     private Timestamp sftp_date;
     private Timestamp housekeeping_date;
@@ -51,6 +52,16 @@ public class FileTransactionsEntity {
 
     public void setExtractDate(Timestamp extract_date) {
         this.extract_date = extract_date;
+    }
+
+    @Basic
+    @Column(name = "zip_date")
+    public Timestamp getZipDate() {
+        return zip_date;
+    }
+
+    public void setZipDate(Timestamp zip_date) {
+        this.zip_date = zip_date;
     }
 
     @Basic
@@ -95,6 +106,7 @@ public class FileTransactionsEntity {
         return transaction_id == that.transaction_id &&
                 filename.equals(that.filename) &&
                 extract_date.equals(that.extract_date) &&
+                zip_date.equals(that.zip_date) &&
                 encrypt_date.equals(that.encrypt_date) &&
                 sftp_date.equals(that.sftp_date) &&
                 housekeeping_date.equals(that.housekeeping_date);
@@ -105,6 +117,7 @@ public class FileTransactionsEntity {
         return Objects.hash(transaction_id,
                 filename,
                 extract_date,
+                zip_date,
                 encrypt_date,
                 sftp_date,
                 housekeeping_date);
@@ -124,20 +137,28 @@ public class FileTransactionsEntity {
         entityManager.getTransaction().commit();
     }
 
+    public static List<FileTransactionsEntity> getFilesForZip() throws Exception {
+        return getFileTransactionsValues(false, true,
+                true, true, true);
+    }
+
     public static List<FileTransactionsEntity> getFilesForEncryption() throws Exception {
-        return getFileTransactionsValues(false,true, true, true);
+        return getFileTransactionsValues(false, false,
+                true, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForSftp() throws Exception {
-        return getFileTransactionsValues(false,false, true, true);
+        return getFileTransactionsValues(false,false,
+                false, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForHousekeeping() throws Exception {
-        return getFileTransactionsValues(false,false, false, true);
+        return getFileTransactionsValues(false,false,
+                false,false, true);
     }
 
     private static List<FileTransactionsEntity> getFileTransactionsValues(
-            boolean extractisNull, boolean encryptIsNull,
+            boolean extractisNull, boolean zipIsNull, boolean encryptIsNull,
             boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -157,6 +178,12 @@ public class FileTransactionsEntity {
             predicates.add(builder.isNull(root.get("encryptDate")));
         } else {
             predicates.add(builder.isNotNull(root.get("encryptDate")));
+        }
+
+        if (zipIsNull) {
+            predicates.add(builder.isNull(root.get("zipDate")));
+        } else {
+            predicates.add(builder.isNotNull(root.get("zipDate")));
         }
 
         if (sftpIsNull) {
