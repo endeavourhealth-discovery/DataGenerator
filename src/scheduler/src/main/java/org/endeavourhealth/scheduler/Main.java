@@ -211,20 +211,20 @@ public class Main {
     private static void encryptCSVFiles(boolean isScheduled) throws Exception {
         System.out.println("Encrypting the CSV files");
         if (isScheduled) {
-            JobDetail encryptCSVFilesJob = JobBuilder.newJob(EncryptCsvFiles.class).build();
+            JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
 
             //TODO determine timing
             //TODO temporarily run job every 20 seconds
-            Trigger encryptCSVFilesTrigger = TriggerBuilder.newTrigger()
+            Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
                     .build();
 
             encryptCSVFilesScheduler = new StdSchedulerFactory().getScheduler();
             encryptCSVFilesScheduler.start();
-            encryptCSVFilesScheduler.scheduleJob(encryptCSVFilesJob, encryptCSVFilesTrigger);
+            encryptCSVFilesScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
 
         } else {
-            EncryptCsvFiles encryptCsvFiles = new EncryptCsvFiles();
+            EncryptFiles encryptCsvFiles = new EncryptFiles();
             encryptCsvFiles.execute(null);
         }
     }

@@ -68,7 +68,7 @@ public class TransferEncryptedFilesToSftp implements Job {
         }
     }
 
-    private ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
+    public ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
         // Setting up the connection details
 
         // Hostname IP Address 35.176.117.37 (internet) 10.0.101.239 (vpn)
@@ -114,7 +114,7 @@ public class TransferEncryptedFilesToSftp implements Job {
         return sftpConnectionDetails;
     }
 
-    private Connection openSftpConnection(ConnectionDetails sftpConnectionDetails) throws Exception {
+    public Connection openSftpConnection(ConnectionDetails sftpConnectionDetails) throws Exception {
         // Opening a connection to the SFTP
         Connection sftpConnection = null;
         sftpConnection = ConnectionActivator.createConnection(sftpConnectionDetails);
@@ -132,7 +132,7 @@ public class TransferEncryptedFilesToSftp implements Job {
         return sftpConnection;
     }
 
-    private void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
+    public void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
         String sourcePath = source;
         String destinationPath = destination;
         Calendar startCalendar = Calendar.getInstance();

@@ -22,9 +22,9 @@ import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class EncryptCsvFiles implements Job {
+public class EncryptFiles implements Job {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EncryptCsvFiles.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EncryptFiles.class);
     private static final String PROVIDER = "BC";
 
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -57,7 +57,7 @@ public class EncryptCsvFiles implements Job {
             //create certificate object
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
             Path path =
-                    Paths.get(EncryptCsvFiles.class.getClassLoader().getResource("endeavour.cer").toURI());
+                    Paths.get(EncryptFiles.class.getClassLoader().getResource("endeavour.cer").toURI());
             X509Certificate certificate =
                     (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
 
