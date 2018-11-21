@@ -26,7 +26,7 @@ DELIMITER //
 CREATE PROCEDURE generate_observation_all_col (
     IN extractId int,
     IN codeSetId int,
-    IN maxTransactionId int
+    IN maxTransactionId bigint
 )
 BEGIN
 
@@ -107,7 +107,7 @@ BEGIN
   join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code 
 												and csc.code_set_id = codeSetId
                                                 and csc.extract_type = 0 -- all codes                                                
-  join pcr.event_log e on e.item_id = o.id and e.table_name = 'Observation'
+  join pcr.event_log e on e.item_id = o.id and e.table_id = 32
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId
   union
@@ -115,7 +115,7 @@ BEGIN
   join data_generator.cohort_results cr on cr.patient_id = o.patient_id and cr.extract_id = extractId
   join data_generator.extract ex on ex.extract_id = cr.extract_id
   join earliest_codes ec on o.id = ec.id  -- earliest codes only  
-  join pcr.event_log e on e.item_id = ec.id and e.table_name = 'Observation'
+  join pcr.event_log e on e.item_id = ec.id and e.table_id = 32
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId
   union
@@ -123,7 +123,7 @@ BEGIN
   join data_generator.cohort_results cr on cr.patient_id = o.patient_id and cr.extract_id = extractId
   join data_generator.extract ex on ex.extract_id = cr.extract_id
   join latest_codes ec on o.id = ec.id  -- latest codes only  
-  join pcr.event_log e on e.item_id = ec.id and e.table_name = 'Observation'
+  join pcr.event_log e on e.item_id = ec.id and e.table_id = 32
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId;
     

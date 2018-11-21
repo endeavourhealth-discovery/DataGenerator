@@ -40,7 +40,7 @@ BEGIN
   SELECT ms.* FROM pcr.medication_statement ms
   join data_generator.cohort_results cr on cr.patient_id = ms.patient_id and cr.extract_id = extractId
   join data_generator.extract ex on ex.extract_id = cr.extract_id
-  join pcr.event_log e on e.item_id = ms.id and e.table_name in ( 'Medication')
+  join pcr.event_log e on e.item_id = ms.id and e.table_id in ( 44)
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId
     and ms.is_active = status_code;

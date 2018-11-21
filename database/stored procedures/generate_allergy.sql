@@ -45,7 +45,7 @@ BEGIN
   join data_generator.cohort_results cr on cr.patient_id = o.patient_id and cr.extract_id = extractId
   join data_generator.extract ex on ex.extract_id = cr.extract_id
   join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code and csc.code_set_id = codeSetId
-  join pcr.event_log e on e.item_id = o.id and e.table_name in ( 'Observation', 'allergy')
+  join pcr.event_log e on e.item_id = o.id and e.table_id in ( 32, 41)
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId;
   

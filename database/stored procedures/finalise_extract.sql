@@ -3,7 +3,7 @@ drop procedure if exists finalise_extract;
 DELIMITER //
 CREATE PROCEDURE finalise_extract (
     IN extractId int,
-    IN maxTransactionId int
+    IN maxTransactionId bigint
 )
 BEGIN
     

@@ -36,7 +36,7 @@ BEGIN
   SELECT p.* FROM pcr.patient p
   join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = extractId
   join data_generator.extract ex on ex.extract_id = cr.extract_id
-  join pcr.event_log e on e.item_id = p.id and e.table_name = 'Patient'
+  join pcr.event_log e on e.item_id = p.id and e.table_id = 8
   where cr.bulked = 1
     and e.id > ex.transaction_id and e.id <= maxTransactionId;
 END//

@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
 import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
+import java.math.BigInteger;
 
 public class GenerateData implements Job {
 
@@ -51,7 +52,7 @@ public class GenerateData implements Job {
 
         if (datasetConfig.getExtract() != null) {
 
-            int maxTransactionId = getMaxTransactionId();
+            Long maxTransactionId = getMaxTransactionId();
 
             for (DatasetConfigExtract extract : datasetConfig.getExtract()) {
                 System.out.println(extract.getType());
@@ -123,7 +124,7 @@ public class GenerateData implements Job {
     }
 
     private void runGenericExtractAll(DatasetConfigExtract extract, int extractId, String procedureName,
-                                      int codeSetId, int maxTransactionId) throws Exception {
+                                      int codeSetId, long maxTransactionId) throws Exception {
         long startTime = System.currentTimeMillis();
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -132,7 +133,7 @@ public class GenerateData implements Job {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
                 .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("codeSetId", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("maxTransactionId", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("maxTransactionId", Long.class, ParameterMode.IN)
                 .setParameter("extractId", extractId)
                 .setParameter("codeSetId", codeSetId)
                 .setParameter("maxTransactionId", maxTransactionId);
@@ -169,7 +170,7 @@ public class GenerateData implements Job {
     }
 
     private void runGenericStatusExtractAll(DatasetConfigExtract extract, int extractId, String procedureName,
-                                            int codeSetId, int maxTransactionId) throws Exception {
+                                            int codeSetId, long maxTransactionId) throws Exception {
         long startTime = System.currentTimeMillis();
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -185,7 +186,7 @@ public class GenerateData implements Job {
                 .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("codeSetId", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("maxTransactionId", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("maxTransactionId", Long.class, ParameterMode.IN)
                 .setParameter("extractId", extractId)
                 .setParameter("status_code", medStatus)
                 .setParameter("codeSetId", codeSetId)
@@ -196,14 +197,16 @@ public class GenerateData implements Job {
         System.out.println(procedureName + " executed, Time taken " + estimatedTime);
     }
 
-    private int getMaxTransactionId() throws Exception {
+    private Long getMaxTransactionId() throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         String sql = "select max(id) from pcr.event_log;";
         try {
             Query query = entityManager.createNativeQuery(sql);
 
-            int results = (int)query.getSingleResult();
+            BigInteger result = (BigInteger)query.getSingleResult();
+
+            Long results = result.longValue();
 
             return results;
 
@@ -212,7 +215,7 @@ public class GenerateData implements Job {
         }
     }
 
-    private void runFinaliseExtract(int extractId, int maxTransactionId) throws Exception {
+    private void runFinaliseExtract(int extractId, long maxTransactionId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         System.out.println("Running finalise_extract" );
@@ -220,7 +223,7 @@ public class GenerateData implements Job {
 
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("finalise_extract")
                 .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
-                .registerStoredProcedureParameter("maxTransactionId", Integer.class, ParameterMode.IN)
+                .registerStoredProcedureParameter("maxTransactionId", Long.class, ParameterMode.IN)
                 .setParameter("extractId", extractId)
                 .setParameter("maxTransactionId", maxTransactionId);
 
