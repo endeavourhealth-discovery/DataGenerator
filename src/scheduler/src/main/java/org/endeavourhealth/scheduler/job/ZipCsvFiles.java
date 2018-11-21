@@ -10,6 +10,8 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.Calendar;
 // import java.io.File;
 
@@ -68,5 +70,15 @@ public class ZipCsvFiles implements Job {
                 LOG.error("Exception occurred with using the config database: " + e);
             }
         }
+    }
+
+    private static File[] getFilesFromDirectory(String directory, String prefix) {
+        final String str = prefix;
+        FileFilter fileFilter = new FileFilter() {
+            public boolean accept(File file) {
+                return file.getName().startsWith(str);
+            }
+        };
+        return new File(directory).listFiles(fileFilter);
     }
 }
