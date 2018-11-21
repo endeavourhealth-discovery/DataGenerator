@@ -11,7 +11,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
-import java.io.FileFilter;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
@@ -59,24 +58,26 @@ public class ZipCsvFiles implements Job {
                         // String sourceLocation = config.getFileLocationDetails().getSource();
                         String sourceLocation = entry.getFilename();
 
-                        ZipFile zipFile = new ZipFile(sourceLocation + "/" + sourceLocation.substring(3) + ".zip");
-
+                        ZipFile zipFile = new ZipFile(sourceLocation + "/" // Will need to find a better way of
+                                + sourceLocation.substring(3) + ".zip");   // creating the zip filename from folder
+                                                                           // name specified in file_transactions
                         ZipParameters parameters = new ZipParameters();
                         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
                         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
                         parameters.setIncludeRootFolder(false);
+
                         Calendar startCalendar = Calendar.getInstance();
                         System.out.println("Tried starting zipping contents of folder " + sourceLocation + " on " + startCalendar.getTime());
                         LOG.info("Tried starting zipping contents of folder " + sourceLocation + " on " + startCalendar.getTime());
                         zipFile.createZipFileFromFolder(sourceLocation, parameters, true, ZIP_SPLIT_SIZE);
-                        Calendar endCalendar = Calendar.getInstance();
-                        System.out.println("Contents of folder zipped to multi-part zip file "
-                                + zipFile.toString() + " on " + endCalendar.getTime());
-                        LOG.info("Contents of folder zipped to multi-part zip file "
-                                + zipFile.toString() + " on " + endCalendar.getTime());
 
+                        Calendar endCalendar = Calendar.getInstance();
                         List<String> splitZipFileList = zipFile.getSplitZipFiles();
-                        System.out.println(splitZipFileList);
+                        System.out.println("Contents of folder zipped to multi-part zip file "
+                                + splitZipFileList + " on " + endCalendar.getTime());
+                        LOG.info("Contents of folder zipped to multi-part zip file "
+                                + splitZipFileList + " on " + endCalendar.getTime());
+
                         for (String filePathAndName : splitZipFileList) {
                             File file = new File(filePathAndName);
                             String fileName = file.getName();
@@ -86,7 +87,13 @@ public class ZipCsvFiles implements Job {
                             newFileTransEntityForCreation.setExtractDate(entry.getExtractDate());
                             newFileTransEntityForCreation.setZipDate(new Timestamp(System.currentTimeMillis()));
                             FileTransactionsEntity.create(newFileTransEntityForCreation);
+                            System.out.println("File: " + fileName + " record created");
+                            LOG.info("File: " + fileName + " record created");
                         }
+
+                        // FileTransactionsEntity.delete(entry);
+                        // System.out.println("File (folder): " + sourceLocation + " record deleted");
+                        // LOG.info("File (folder): " + sourceLocation + " record deleted");
                     } catch (Exception e) {
                         // Catch if there is a problem while creating the zip folder
                         System.out.println("Exception occurred with creating the zip file: " + e);
