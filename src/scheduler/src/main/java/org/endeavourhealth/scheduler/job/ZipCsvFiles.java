@@ -71,14 +71,4 @@ public class ZipCsvFiles implements Job {
             }
         }
     }
-
-    private static File[] getFilesFromDirectory(String directory, String prefix) {
-        final String str = prefix;
-        FileFilter fileFilter = new FileFilter() {
-            public boolean accept(File file) {
-                return file.getName().startsWith(str);
-            }
-        };
-        return new File(directory).listFiles(fileFilter);
-    }
 }
