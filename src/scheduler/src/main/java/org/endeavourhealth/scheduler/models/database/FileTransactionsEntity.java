@@ -16,7 +16,7 @@ import java.util.Objects;
 @Table(name = "file_transactions", schema = "data_generator")
 public class FileTransactionsEntity {
 
-    private long transaction_id;
+    private int extract_id;
     private String filename;
     private Timestamp extract_date;
     private Timestamp zip_date;
@@ -24,17 +24,17 @@ public class FileTransactionsEntity {
     private Timestamp sftp_date;
     private Timestamp housekeeping_date;
 
-    @Id
-    @Column(name = "transaction_id")
-    public long getTransactionId() {
-        return transaction_id;
-    }
-
-    public void setTransactionId(long transaction_id) {
-        this.transaction_id = transaction_id;
-    }
-
     @Basic
+    @Column(name = "extract_id")
+    public int getExtractId() {
+        return extract_id;
+    }
+
+    public void setExtractId(int extract_id) {
+        this.extract_id = extract_id;
+    }
+
+    @Id
     @Column(name = "filename")
     public String getFilename() {
         return filename;
@@ -103,7 +103,7 @@ public class FileTransactionsEntity {
             return false;
         }
         FileTransactionsEntity that = (FileTransactionsEntity) obj;
-        return transaction_id == that.transaction_id &&
+        return extract_id == that.extract_id &&
                 filename.equals(that.filename) &&
                 extract_date.equals(that.extract_date) &&
                 zip_date.equals(that.zip_date) &&
@@ -114,7 +114,7 @@ public class FileTransactionsEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(transaction_id,
+        return Objects.hash(extract_id,
                 filename,
                 extract_date,
                 zip_date,
@@ -144,8 +144,8 @@ public class FileTransactionsEntity {
         entityManager.getTransaction().commit();
     }
 
-    public static List<FileTransactionsEntity> getFilesForResending(long transaction_id) throws Exception {
-        return getFileTransactionsValues(transaction_id, false, false,
+    public static List<FileTransactionsEntity> getFilesForResending(int extractId) throws Exception {
+        return getFileTransactionsValues(extractId, false, false,
                 false, false, false);
     }
 
@@ -169,7 +169,7 @@ public class FileTransactionsEntity {
                 false,false, true);
     }
 
-    private static List<FileTransactionsEntity> getFileTransactionsValues(Long transaction_id,
+    private static List<FileTransactionsEntity> getFileTransactionsValues(Integer extractId,
         boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
         boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
@@ -180,8 +180,8 @@ public class FileTransactionsEntity {
         Root<FileTransactionsEntity> root = query.from(FileTransactionsEntity.class);
         List<Predicate> predicates = new ArrayList();
 
-        if (transaction_id != null) {
-            predicates.add(builder.equal(root.get("transactionId"), transaction_id));
+        if (extractId != null) {
+            predicates.add(builder.equal(root.get("extractId"), extractId));
         }
 
         if (extractIsNull) {

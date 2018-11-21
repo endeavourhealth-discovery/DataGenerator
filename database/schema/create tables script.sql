@@ -5,6 +5,7 @@ create database data_generator;
 drop table if exists data_generator.dataset;
 drop table if exists data_generator.extract;
 drop table if exists data_generator.cohort_results;
+drop table if exists data_generator.file_transactions;
 
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
@@ -37,13 +38,14 @@ create table data_generator.cohort_results (
 );
 
 create table data_generator.file_transactions (
-  transaction_id bigint(20) not null comment 'Transaction ID',
-  filename varchar(50) not null comment 'Unique Filename',
-  extract_date datetime default null comment 'Date and time when the extract file was created',
-  zip_date datetime default null comment 'Date and time when the extract file was zipped',
-  encrypt_date datetime default null comment 'Date and time when the extract file was encrypted',
-  sftp_date datetime default null comment 'Date and time when the encrypted extract file was sent via sftp',
-  housekeeping_date datetime default null comment 'Date and time when the encrypted extract file was kept for storage',
-  primary key (transaction_id,filename),
-  unique key filename_unique (filename)
+	extract_id int not null comment 'The extract that this patient is related to',
+	filename varchar(50) not null comment 'Unique Filename',
+	extract_date datetime default null comment 'Date and time when the extract file was created',
+	zip_date datetime default null comment 'Date and time when the extract file was zipped',
+	encrypt_date datetime default null comment 'Date and time when the extract file was encrypted',
+	sftp_date datetime default null comment 'Date and time when the encrypted extract file was sent via sftp',
+	housekeeping_date datetime default null comment 'Date and time when the encrypted extract file was kept for storage',
+  
+	primary key (extract_id,filename),
+	unique key filename_unique (filename)
 );
