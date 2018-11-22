@@ -27,14 +27,15 @@ public class TransferEncryptedFilesToSftp implements Job {
 
         System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
-        // int[] extractIdArray = {1, 2};
-        // for (int extractId : extractIdArray) {
+        int[] extractIdArray = {1, 2};
+        for (int extractId : extractIdArray) {
             try {
-                // Calling the SFTP config from the database
-                int extractId = 1;
+                // Getting the extract config from the extract table of the database
+                // int extractId = 1;
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
                 System.out.println(config.getName());
 
+                // Getting the file transaction details from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(extractId);
                 if (toProcess == null || toProcess.size() == 0) {
                     System.out.println("No files for transfer to SFTP");
@@ -42,29 +43,34 @@ public class TransferEncryptedFilesToSftp implements Job {
                     return;
                 }
 
-                for (FileTransactionsEntity entry : toProcess) {
+                // Setting up the connection details
+                ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
 
-                    // Setting up the connection details
-                    ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
+                // Creating the sftpConnection object
+                Connection sftpConnection = null;
 
-                    // Creating the sftpConnection object
-                    Connection sftpConnection = null;
-                    try {
-                        // Opening a connection to the SFTP
-                        sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+                try {
+                    // Opening a connection to the SFTP
+                    sftpConnection = this.openSftpConnection(sftpConnectionDetails);
 
-                        // Getting a set of files from the extract definition, file location details,
-                        // specified source folder, and uploading them to the similarly specified
-                        // SFTP destination folder
-                        /* String sourceLocation = config.getFileLocationDetails().getSource();
-                        File sourceFolder = new File(sourceLocation);
-                        String[] folderFilenamesStringArray = sourceFolder.list();
-                        for (String filename : folderFilenamesStringArray) {
-                            String sourcePath = sourceLocation + filename;
-                            String destinationPath = config.getFileLocationDetails().getDestination()
-                                    + filename;
-                            this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
-                        } */
+                    for (FileTransactionsEntity entry : toProcess) {
+
+                        /*  // Getting a set of files from the extract definition, file location details,
+                         *  // specified source folder, and uploading them to the similarly specified
+                         *  // SFTP destination folder
+                         *
+                         *  String sourceLocation = config.getFileLocationDetails().getSource();
+                         *  File sourceFolder = new File(sourceLocation);
+                         *  String[] folderFilenamesStringArray = sourceFolder.list();
+                         *  for (String filename : folderFilenamesStringArray) {
+                         *      String sourcePath = sourceLocation + filename;
+                         *      String destinationPath = config.getFileLocationDetails().getDestination()
+                         *              + filename;
+                         *       this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                         *  }
+                         */
+
+                        // Getting one file at a time and uploading it to the SFTP
                         String sourceLocation = config.getFileLocationDetails().getSource();
                         String sourcePath = sourceLocation + entry.getFilename();
                         String destinationPath = config.getFileLocationDetails().getDestination()
@@ -75,22 +81,21 @@ public class TransferEncryptedFilesToSftp implements Job {
                         FileTransactionsEntity.update(entry);
                         System.out.println("File: " + entry.getFilename() + " record updated");
                         LOG.info("File: " + entry.getFilename() + " record updated");
-
-                    } catch (Exception e) {
-                        // Catch if there is a problem while connecting to, or using, the SFTP
-                        System.out.println("Exception occurred with using the SFTP: " + e);
-                        LOG.error("Exception occurred with using the SFTP: " + e);
-                    } finally {
-                        // Close the connection to the SFTP
-                        if (sftpConnection != null)
-                            sftpConnection.close();
                     }
+                } catch (Exception e) {
+                    // Catch if there is a problem while connecting to, or using, the SFTP
+                    System.out.println("Exception occurred with using the SFTP: " + e);
+                    LOG.error("Exception occurred with using the SFTP: " + e);
+                } finally {
+                    // Close the connection to the SFTP
+                    if (sftpConnection != null)
+                        sftpConnection.close();
                 }
             } catch (Exception e) {
-                System.out.println("Exception occurred with using the config database: " + e);
-                LOG.error("Exception occurred with using the config database: " + e);
+                System.out.println("Exception occurred with using the database: " + e);
+                LOG.error("Exception occurred with using the database: " + e);
             }
-        // }
+        }
     }
 
     public ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
