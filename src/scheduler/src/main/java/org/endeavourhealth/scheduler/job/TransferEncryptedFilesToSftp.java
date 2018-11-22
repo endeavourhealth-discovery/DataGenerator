@@ -5,6 +5,7 @@ import org.endeavourhealth.scheduler.json.ExtractConfig;
 // import org.endeavourhealth.sftpreader.sources.Connection;
 // import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
 // import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
+import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionActivator;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
@@ -13,8 +14,10 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+// import java.io.*;
+import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 
 public class TransferEncryptedFilesToSftp implements Job {
 
@@ -24,48 +27,70 @@ public class TransferEncryptedFilesToSftp implements Job {
 
         System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
-        int[] extractIdArray = {1, 2};
-        for (int extractId : extractIdArray) {
+        // int[] extractIdArray = {1, 2};
+        // for (int extractId : extractIdArray) {
             try {
                 // Calling the SFTP config from the database
+                int extractId = 1;
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
                 System.out.println(config.getName());
 
-                // Setting up the connection details
-                ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
+                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp();
+                if (toProcess == null || toProcess.size() == 0) {
+                    System.out.println("No files for transfer to SFTP");
+                    LOG.info("No files for transfer to SFTP");
+                    return;
+                }
 
-                // Creating the sftpConnection object
-                Connection sftpConnection = null;
-                try {
-                    // Opening a connection to the SFTP
-                    sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+                for (FileTransactionsEntity entry : toProcess) {
 
-                    // Getting a set of files from the extract definition, file location details,
-                    // specified source folder, and uploading them to the similarly specified
-                    // SFTP destination folder
-                    String sourceLocation = config.getFileLocationDetails().getSource();
-                    File sourceFolder = new File(sourceLocation);
-                    String[] folderFilenamesStringArray = sourceFolder.list();
-                    for (String filename : folderFilenamesStringArray) {
-                        String sourcePath = sourceLocation + filename;
+                    // Setting up the connection details
+                    ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
+
+                    // Creating the sftpConnection object
+                    Connection sftpConnection = null;
+                    try {
+                        // Opening a connection to the SFTP
+                        sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+
+                        // Getting a set of files from the extract definition, file location details,
+                        // specified source folder, and uploading them to the similarly specified
+                        // SFTP destination folder
+                        /* String sourceLocation = config.getFileLocationDetails().getSource();
+                        File sourceFolder = new File(sourceLocation);
+                        String[] folderFilenamesStringArray = sourceFolder.list();
+                        for (String filename : folderFilenamesStringArray) {
+                            String sourcePath = sourceLocation + filename;
+                            String destinationPath = config.getFileLocationDetails().getDestination()
+                                    + filename;
+                            this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                        } */
+                        String sourceLocation = config.getFileLocationDetails().getSource();
+                        String sourcePath = sourceLocation + entry.getFilename();
                         String destinationPath = config.getFileLocationDetails().getDestination()
-                                + filename;
+                                + entry.getFilename();
                         this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+
+                        entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
+                        FileTransactionsEntity.update(entry);
+                        System.out.println("File: " + entry.getFilename() + " record updated");
+                        LOG.info("File: " + entry.getFilename() + " record updated");
+
+                    } catch (Exception e) {
+                        // Catch if there is a problem while connecting to, or using, the SFTP
+                        System.out.println("Exception occurred with using the SFTP: " + e);
+                        LOG.error("Exception occurred with using the SFTP: " + e);
+                    } finally {
+                        // Close the connection to the SFTP
+                        if (sftpConnection != null)
+                            sftpConnection.close();
                     }
-                } catch (Exception e) {
-                    // Catch if there is a problem while connecting to, or using, the SFTP
-                    System.out.println("Exception occurred with using the SFTP: " + e);
-                    LOG.error("Exception occurred with using the SFTP: " + e);
-                } finally {
-                    // Close the connection to the SFTP
-                    if (sftpConnection != null)
-                        sftpConnection.close();
                 }
             } catch (Exception e) {
                 System.out.println("Exception occurred with using the config database: " + e);
                 LOG.error("Exception occurred with using the config database: " + e);
             }
-        }
+        // }
     }
 
     public ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
