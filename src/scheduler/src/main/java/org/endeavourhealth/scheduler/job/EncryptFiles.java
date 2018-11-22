@@ -32,7 +32,9 @@ public class EncryptFiles implements Job {
         List<FileTransactionsEntity> toProcess;
         String location = null;
         try {
-            ExtractConfig config = ExtractCache.getExtractConfig(1);
+            //TODO determine logic to pass or obtain from tables the value/s needed for extractId
+            int extractId = 123;
+            ExtractConfig config = ExtractCache.getExtractConfig(extractId);
             location = config.getFileLocationDetails().getSource();
             if (!location.endsWith(File.separator)) {
                 location += File.separator;
@@ -40,7 +42,7 @@ public class EncryptFiles implements Job {
             LOG.debug("location:" + location);
 
             //retrieve files for encryption
-            toProcess = FileTransactionsEntity.getFilesForEncryption();
+            toProcess = FileTransactionsEntity.getFilesForEncryption(extractId);
             if (toProcess == null || toProcess.size() == 0) {
                 LOG.info("No file/s ready for encryption.");
                 return;

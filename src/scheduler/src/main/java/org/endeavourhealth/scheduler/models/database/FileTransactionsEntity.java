@@ -149,23 +149,23 @@ public class FileTransactionsEntity {
                 false, false, false);
     }
 
-    public static List<FileTransactionsEntity> getFilesForZip() throws Exception {
-        return getFileTransactionsValues(null, false, true,
+    public static List<FileTransactionsEntity> getFilesForZip(int extractId) throws Exception {
+        return getFileTransactionsValues(extractId, false, true,
                 true, true, true);
     }
 
-    public static List<FileTransactionsEntity> getFilesForEncryption() throws Exception {
-        return getFileTransactionsValues(null,false, false,
+    public static List<FileTransactionsEntity> getFilesForEncryption(int extractId) throws Exception {
+        return getFileTransactionsValues(extractId,false, false,
                 true, true, true);
     }
 
-    public static List<FileTransactionsEntity> getFilesForSftp() throws Exception {
-        return getFileTransactionsValues(null, false,false,
+    public static List<FileTransactionsEntity> getFilesForSftp(int extractId) throws Exception {
+        return getFileTransactionsValues(extractId, false,false,
                 false, true, true);
     }
 
-    public static List<FileTransactionsEntity> getFilesForHousekeeping() throws Exception {
-        return getFileTransactionsValues(null, false,false,
+    public static List<FileTransactionsEntity> getFilesForHousekeeping(int extractId) throws Exception {
+        return getFileTransactionsValues(extractId, false,false,
                 false,false, true);
     }
 

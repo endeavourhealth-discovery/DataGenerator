@@ -22,8 +22,10 @@ public class HousekeepFiles implements Job  {
     public void execute(JobExecutionContext jobExecutionContext) {
 
         try {
-            ExtractConfig config = ExtractCache.getExtractConfig(1);
+            //TODO determine logic to pass or obtain from tables the value/s needed for extractId
+            int extractId = 123;
 
+            ExtractConfig config = ExtractCache.getExtractConfig(extractId);
             String location = config.getFileLocationDetails().getSource();
             if (!location.endsWith(File.separator)) {
                 location += File.separator;
@@ -38,7 +40,7 @@ public class HousekeepFiles implements Job  {
             LOG.debug("housekeep:" + housekeep);
 
             //retrieve files for housekeeping
-            List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForHousekeeping();
+            List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForHousekeeping(extractId);
             if (toProcess == null || toProcess.size() == 0) {
                 LOG.info("No file/s for housekeeping.");
                 return;

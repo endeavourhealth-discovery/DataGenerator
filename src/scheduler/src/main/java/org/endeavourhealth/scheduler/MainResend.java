@@ -70,8 +70,9 @@ public class MainResend {
             } catch (Exception e) {
                 LOG.error("Error encountered during SFTP. " + e.getMessage());
             } finally {
-                if (connection != null)
+                if (connection != null) {
                     connection.close();
+                }
             }
         } catch (NumberFormatException e) {
             LOG.error("Extract ID should be numeric. " + e.getMessage());
