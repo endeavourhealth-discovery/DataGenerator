@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainResend {
@@ -48,6 +50,23 @@ public class MainResend {
             String filename = toProcess.get(0).getFilename();
             File[] files = MainResend.getFilesFromDirectory(housekeep, filename.substring(0, filename.indexOf(".")));
             if (toProcess.size() != files.length) {
+                LOG.error("Files needed for this Extract ID do not match the available files stored in housekeeping.");
+                return;
+            }
+
+            ArrayList<String> filesList = new ArrayList();
+            for (File file : files) {
+                filesList.add(file.getName());
+            }
+
+            boolean match = true;
+            for (FileTransactionsEntity entry : toProcess) {
+                if (filesList.contains(entry.getFilename())) {
+                    match = false;
+                    break;
+                }
+            }
+            if (!match) {
                 LOG.error("Files needed for this Extract ID do not match the available files stored in housekeeping.");
                 return;
             }

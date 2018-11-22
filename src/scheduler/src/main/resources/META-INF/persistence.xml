@@ -7,14 +7,18 @@
         <class>org.endeavourhealth.scheduler.models.database.DatasetEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.FileTransactionsEntity</class>
         <properties>
-            <property name="toplink.jdbc.url" value="jdbc:mysql://localhost:3306/data_generator?useSSL=false"/>
-            <property name="toplink.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/data_generator?useSSL=false"/>
-            <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="openjpa.ConnectionURL" value="jdbc:mysql://localhost:3306/data_generator?useSSL=false"/>
-            <property name="openjpa.ConnectionDriverName" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="eclipselink.jdbc.url" value="jdbc:mysql://localhost:3306/data_generator?useSSL=false"/>
-            <property name="eclipselink.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
+            <property name="hibernate.auth" value="Container" />
+            <property name="hibernate.hikari.connectionTimeout" value="300000" />
+            <property name="hibernate.hikari.maximumPoolSize" value="4" />
+            <property name="hibernate.hikari.minimumIdle" value="1" />
+            <property name="hibernate.hikari.idleTimeout" value="60000" />
+            <property name="hibernate.hikari.dataSourceClassName" value="com.mysql.cj.jdbc.MysqlDataSource" />
+            <property name="hibernate.hikari.leakDetectionThreshold" value="5000" />
+            <property name="hibernate.connection.autocommit" value="false" />
+            <!-- NOTE: ALL THESE PROPERTIES MAY BE OVERRIDDEN BY THE CONFIG JSON -->
         </properties>
     </persistence-unit>
 </persistence>
