@@ -35,7 +35,7 @@ public class TransferEncryptedFilesToSftp implements Job {
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
                 System.out.println(config.getName());
 
-                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp();
+                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(extractId);
                 if (toProcess == null || toProcess.size() == 0) {
                     System.out.println("No files for transfer to SFTP");
                     LOG.info("No files for transfer to SFTP");

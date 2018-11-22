@@ -34,7 +34,7 @@ public class ZipCsvFiles implements Job {
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
                 System.out.println(config.getName());
 
-                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForZip();
+                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForZip(extractId);
                 if (toProcess == null || toProcess.size() == 0) {
                     System.out.println("No files for zipping");
                     LOG.info("No files for zipping");
