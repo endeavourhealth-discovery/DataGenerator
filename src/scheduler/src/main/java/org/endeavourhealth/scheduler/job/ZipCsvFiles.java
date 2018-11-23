@@ -63,7 +63,7 @@ public class ZipCsvFiles implements Job {
 
                         ZipFile zipFile = new ZipFile(sourceLocation + "/" // Will need to find a better way of
                                 + sourceLocation.substring(3) + ".zip");   // creating the zip filename from folder
-                        // name specified in file_transactions
+                                                                           // name specified in file_transactions
                         ZipParameters parameters = new ZipParameters();
                         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
                         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
