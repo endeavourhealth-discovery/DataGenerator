@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -57,6 +59,7 @@ public class EncryptFiles implements Job {
         try {
 
             //create certificate object
+            Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
             Path path =
                     Paths.get(EncryptFiles.class.getClassLoader().getResource("endeavour.cer").toURI());
