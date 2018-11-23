@@ -27,7 +27,7 @@ public class ZipCsvFiles implements Job {
         System.out.println("Zipping CSV files contained in folders");
         LOG.info("Zipping CSV files contained in folders");
 
-        int[] extractIdArray = {1, 2};
+        int[] extractIdArray = {1};
         for (int extractId : extractIdArray) {
 
             try {
@@ -58,12 +58,34 @@ public class ZipCsvFiles implements Job {
                         // The below takes the contents of a specified folder location (i.e. all its files)
                         // and creates a multi-part zip file in the same place: original files not deleted
 
-                        // String sourceLocation = config.getFileLocationDetails().getSource();
-                        String sourceLocation = entry.getFilename();
+                        String sourceLocation = config.getFileLocationDetails().getSource();
 
-                        ZipFile zipFile = new ZipFile(sourceLocation + "/" // Will need to find a better way of
-                                + sourceLocation.substring(3) + ".zip");   // creating the zip filename from folder
-                                                                           // name specified in file_transactions
+                        if (!(sourceLocation.endsWith(File.separator))) {
+                            sourceLocation += File.separator;
+                        }
+
+                        // Create a string in CCYYMMDD format for today's date
+                        Calendar calendar = Calendar.getInstance();
+                        Integer year = calendar.get(calendar.YEAR);
+                        Integer month = calendar.get(calendar.MONTH);
+                        month = month + 1;
+                        String monthString = null;
+                        if (month < 10) {monthString = "0" + month;}
+                        else {monthString = month.toString();}
+                        Integer day = calendar.get(calendar.DAY_OF_MONTH);
+                        String dayString = null;
+                        if (day < 10) {dayString = "0" + day;}
+                        else {dayString = day.toString();}
+                        String todayDateString = year + monthString + dayString;
+
+                        File file1 = new File(sourceLocation);
+                        String zipFilename = file1.getName();
+
+                        // Create the zip file, named from the source folder
+                        // name, concatenated with the today's date string
+                        ZipFile zipFile = new ZipFile(sourceLocation +
+                                zipFilename + "_" + todayDateString + ".zip");
+
                         ZipParameters parameters = new ZipParameters();
                         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
                         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
@@ -82,8 +104,8 @@ public class ZipCsvFiles implements Job {
                                 + splitZipFileList + " on " + endCalendar.getTime());
 
                         for (String filePathAndName : splitZipFileList) {
-                            File file = new File(filePathAndName);
-                            String fileName = file.getName();
+                            File file2 = new File(filePathAndName);
+                            String fileName = file2.getName();
                             FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
                             newFileTransEntityForCreation.setExtractId(extractId);
                             newFileTransEntityForCreation.setFilename(fileName);

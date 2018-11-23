@@ -40,9 +40,9 @@ select 1, 'Child Imms', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 1",
  "id": "1",
  "fileLocationDetails": {
-          "source": "C:/extract1testsource/",
+          "source": "C:/extract1testsource",
           "destination": "/endeavour/ftp/",
-          "housekeep": "C:/extract1testhousekeep/"
+          "housekeep": "C:/extract1testhousekeep"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -60,9 +60,9 @@ select 2, 'Health check', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 2",
  "id": "2",
  "fileLocationDetails": {
-          "source": "C:/extract2testsource/",
+          "source": "C:/extract2testsource",
           "destination": "/endeavour/ftp/",
-          "housekeep": "C:/extract2testhousekeep/"
+          "housekeep": "C:/extract2testhousekeep"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",

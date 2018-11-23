@@ -35,7 +35,7 @@ public class EncryptFiles implements Job {
         String location = null;
         try {
             //TODO determine logic to pass or obtain from tables the value/s needed for extractId
-            int extractId = 123;
+            int extractId = 1;
             ExtractConfig config = ExtractCache.getExtractConfig(extractId);
             location = config.getFileLocationDetails().getSource();
             if (!location.endsWith(File.separator)) {

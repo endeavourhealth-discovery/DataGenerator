@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // import java.io.*;
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
@@ -27,7 +28,7 @@ public class TransferEncryptedFilesToSftp implements Job {
 
         System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
-        int[] extractIdArray = {1, 2};
+        int[] extractIdArray = {1};
         for (int extractId : extractIdArray) {
             try {
                 // Getting the extract config from the extract table of the database
@@ -72,9 +73,17 @@ public class TransferEncryptedFilesToSftp implements Job {
 
                         // Getting one file at a time and uploading it to the SFTP
                         String sourceLocation = config.getFileLocationDetails().getSource();
+                        if (!(sourceLocation.endsWith(File.separator))) {
+                            sourceLocation += File.separator;
+                        }
                         String sourcePath = sourceLocation + entry.getFilename();
-                        String destinationPath = config.getFileLocationDetails().getDestination()
-                                + entry.getFilename();
+
+                        String destinationLocation = config.getFileLocationDetails().getDestination();
+                        if (!(destinationLocation.endsWith(File.separator))) {
+                            destinationLocation += File.separator;
+                        }
+                        String destinationPath = destinationLocation + entry.getFilename();
+
                         this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
 
                         entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
@@ -165,6 +174,7 @@ public class TransferEncryptedFilesToSftp implements Job {
     public void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
         String sourcePath = source;
         String destinationPath = destination;
+
         Calendar startCalendar = Calendar.getInstance();
         System.out.println("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
         LOG.info("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
