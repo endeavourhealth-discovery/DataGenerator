@@ -5,6 +5,7 @@ import java.util.List;
 public class DatasetConfigExtract {
     private String type = null;
     private String fields = null;
+    private List<DatasetCodeSet> codeSets;
     private List<DatasetParameter> parameters;
 
     public String getType() {
@@ -29,5 +30,13 @@ public class DatasetConfigExtract {
 
     public void setParameters(List<DatasetParameter> parameters) {
         this.parameters = parameters;
+    }
+
+    public List<DatasetCodeSet> getCodeSets() {
+        return codeSets;
+    }
+
+    public void setCodeSets(List<DatasetCodeSet> codeSets) {
+        this.codeSets = codeSets;
     }
 }
