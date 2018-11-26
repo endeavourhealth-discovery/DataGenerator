@@ -8,8 +8,8 @@ import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetFields;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.CustomExtracts.AllergyExtracts;
+import org.endeavourhealth.scheduler.models.CustomExtracts.GeneralQueries;
 import org.endeavourhealth.scheduler.models.CustomExtracts.ImmunisationExtracts;
-import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.CustomExtracts.ObservationExtracts;
 import org.quartz.Job;
@@ -17,12 +17,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
-import javax.persistence.Query;
-import javax.persistence.StoredProcedureQuery;
 import java.io.FileWriter;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,7 +56,7 @@ public class GenerateData implements Job {
 
         if (datasetConfig.getExtract() != null) {
 
-            Long maxTransactionId = getMaxTransactionId();
+            Long maxTransactionId = GeneralQueries.getMaxTransactionId();
 
             for (DatasetConfigExtract extract : datasetConfig.getExtract()) {
                 System.out.println(extract.getType());
@@ -262,41 +257,10 @@ public class GenerateData implements Job {
         }
     }
 
-    private Long getMaxTransactionId() throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        try {
-            String sql = "select max(id) from pcr.event_log;";
-            Query query = entityManager.createNativeQuery(sql);
-
-            BigInteger result = (BigInteger)query.getSingleResult();
-
-            return result.longValue();
-
-        } finally {
-            entityManager.close();
-        }
-    }
-
     private void runFinaliseExtract(int extractId, Long maxTransactionId) throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
 
-        try {
-
-            System.out.println("Running finalise_extract");
-
-
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("finalise_extract")
-                    .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
-                    .registerStoredProcedureParameter("maxTransactionId", Long.class, ParameterMode.IN)
-                    .setParameter("extractId", extractId)
-                    .setParameter("maxTransactionId", maxTransactionId);
-
-            query.execute();
-            System.out.println("finalise_extract executed");
-        } finally {
-            entityManager.close();
-        }
+        GeneralQueries.setBulkedStatus(extractId);
+        GeneralQueries.setTransactionId(extractId, maxTransactionId);
     }
 
     private void createCSV(List<String> fieldHeaders, String tableName, int extractId) throws Exception {
