@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.models.database;
+package org.endeavourhealth.scheduler.models.CustomExtracts;
 
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 
@@ -6,15 +6,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
 
-public class ExtractSQL {
+public class AllergyExtracts {
 
-    public static List runBulkObservationAllCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyAllCodesQuery(int extractId, int codeSetId) throws Exception {
         System.out.println("bulk all");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
@@ -31,14 +31,14 @@ public class ExtractSQL {
         }
     }
 
-    public static List runDeltaObservationAllCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static List runDeltaAllergyAllCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         System.out.println("delta all");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr.event_log e " +
@@ -61,17 +61,17 @@ public class ExtractSQL {
         }
     }
 
-    public static List runBulkObservationEarliestEachCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyEarliestEachCodesQuery(int extractId, int codeSetId) throws Exception {
         System.out.println("bulk earliest each");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr.allergy oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date < oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
@@ -90,17 +90,17 @@ public class ExtractSQL {
         }
     }
 
-    public static List runDeltaObservationEarliestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static List runDeltaAllergyEarliestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         System.out.println("delta earliest each");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr.allergy oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date < oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
@@ -125,17 +125,17 @@ public class ExtractSQL {
         }
     }
 
-    public static List runBulkObservationLatestEachCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyLatestEachCodesQuery(int extractId, int codeSetId) throws Exception {
         System.out.println("bulk latest each");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr.allergy oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date > oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
@@ -154,17 +154,17 @@ public class ExtractSQL {
         }
     }
 
-    public static List runDeltaObservationLatestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static List runDeltaAllergyLatestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         System.out.println("delta latest each");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr.allergy oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date > oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
@@ -189,10 +189,10 @@ public class ExtractSQL {
         }
     }
 
-    public static List runBulkObservationLatestCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyLatestCodesQuery(int extractId, int codeSetId) throws Exception {
         // build the temp table to use for subsequent query
         System.out.println("bulk latest");
-        createMatchingObservationCodesTempTable(extractId, codeSetId);
+        createMatchingAllergyCodesTempTable(extractId, codeSetId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -211,14 +211,14 @@ public class ExtractSQL {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            deleteMatchingAllergyCodesTempTable();
         }
     }
 
-    public static List runDeltaObservationLatestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static List runDeltaAllergyLatestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         // build the temp table to use for subsequent query
         System.out.println("delta latest");
-        createDeltaMatchingObservationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
+        createDeltaMatchingAllergyCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -237,14 +237,14 @@ public class ExtractSQL {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            deleteMatchingAllergyCodesTempTable();
         }
     }
 
-    public static List runBulkObservationEarliestCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyEarliestCodesQuery(int extractId, int codeSetId) throws Exception {
         // build the temp table to use for subsequent query
         System.out.println("bulk earliest");
-        createMatchingObservationCodesTempTable(extractId, codeSetId);
+        createMatchingAllergyCodesTempTable(extractId, codeSetId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -263,14 +263,14 @@ public class ExtractSQL {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            deleteMatchingAllergyCodesTempTable();
         }
     }
 
-    public static List runDeltaObservationEarliestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static List runDeltaAllergyEarliestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         // build the temp table to use for subsequent query
         System.out.println("delta earliest");
-        createDeltaMatchingObservationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
+        createDeltaMatchingAllergyCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -289,11 +289,11 @@ public class ExtractSQL {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            deleteMatchingAllergyCodesTempTable();
         }
     }
 
-    public static void createMatchingObservationCodesTempTable(int extractId, int codeSetId) throws Exception {
+    public static void createMatchingAllergyCodesTempTable(int extractId, int codeSetId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         System.out.println("matching codes");
 
@@ -301,7 +301,7 @@ public class ExtractSQL {
             String sql = "create table matching_codes as " +
                     " select o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
@@ -318,7 +318,7 @@ public class ExtractSQL {
         }
     }
 
-    public static void createDeltaMatchingObservationCodesTempTable(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    public static void createDeltaMatchingAllergyCodesTempTable(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         System.out.println("delta matching codes");
 
@@ -326,7 +326,7 @@ public class ExtractSQL {
             String sql = "create table matching_codes as " +
                     " select o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join pcr.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr.event_log e " +
@@ -349,7 +349,7 @@ public class ExtractSQL {
         }
     }
 
-    public static void deleteMatchingObservationCodesTempTable() throws Exception {
+    public static void deleteMatchingAllergyCodesTempTable() throws Exception {
         System.out.println("delete matching codes");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 

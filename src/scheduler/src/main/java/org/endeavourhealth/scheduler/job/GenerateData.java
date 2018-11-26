@@ -6,9 +6,11 @@ import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetCodeSet;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetFields;
+import org.endeavourhealth.scheduler.models.CustomExtracts.AllergyExtracts;
+import org.endeavourhealth.scheduler.models.CustomExtracts.ImmunisationExtracts;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
-import org.endeavourhealth.scheduler.models.database.ExtractSQL;
+import org.endeavourhealth.scheduler.models.CustomExtracts.ObservationExtracts;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -64,7 +66,7 @@ public class GenerateData implements Job {
                 System.out.println(extract.getType());
                 switch (extract.getType()) {
                     case "patient":
-                        // runExtractForCodeSets(extract.getCodeSets(), extractId, "observation", maxTransactionId);
+                        // runObservationExtractForCodeSets(extract.getCodeSets(), extractId, "observation", maxTransactionId);
                         break;
                     case "medication":
                         /*if (limitCols) {
@@ -75,23 +77,13 @@ public class GenerateData implements Job {
                         }*/
                         break;
                     case "observation":
-                        runExtractForCodeSets(extract, extractId, "observation", extractDetails.getTransactionId(), maxTransactionId);
+                        runObservationExtractForCodeSets(extract, extractId, "observation", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "allergy":
-                        /*if (limitCols) {
-                            runGenericStatusExtract(extract, extractId, "generate_allergy");
-                        } else {
-                            runGenericStatusExtractAll(extract, extractId, "generate_allergy_all_col",
-                                    extractDetails.getCodeSetId(), maxTransactionId);
-                        }*/
+                        runAllergyExtractForCodeSets(extract, extractId, "allergy", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "immunisation":
-                        /*if (limitCols) {
-                            runGenericExtract(extract, extractId, "generate_immunisation");
-                        } else {
-                            runGenericExtractAll(extract, extractId, "generate_immunisation_all_col",
-                                    extractDetails.getCodeSetId(), maxTransactionId);
-                        }*/
+                        runImmunisationExtractForCodeSets(extract, extractId, "immunisation", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                 }
             }
@@ -101,7 +93,7 @@ public class GenerateData implements Job {
 
     }
 
-    private void runExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
+    private void runObservationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
 
         List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
 
@@ -114,41 +106,41 @@ public class GenerateData implements Job {
             createCSV(fieldHeaders, sectionName);
 
             for (DatasetCodeSet codeSet : codeSets) {
-                List<Object[]> results;
+                List results;
                 switch (codeSet.getExtractType())
                 {
                     case "all":
-                        results = ExtractSQL.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId());
+                        results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes);
-                        results = ExtractSQL.runDeltaObservationAllCodesQuery(extractId, codeSet.getCodeSetId(),
+                        results = ObservationExtracts.runDeltaObservationAllCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes);
                         break;
                     case "earliest_each":
-                        results = ExtractSQL.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        results = ObservationExtracts.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes);
-                        results = ExtractSQL.runDeltaObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                        results = ObservationExtracts.runDeltaObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes);
                         break;
                     case "latest_each":
-                        results = ExtractSQL.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes);
-                        results = ExtractSQL.runDeltaObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                        results = ObservationExtracts.runDeltaObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes);
                         break;
                     case "earliest":
-                        results = ExtractSQL.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
+                        results = ObservationExtracts.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes);
-                        results = ExtractSQL.runDeltaObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
+                        results = ObservationExtracts.runDeltaObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes);
                         break;
                     case "latest":
-                        results = ExtractSQL.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId());
+                        results = ObservationExtracts.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes);
-                        results = ExtractSQL.runDeltaObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
+                        results = ObservationExtracts.runDeltaObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes);
                         break;
@@ -157,61 +149,115 @@ public class GenerateData implements Job {
         }
     }
 
-    private List<Object[]> executeBulkExtract(int extractId, int codeSetId, String procedureName) throws Exception {
+    private void runAllergyExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
 
-        long startTime = System.currentTimeMillis();
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
 
-        try {
-            System.out.println("Running " + procedureName);
+        List<String> fieldHeaders = extractConfig.getFields().stream().map(DatasetFields::getHeader).collect(Collectors.toList());
+        List<Integer> fieldIndexes = extractConfig.getFields().stream().map(DatasetFields::getIndex).collect(Collectors.toList());
 
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
-                    .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
-                    .registerStoredProcedureParameter("codeSetId", Integer.class, ParameterMode.IN)
-                    .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", extractId);
+        if (codeSets != null && codeSets.size() > 0) {
 
-            List<Object[]> results = query.getResultList();
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            System.out.println(procedureName + " executed, Time taken " + estimatedTime);
+            // create the headers and the actual file
+            createCSV(fieldHeaders, sectionName);
 
-            return results;
-        } finally {
-            entityManager.close();
+            for (DatasetCodeSet codeSet : codeSets) {
+                List results;
+                switch (codeSet.getExtractType())
+                {
+                    case "all":
+                        results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = AllergyExtracts.runDeltaAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest_each":
+                        results = AllergyExtracts.runBulkAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = AllergyExtracts.runDeltaAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest_each":
+                        results = AllergyExtracts.runBulkAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = AllergyExtracts.runDeltaAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest":
+                        results = AllergyExtracts.runBulkAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = AllergyExtracts.runDeltaAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest":
+                        results = AllergyExtracts.runBulkAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = AllergyExtracts.runDeltaAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                }
+            }
         }
     }
 
-    private List<Object[]> executeDeltaExtract(int extractId, int codeSetId, String procedureName, Long maxTransactionId) throws Exception {
-        long startTime = System.currentTimeMillis();
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+    private void runImmunisationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
 
-        try {
+        List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
 
-            System.out.println("Running " + procedureName);
+        List<String> fieldHeaders = extractConfig.getFields().stream().map(DatasetFields::getHeader).collect(Collectors.toList());
+        List<Integer> fieldIndexes = extractConfig.getFields().stream().map(DatasetFields::getIndex).collect(Collectors.toList());
 
-            StoredProcedureQuery query = entityManager.createStoredProcedureQuery(procedureName)
-                    .registerStoredProcedureParameter("extractId", Integer.class, ParameterMode.IN)
-                    .registerStoredProcedureParameter("codeSetId", Integer.class, ParameterMode.IN)
-                    .registerStoredProcedureParameter("maxTransactionId", Long.class, ParameterMode.IN)
-                    .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", codeSetId)
-                    .setParameter("maxTransactionId", maxTransactionId);
+        if (codeSets != null && codeSets.size() > 0) {
 
-            List<Object[]> results = query.getResultList();
-            boolean hadResults = query.execute();
-            if (hadResults) {
-                List rs = query.getResultList();
-                for (Object r : rs) {
-                    System.out.println(r);
+            // create the headers and the actual file
+            createCSV(fieldHeaders, sectionName);
+
+            for (DatasetCodeSet codeSet : codeSets) {
+                List results;
+                switch (codeSet.getExtractType())
+                {
+                    case "all":
+                        results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ImmunisationExtracts.runDeltaImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest_each":
+                        results = ImmunisationExtracts.runBulkImmunisationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ImmunisationExtracts.runDeltaImmunisationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest_each":
+                        results = ImmunisationExtracts.runBulkImmunisationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ImmunisationExtracts.runDeltaImmunisationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest":
+                        results = ImmunisationExtracts.runBulkImmunisationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ImmunisationExtracts.runDeltaImmunisationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest":
+                        results = ImmunisationExtracts.runBulkImmunisationLatestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ImmunisationExtracts.runDeltaImmunisationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
                 }
             }
-
-            long estimatedTime = System.currentTimeMillis() - startTime;
-            System.out.println(procedureName + " executed, Time taken " + estimatedTime);
-
-            return results;
-        } finally {
-            entityManager.close();
         }
     }
 
@@ -282,13 +328,6 @@ public class GenerateData implements Job {
                         fw.append(',');
                     }
                 }
-/*
-                for (Object obj : result) {
-                    if (obj != null) {
-                        fw.append(obj.toString());
-                        fw.append(',');
-                    }
-                }*/
                 fw.append(System.getProperty("line.separator"));
             }
         } finally {

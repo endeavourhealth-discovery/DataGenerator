@@ -5,30 +5,62 @@ select 1, id, organisation_id from pcr.patient;
 -- insert into the dataset table
 insert into data_generator.dataset
 select 1, '{
-"extracts": [{
- 		"type": "patient",
- 		"fields": "patient_id, nhs_number, gender_concept_id, date_of_birth, organisation_id"},
- 		{
- 		"type": "medication",
- 		"fields": "patient_id, effective_date, is_active, drug_concept_id",
- 		"parameters": [
-         {
- 			"status": "activeOnly"
- 		}]
- 	},
- 		{
- 		"type": "observation",
- 		"fields": "patient_id, effective_date, original_code, original_concept"
- 	},
- 		{
- 		"type": "allergy",
- 		"fields": "a.patient_id, a.effective_date, o.original_code, o.original_concept",
- 		"parameters": [
-         {
- 			"status": "activeOnly"
- 		}]
- 	}]
-}';
+ "name": "Child Health",
+ "id": "1",
+ "extract": [{
+  		"type": "patient",
+  		"fields": [
+{"header" : "observation id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "original code", "index" : "11"},
+{"header" : "original term", "index" : "12"}],
+
+  		"type": "immunisation",
+  		"fields": [
+{"header" : "observation id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "original code", "index" : "11"},
+{"header" : "original term", "index" : "12"}],
+ 		"codeSets": [
+ {"codeSetId": 1, "extractType": "all"},
+ {"codeSetId": 2, "extractType": "latest"},
+ {"codeSetId": 3, "extractType": "earliest"},
+ {"codeSetId": 4, "extractType": "latest_each"},
+ {"codeSetId": 5, "extractType": "earliest_each"}]
+  	},
+  		{
+  		"type": "observation",
+  		"fields": [
+{"header" : "observation id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "original code", "index" : "11"},
+{"header" : "original term", "index" : "12"}],
+ 		"codeSets": [
+ {"codeSetId": 1, "extractType": "all"},
+ {"codeSetId": 2, "extractType": "latest"},
+ {"codeSetId": 3, "extractType": "earliest"},
+ {"codeSetId": 4, "extractType": "latest_each"},
+ {"codeSetId": 5, "extractType": "earliest_each"}]
+  	},
+  		{
+  		"type": "allergy",
+  		"fields": [
+{"header" : "observation id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "original code", "index" : "11"},
+{"header" : "original term", "index" : "12"}],
+ 		"codeSets": [
+ {"codeSetId": 1, "extractType": "all"},
+ {"codeSetId": 2, "extractType": "latest"},
+ {"codeSetId": 3, "extractType": "earliest"},
+ {"codeSetId": 4, "extractType": "latest_each"},
+ {"codeSetId": 5, "extractType": "earliest_each"}]
+  	}]
+ }';
 
 -- delete some extract data
 delete from data_generator.extract where extract_id <= 4;
