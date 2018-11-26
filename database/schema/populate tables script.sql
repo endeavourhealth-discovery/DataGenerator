@@ -1,6 +1,6 @@
 -- populate the cohort results table with data from the pcr tables
 insert into data_generator.cohort_results
-select 1, id, organisation_id from pcr.patient;
+select 1, id, organisation_id, 0 from pcr.patient;
 
 -- insert into the dataset table
 insert into data_generator.dataset
