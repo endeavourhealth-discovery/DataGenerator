@@ -3,6 +3,7 @@ package org.endeavourhealth.scheduler.job;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
+import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
@@ -13,21 +14,20 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
 
 public class ZipCsvFiles implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZipCsvFiles.class);
 
-    private static final long ZIP_SPLIT_SIZE = 2621440; // 5242880 // 10485760
+    private static final long ZIP_SPLIT_SIZE = 10485760;
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
         // System.out.println("Zipping CSV files contained in folders");
         LOG.info("Zipping CSV files contained in folders");
 
-        int[] extractIdArray = {2};
+        int[] extractIdArray = {1};
         for (int extractId : extractIdArray) {
 
             try {
@@ -44,19 +44,9 @@ public class ZipCsvFiles implements Job {
                     return;
                 }
 
-                for (FileTransactionsEntity entry : toProcess) {
+                FileTransactionsEntity entry = toProcess.get(0);
+                if (entry != null) {
                     try {
-                        // This turns a single file into a multi-part zip file
-
-                        // String sourcePath = "C:/ziplocation/largefiletest1m32mb.csv";
-                        // File sourceFile = new File(sourcePath);
-                        // File destinationZipFolder = new File (sourceFile.getParent(),
-                        // sourceFile.getName() + ".zip");
-                        // ZipFile zip = new ZipFile(destinationZipFolder);
-                        // zip.createZipFile(sourceFile, parameters, true, ZIP_SPLIT_SIZE);
-
-                        // The below takes the contents of a specified folder location (i.e. all its files)
-                        // and creates a multi-part zip file in the same place: original files not deleted
 
                         String sourceLocation = config.getFileLocationDetails().getSource();
 
@@ -64,28 +54,11 @@ public class ZipCsvFiles implements Job {
                             sourceLocation += File.separator;
                         }
 
-                        File file1 = new File(sourceLocation);
-                        String zipFilename = file1.getName(); // or .getParent() if the subfolder is called Source
-                                                              // and the parent folder is the name of the Product
-
-                        // Create a string in CCYYMMDD format for today's date
-                        Calendar calendar = Calendar.getInstance();
-                        Integer year = calendar.get(calendar.YEAR);
-                        Integer month = calendar.get(calendar.MONTH);
-                        month = month + 1;
-                        String monthString = null;
-                        if (month < 10) {monthString = "0" + month;}
-                        else {monthString = month.toString();}
-                        Integer day = calendar.get(calendar.DAY_OF_MONTH);
-                        String dayString = null;
-                        if (day < 10) {dayString = "0" + day;}
-                        else {dayString = day.toString();}
-                        String todayDateString = year + monthString + dayString;
+                        sourceLocation += entry.getFilename();
 
                         // Create the empty zip file, named from the source
                         // folder name, concatenated with the todayDateString
-                        ZipFile zipFile = new ZipFile(sourceLocation +
-                                zipFilename + "_" + todayDateString + ".zip");
+                        ZipFile zipFile = new ZipFile(sourceLocation + ".zip");
 
                         // Set the zip file parameters
                         ZipParameters parameters = new ZipParameters();
@@ -93,29 +66,24 @@ public class ZipCsvFiles implements Job {
                         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
                         parameters.setIncludeRootFolder(false);
 
-                        Calendar startCalendar = Calendar.getInstance();
-                        // System.out.println("Tried starting zipping contents of folder " + sourceLocation
-                        //        + " on " + startCalendar.getTime());
-                        LOG.info("Tried starting zipping contents of folder " + sourceLocation
-                                + " on " + startCalendar.getTime());
+                        LOG.info("Tried starting zipping contents of folder " + sourceLocation);
 
                         // Create the multi-part zip file from the files in the
                         // specified folder, using the zip file parameters
                         zipFile.createZipFileFromFolder(sourceLocation, parameters,
                                 true, ZIP_SPLIT_SIZE);
 
-                        Calendar endCalendar = Calendar.getInstance();
                         List<String> splitZipFileList = zipFile.getSplitZipFiles();
                         // System.out.println("Contents of folder zipped to multi-part zip file "
                         //        + splitZipFileList + " on " + endCalendar.getTime());
                         LOG.info("Contents of folder zipped to multi-part zip file "
-                                + splitZipFileList + " on " + endCalendar.getTime());
+                                + splitZipFileList);
 
                         // Add, to the file_transactions table of the database,
                         // the entries for each part of the multi-part zip file
                         for (String filePathAndName : splitZipFileList) {
-                            File file2 = new File(filePathAndName);
-                            String fileName = file2.getName();
+                            File file = new File(filePathAndName);
+                            String fileName = file.getName();
                             FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
                             newFileTransEntityForCreation.setExtractId(extractId);
                             newFileTransEntityForCreation.setFilename(fileName);
@@ -126,22 +94,13 @@ public class ZipCsvFiles implements Job {
                             LOG.info("File: " + fileName + " record created");
                         }
 
-                        // Delete the .csv files from the specified folder location
-                        File file3 = new File(sourceLocation);
-                        String[] fileList = file3.list();
-                        for (String filename : fileList){
-                            if (filename.contains(".csv")){
-                                File fileForDeletion = new File(sourceLocation + filename);
-                                fileForDeletion.delete();
-                                // System.out.println(filename + " has been deleted");
-                                LOG.info(filename + " has been deleted");
-                            }
-                        }
+                        File file = new File(sourceLocation);
+                        FileUtils.deleteDirectory(file);
 
                         // Delete, from the file_transactions table, the entry for the folder to be zipped
-                        // FileTransactionsEntity.delete(entry);
+                        FileTransactionsEntity.delete(entry);
                         // System.out.println("File (folder): " + sourceLocation + " record deleted");
-                        // LOG.info("File (folder): " + sourceLocation + " record deleted");
+                        LOG.info("File (folder): " + file.getName() + " record deleted");
 
                     } catch (Exception e) {
                         // System.out.println("Exception occurred with creating the zip file: " + e);

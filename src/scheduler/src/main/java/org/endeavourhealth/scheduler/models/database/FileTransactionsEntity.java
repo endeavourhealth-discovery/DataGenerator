@@ -140,6 +140,7 @@ public class FileTransactionsEntity {
     public static void delete(FileTransactionsEntity entry) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
+        entry = entityManager.merge(entry);
         entityManager.remove(entry);
         entityManager.getTransaction().commit();
     }
@@ -214,6 +215,7 @@ public class FileTransactionsEntity {
             predicates.add(builder.isNotNull(root.get("housekeepingDate")));
         }
 
+        query.orderBy(builder.desc(root.get("filename")));
         query.where(predicates.toArray(new Predicate[0]));
         TypedQuery<FileTransactionsEntity> tq = entityManager.createQuery(query);
         List<FileTransactionsEntity> ret = tq.getResultList();

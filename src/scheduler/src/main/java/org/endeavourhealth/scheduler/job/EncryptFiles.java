@@ -68,21 +68,27 @@ public class EncryptFiles implements Job {
 
             for (FileTransactionsEntity entry : toProcess) {
 
-                File file = new File(location + entry.getFilename());
-                boolean success = PgpEncryptDecrypt.encryptFile(file, certificate, PROVIDER);
+                boolean success = true;
+                if (entry.getFilename().contains(".zip")) {
+                    File file = new File(location + entry.getFilename());
+                    success = PgpEncryptDecrypt.encryptFile(file, certificate, PROVIDER);
+                }
 
                 if (success) {
 
-                    LOG.info("File:" + file.getName() + " encrypted.");
+                    if (entry.getFilename().contains(".zip")) {
+                        LOG.info("File:" + entry.getFilename() + " encrypted.");
+                    }
 
                     //update the file's encryption date
                     entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
                     FileTransactionsEntity.update(entry);
 
-                    LOG.info("File:" + file.getName() + " record updated.");
+                    LOG.info("File:" + entry.getFilename() + " record updated.");
 
                 } else {
-                    LOG.error("File:" + file.getName() + " failed encryption.");
+                    LOG.error("File:" + entry.getFilename() + " failed encryption.");
+                    return;
                 }
             }
         } catch (CertificateException e) {
