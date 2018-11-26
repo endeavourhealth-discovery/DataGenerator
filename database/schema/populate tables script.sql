@@ -155,18 +155,18 @@ delete from data_generator.file_transactions where extract_id = 2;
 
 -- create some file_transactions data 
 insert into data_generator.file_transactions
-select 1, 'C:/extract1testsource', null, null, null, null, null;
+select 1, '1_20181126', null, null, null, null, null;
 insert into data_generator.file_transactions
-select 2, 'C:/extract2testsource', null, null, null, null, null;
+select 2, '2_20181126', null, null, null, null, null;
 
 -- set extract_date to now() for the two records above, in order to kick off all 
 -- subsequent Java processes, i.e. where file_transactions is being used as a queue 
 update data_generator.file_transactions
-set extract_date = now() where extract_id = 1 and filename = 'C:/extract1testsource';
+set extract_date = now() where extract_id = 1 and filename = '1_20181126';
 update data_generator.file_transactions
-set extract_date = now() where extract_id = 2 and filename = 'C:/extract2testsource';
+set extract_date = now() where extract_id = 2 and filename = '2_20181126';
 
 -- update data_generator.file_transactions
--- set encrypt_date = now() where extract_id = 2 and filename = 'extract2testsource.z01';
+-- set encrypt_date = now() where extract_id = 2 and filename = '2_20181126.z01';
 -- update data_generator.file_transactions
--- set encrypt_date = now() where extract_id = 2 and filename = 'extract2testsource.zip';
+-- set encrypt_date = now() where extract_id = 2 and filename = '2_20181126.zip';
