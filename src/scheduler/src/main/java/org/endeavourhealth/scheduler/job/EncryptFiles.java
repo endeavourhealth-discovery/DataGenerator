@@ -2,7 +2,7 @@ package org.endeavourhealth.scheduler.job;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.quartz.Job;

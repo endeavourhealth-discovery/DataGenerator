@@ -2,7 +2,7 @@ package org.endeavourhealth.scheduler;
 
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.job.TransferEncryptedFilesToSftp;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainResend {

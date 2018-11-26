@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.json;
+package org.endeavourhealth.scheduler.json.DatasetDefinition;
 
 import java.util.List;
 

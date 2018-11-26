@@ -18,6 +18,7 @@ public class ExtractEntity {
     private int codeSetId;
     private int datasetId;
     private String definition;
+    private long transactionId;
 
     @Id
     @Column(name = "extract_id")
@@ -79,6 +80,16 @@ public class ExtractEntity {
         this.definition = definition;
     }
 
+    @Basic
+    @Column(name = "transaction_id")
+    public long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(long transactionId) {
+        this.transactionId = transactionId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -88,13 +99,15 @@ public class ExtractEntity {
                 cohortId == that.cohortId &&
                 codeSetId == that.codeSetId &&
                 datasetId == that.datasetId &&
+                transactionId == that.transactionId &&
                 Objects.equals(extractName, that.extractName) &&
                 Objects.equals(definition, that.definition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition);
+
+        return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition, transactionId);
     }
 
     public static List<ExtractEntity> getAllExtracts() throws Exception {

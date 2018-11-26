@@ -2,7 +2,7 @@ package org.endeavourhealth.scheduler.job;
 
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

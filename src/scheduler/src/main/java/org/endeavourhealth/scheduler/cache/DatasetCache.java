@@ -2,7 +2,7 @@ package org.endeavourhealth.scheduler.cache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
-import org.endeavourhealth.scheduler.json.DatasetConfig;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
 import org.endeavourhealth.scheduler.models.database.DatasetEntity;
 
 import java.util.HashMap;

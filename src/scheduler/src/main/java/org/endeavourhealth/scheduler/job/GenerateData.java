@@ -2,9 +2,10 @@ package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.DatasetCache;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
-import org.endeavourhealth.scheduler.json.DatasetCodeSet;
-import org.endeavourhealth.scheduler.json.DatasetConfig;
-import org.endeavourhealth.scheduler.json.DatasetConfigExtract;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetCodeSet;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetFields;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.ExtractSQL;
@@ -19,8 +20,8 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 import java.io.FileWriter;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GenerateData implements Job {
 
@@ -74,7 +75,7 @@ public class GenerateData implements Job {
                         }*/
                         break;
                     case "observation":
-                        runExtractForCodeSets(extract, extractId, "observation", maxTransactionId);
+                        runExtractForCodeSets(extract, extractId, "observation", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "allergy":
                         /*if (limitCols) {
@@ -100,25 +101,58 @@ public class GenerateData implements Job {
 
     }
 
-    private void runExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long maxTransactionId) throws Exception {
+    private void runExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
 
         List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
+
+        List<String> fieldHeaders = extractConfig.getFields().stream().map(DatasetFields::getHeader).collect(Collectors.toList());
+        List<Integer> fieldIndexes = extractConfig.getFields().stream().map(DatasetFields::getIndex).collect(Collectors.toList());
 
         if (codeSets != null && codeSets.size() > 0) {
 
             // create the headers and the actual file
-            createCSV(extractConfig.getFields(), sectionName);
+            createCSV(fieldHeaders, sectionName);
 
             for (DatasetCodeSet codeSet : codeSets) {
-                String bulkProcName = "bulk_" + sectionName + "_" + codeSet.getExtractType() + "_in_code_set";
-                String deltaProcName = "delta_" + sectionName + "_" + codeSet.getExtractType() + "_in_code_set";
-                System.out.println(bulkProcName);
-
-                List<Object[]> bulkResults = ExtractSQL.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId());
-                // List<Object[]> bulkResults = executeBulkExtract(extractId, codeSet.getCodeSetId(), bulkProcName);
-                saveToCSV(bulkResults, sectionName);
-                // List<Object[]> deltaResults = executeDeltaExtract(extractId, codeSet.getCodeSetId(), deltaProcName, maxTransactionId);
-                // saveToCSV(deltaResults, sectionName);
+                List<Object[]> results;
+                switch (codeSet.getExtractType())
+                {
+                    case "all":
+                        results = ExtractSQL.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ExtractSQL.runDeltaObservationAllCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest_each":
+                        results = ExtractSQL.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ExtractSQL.runDeltaObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest_each":
+                        results = ExtractSQL.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ExtractSQL.runDeltaObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "earliest":
+                        results = ExtractSQL.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ExtractSQL.runDeltaObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                    case "latest":
+                        results = ExtractSQL.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        results = ExtractSQL.runDeltaObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes);
+                        break;
+                }
             }
         }
     }
@@ -218,13 +252,12 @@ public class GenerateData implements Job {
         }
     }
 
-    private void createCSV(String fields, String tableName) throws Exception {
+    private void createCSV(List<String> fieldHeaders, String tableName) throws Exception {
         String filename = "C:\\sftpkey\\" + tableName + ".csv";
-
 
         FileWriter fw = new FileWriter(filename);
         try {
-            for (String field: fields.split(",")) {
+            for (String field: fieldHeaders) {
                 fw.append(field);
                 fw.append(',');
             }
@@ -236,19 +269,14 @@ public class GenerateData implements Job {
         }
     }
 
-    private void saveToCSV(List<Object[]> results,  String tableName) throws Exception {
+    private void saveToCSV(List<Object[]> results,  String tableName, List<Integer> fieldIndexes) throws Exception {
         String filename = "C:\\sftpkey\\" + tableName + ".csv";
 
-        List<Integer> fields = new ArrayList<>();
-        fields.add(1);
-        fields.add(3);
-        fields.add(11);
-        fields.add(12);
         FileWriter fw = new FileWriter(filename, true);
         try {
             for (Object[] result : results) {
 
-                for (Integer idx : fields) {
+                for (Integer idx : fieldIndexes) {
                     if (result[idx] != null) {
                         fw.append(result[idx].toString());
                         fw.append(',');

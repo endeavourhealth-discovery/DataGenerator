@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.json;
+package org.endeavourhealth.scheduler.json.ExtractDefinition;
 
 public class SftpConnectionDetails {
     private String hostname = null;

@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.json;
+package org.endeavourhealth.scheduler.json.ExtractDefinition;
 
 public class ExtractConfig {
     private String name = null;

@@ -2,7 +2,7 @@ package org.endeavourhealth.scheduler.cache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 
 import java.util.HashMap;

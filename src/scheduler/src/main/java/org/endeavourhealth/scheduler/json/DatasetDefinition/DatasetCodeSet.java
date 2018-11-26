@@ -1,4 +1,4 @@
-package org.endeavourhealth.scheduler.json;
+package org.endeavourhealth.scheduler.json.DatasetDefinition;
 
 public class DatasetCodeSet {
     private int codeSetId;

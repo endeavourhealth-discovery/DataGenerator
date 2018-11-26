@@ -1,7 +1,7 @@
 package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.ExtractCache;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 // import org.endeavourhealth.sftpreader.sources.Connection;
 // import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
 // import org.endeavourhealth.sftpreader.sources.ConnectionDetails;

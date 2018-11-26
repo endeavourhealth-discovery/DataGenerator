@@ -1,8 +1,8 @@
 package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.scheduler.cache.DatasetCache;
-import org.endeavourhealth.scheduler.json.DatasetConfig;
-import org.endeavourhealth.scheduler.json.DatasetConfigExtract;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
+import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -62,7 +62,7 @@ public class ExtractSQLToCsv implements Job {
 
     private void runSQLtoCSV(DatasetConfigExtract config, int extractId, String tableName) throws Exception {
 
-        try {
+        /*try {
 
             String fields = config.getFields();
 
@@ -87,7 +87,7 @@ public class ExtractSQLToCsv implements Job {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private List<Object[]> executeSQLBatch(String sql, int pageNumber, int pageSize) throws Exception {

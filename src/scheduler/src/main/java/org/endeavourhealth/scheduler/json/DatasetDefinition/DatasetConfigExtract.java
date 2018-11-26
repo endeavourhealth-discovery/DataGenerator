@@ -1,10 +1,10 @@
-package org.endeavourhealth.scheduler.json;
+package org.endeavourhealth.scheduler.json.DatasetDefinition;
 
 import java.util.List;
 
 public class DatasetConfigExtract {
     private String type = null;
-    private String fields = null;
+    private List<DatasetFields> fields;
     private List<DatasetCodeSet> codeSets;
     private List<DatasetParameter> parameters;
 
@@ -16,11 +16,11 @@ public class DatasetConfigExtract {
         this.type = type;
     }
 
-    public String getFields() {
+    public List<DatasetFields> getFields() {
         return fields;
     }
 
-    public void setFields(String fields) {
+    public void setFields(List<DatasetFields> fields) {
         this.fields = fields;
     }
 

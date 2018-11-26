@@ -4,7 +4,7 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
-import org.endeavourhealth.scheduler.json.ExtractConfig;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
