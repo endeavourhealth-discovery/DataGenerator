@@ -24,22 +24,22 @@ public class ZipCsvFiles implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        System.out.println("Zipping CSV files contained in folders");
+        // System.out.println("Zipping CSV files contained in folders");
         LOG.info("Zipping CSV files contained in folders");
 
-        int[] extractIdArray = {1};
+        int[] extractIdArray = {2};
         for (int extractId : extractIdArray) {
 
             try {
                 // Getting the extract config from the extract table of the database
-                // int extractId = 1;
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
-                System.out.println(config.getName());
+                // System.out.println(config.getName());
+                LOG.info(config.getName());
 
-                // Getting the file transaction details from the file_transactions table of the database
+                // Getting the folder to be zipped from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForZip(extractId);
                 if (toProcess == null || toProcess.size() == 0) {
-                    System.out.println("No files for zipping");
+                    // System.out.println("No files for zipping");
                     LOG.info("No files for zipping");
                     return;
                 }
@@ -64,6 +64,10 @@ public class ZipCsvFiles implements Job {
                             sourceLocation += File.separator;
                         }
 
+                        File file1 = new File(sourceLocation);
+                        String zipFilename = file1.getName(); // or .getParent() if the subfolder is called Source
+                                                              // and the parent folder is the name of the Product
+
                         // Create a string in CCYYMMDD format for today's date
                         Calendar calendar = Calendar.getInstance();
                         Integer year = calendar.get(calendar.YEAR);
@@ -78,31 +82,37 @@ public class ZipCsvFiles implements Job {
                         else {dayString = day.toString();}
                         String todayDateString = year + monthString + dayString;
 
-                        File file1 = new File(sourceLocation);
-                        String zipFilename = file1.getName();
-
-                        // Create the zip file, named from the source folder
-                        // name, concatenated with the today's date string
+                        // Create the empty zip file, named from the source
+                        // folder name, concatenated with the todayDateString
                         ZipFile zipFile = new ZipFile(sourceLocation +
                                 zipFilename + "_" + todayDateString + ".zip");
 
+                        // Set the zip file parameters
                         ZipParameters parameters = new ZipParameters();
                         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
                         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
                         parameters.setIncludeRootFolder(false);
 
                         Calendar startCalendar = Calendar.getInstance();
-                        System.out.println("Tried starting zipping contents of folder " + sourceLocation + " on " + startCalendar.getTime());
-                        LOG.info("Tried starting zipping contents of folder " + sourceLocation + " on " + startCalendar.getTime());
-                        zipFile.createZipFileFromFolder(sourceLocation, parameters, true, ZIP_SPLIT_SIZE);
+                        // System.out.println("Tried starting zipping contents of folder " + sourceLocation
+                        //        + " on " + startCalendar.getTime());
+                        LOG.info("Tried starting zipping contents of folder " + sourceLocation
+                                + " on " + startCalendar.getTime());
+
+                        // Create the multi-part zip file from the files in the
+                        // specified folder, using the zip file parameters
+                        zipFile.createZipFileFromFolder(sourceLocation, parameters,
+                                true, ZIP_SPLIT_SIZE);
 
                         Calendar endCalendar = Calendar.getInstance();
                         List<String> splitZipFileList = zipFile.getSplitZipFiles();
-                        System.out.println("Contents of folder zipped to multi-part zip file "
-                                + splitZipFileList + " on " + endCalendar.getTime());
+                        // System.out.println("Contents of folder zipped to multi-part zip file "
+                        //        + splitZipFileList + " on " + endCalendar.getTime());
                         LOG.info("Contents of folder zipped to multi-part zip file "
                                 + splitZipFileList + " on " + endCalendar.getTime());
 
+                        // Add, to the file_transactions table of the database,
+                        // the entries for each part of the multi-part zip file
                         for (String filePathAndName : splitZipFileList) {
                             File file2 = new File(filePathAndName);
                             String fileName = file2.getName();
@@ -112,21 +122,34 @@ public class ZipCsvFiles implements Job {
                             newFileTransEntityForCreation.setExtractDate(entry.getExtractDate());
                             newFileTransEntityForCreation.setZipDate(new Timestamp(System.currentTimeMillis()));
                             FileTransactionsEntity.create(newFileTransEntityForCreation);
-                            System.out.println("File: " + fileName + " record created");
+                            // System.out.println("File: " + fileName + " record created");
                             LOG.info("File: " + fileName + " record created");
                         }
 
+                        // Delete the .csv files from the specified folder location
+                        File file3 = new File(sourceLocation);
+                        String[] fileList = file3.list();
+                        for (String filename : fileList){
+                            if (filename.contains(".csv")){
+                                File fileForDeletion = new File(sourceLocation + filename);
+                                fileForDeletion.delete();
+                                // System.out.println(filename + " has been deleted");
+                                LOG.info(filename + " has been deleted");
+                            }
+                        }
+
+                        // Delete, from the file_transactions table, the entry for the folder to be zipped
                         // FileTransactionsEntity.delete(entry);
                         // System.out.println("File (folder): " + sourceLocation + " record deleted");
                         // LOG.info("File (folder): " + sourceLocation + " record deleted");
+
                     } catch (Exception e) {
-                        // Catch if there is a problem while creating the zip folder
-                        System.out.println("Exception occurred with creating the zip file: " + e);
+                        // System.out.println("Exception occurred with creating the zip file: " + e);
                         LOG.error("Exception occurred with creating the zip file: " + e);
                     }
                 }
             } catch (Exception e) {
-                System.out.println("Exception occurred with using the database: " + e);
+                // System.out.println("Exception occurred with using the database: " + e);
                 LOG.error("Exception occurred with using the database: " + e);
             }
         }

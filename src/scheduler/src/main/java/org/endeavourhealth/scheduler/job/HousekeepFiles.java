@@ -23,7 +23,7 @@ public class HousekeepFiles implements Job {
 
         try {
             //TODO determine logic to pass or obtain from tables the value/s needed for extractId
-            int extractId = 2;
+            int extractId = 1;
 
             ExtractConfig config = ExtractCache.getExtractConfig(extractId);
             String location = config.getFileLocationDetails().getSource();

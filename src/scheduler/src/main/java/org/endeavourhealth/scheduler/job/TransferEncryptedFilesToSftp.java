@@ -26,20 +26,20 @@ public class TransferEncryptedFilesToSftp implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        System.out.println("Transferring encrypted files");
+        // System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
         int[] extractIdArray = {1};
         for (int extractId : extractIdArray) {
             try {
                 // Getting the extract config from the extract table of the database
-                // int extractId = 1;
                 ExtractConfig config = ExtractCache.getExtractConfig(extractId);
-                System.out.println(config.getName());
+                // System.out.println(config.getName());
+                LOG.info(config.getName());
 
-                // Getting the file transaction details from the file_transactions table of the database
+                // Getting the files for SFTP upload from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(extractId);
                 if (toProcess == null || toProcess.size() == 0) {
-                    System.out.println("No files for transfer to SFTP");
+                    // System.out.println("No files for transfer to SFTP");
                     LOG.info("No files for transfer to SFTP");
                     return;
                 }
@@ -84,16 +84,18 @@ public class TransferEncryptedFilesToSftp implements Job {
                         }
                         String destinationPath = destinationLocation + entry.getFilename();
 
+                        // Uploading the file to the SFTP
                         this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
 
+                        // Update, in the file_transactions table of the database,
+                        // the entry for the file that has been now uploaded to the SFTP
                         entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
                         FileTransactionsEntity.update(entry);
-                        System.out.println("File: " + entry.getFilename() + " record updated");
+                        // System.out.println("File: " + entry.getFilename() + " record updated");
                         LOG.info("File: " + entry.getFilename() + " record updated");
                     }
                 } catch (Exception e) {
-                    // Catch if there is a problem while connecting to, or using, the SFTP
-                    System.out.println("Exception occurred with using the SFTP: " + e);
+                    // System.out.println("Exception occurred with using the SFTP: " + e);
                     LOG.error("Exception occurred with using the SFTP: " + e);
                 } finally {
                     // Close the connection to the SFTP
@@ -101,7 +103,7 @@ public class TransferEncryptedFilesToSftp implements Job {
                         sftpConnection.close();
                 }
             } catch (Exception e) {
-                System.out.println("Exception occurred with using the database: " + e);
+                // System.out.println("Exception occurred with using the database: " + e);
                 LOG.error("Exception occurred with using the database: " + e);
             }
         }
@@ -157,33 +159,35 @@ public class TransferEncryptedFilesToSftp implements Job {
         // Opening a connection to the SFTP
         Connection sftpConnection = null;
         sftpConnection = ConnectionActivator.createConnection(sftpConnectionDetails);
-        System.out.println("Opening SFTP Connection" // + sftpConnection.getClass().getName()
-                + " to " + sftpConnectionDetails.getHostname()
-                + " on Port " + sftpConnectionDetails.getPort()
-                + " with Username " + sftpConnectionDetails.getUsername());
+        // System.out.println("Opening SFTP Connection" // + sftpConnection.getClass().getName()
+        //        + " to " + sftpConnectionDetails.getHostname()
+        //        + " on Port " + sftpConnectionDetails.getPort()
+        //        + " with Username " + sftpConnectionDetails.getUsername());
         LOG.info("Opening SFTP Connection" // + sftpConnection.getClass().getName()
                 + " to " + sftpConnectionDetails.getHostname()
                 + " on port " + sftpConnectionDetails.getPort()
                 + " with username " + sftpConnectionDetails.getUsername());
         sftpConnection.open();
-        System.out.println("Connected to this SFTP");
+        // System.out.println("Connected to this SFTP");
         LOG.info("Connected to this SFTP");
         return sftpConnection;
     }
 
     public void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
-        String sourcePath = source;
-        String destinationPath = destination;
-
         Calendar startCalendar = Calendar.getInstance();
-        System.out.println("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
-        LOG.info("Tried starting upload of file " + sourcePath + " on " + startCalendar.getTime() + " to SFTP: " + destinationPath);
+        // System.out.println("Tried starting upload of file " + source + " on " + startCalendar.getTime()
+        //        + " to SFTP: " + destination);
+        LOG.info("Tried starting upload of file " + source + " on " + startCalendar.getTime()
+                + " to SFTP: " + destination);
 
-        sftpConnection.put(sourcePath, destinationPath);
+        // Uploading a file to the SFTP
+        sftpConnection.put(source, destination);
 
         Calendar endCalendar = Calendar.getInstance();
-        System.out.println("Finished uploading file " + sourcePath + " on " + endCalendar.getTime() + " to SFTP: " + destinationPath);
-        LOG.info("Finished uploading file " + sourcePath + " on " + endCalendar.getTime() + " to SFTP: " + destinationPath);
+        // System.out.println("Finished uploading file " + source + " on " + endCalendar.getTime()
+        //        + " to SFTP: " + destination);
+        LOG.info("Finished uploading file " + source + " on " + endCalendar.getTime()
+                + " to SFTP: " + destination);
     }
 
     /* private void downloadFileFromSftp(Connection sftpConnection) throws Exception {
