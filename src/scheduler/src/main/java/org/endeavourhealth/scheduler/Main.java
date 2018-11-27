@@ -111,9 +111,9 @@ public class Main {
             JobDetail buildCohortJob = JobBuilder.newJob(BuildCohort.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 5 seconds
+            //TODO temporarily run job every minute
             Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/5 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
                     .build();
 
             buildCohortScheduler = new StdSchedulerFactory().getScheduler();
@@ -135,9 +135,9 @@ public class Main {
             JobDetail generateDataJob = JobBuilder.newJob(GenerateData.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 10 seconds
+            //TODO temporarily run job every 30 seconds
             Trigger generateDataTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/30 * * * * ?"))
                     .build();
 
             generateDataScheduler = new StdSchedulerFactory().getScheduler();
@@ -160,9 +160,9 @@ public class Main {
             JobDetail zipFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 20 seconds
+            //TODO temporarily run job every 10 seconds
             Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             zipFilesScheduler = new StdSchedulerFactory().getScheduler();
@@ -184,9 +184,9 @@ public class Main {
             JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 25 seconds
+            //TODO temporarily run job every 10 seconds
             Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/25 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             encryptFilesScheduler = new StdSchedulerFactory().getScheduler();
@@ -208,9 +208,9 @@ public class Main {
             JobDetail moveFilesToSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 30 seconds
+            //TODO temporarily run job every 10 seconds
             Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/30 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             moveFilesToSFTPScheduler = new StdSchedulerFactory().getScheduler();
@@ -232,9 +232,9 @@ public class Main {
             JobDetail housekeepFilesJob = JobBuilder.newJob(HousekeepFiles.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 35 seconds
+            //TODO temporarily run job every 10 seconds
             Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/35 * * * * ?"))
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             housekeepFilesScheduler = new StdSchedulerFactory().getScheduler();

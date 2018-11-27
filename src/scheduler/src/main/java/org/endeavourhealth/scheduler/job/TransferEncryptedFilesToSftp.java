@@ -5,12 +5,14 @@ import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 // import org.endeavourhealth.sftpreader.sources.Connection;
 // import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
 // import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
+import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionActivator;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,18 +28,23 @@ public class TransferEncryptedFilesToSftp implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
+        List<ExtractEntity> extractsToProcess = null;
+        try {
+            extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+        } catch (SchedulerException e) {
+            LOG.error("Unknown error encountered in ftp handling. " + e.getMessage());
+        }
         // System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
-        int[] extractIdArray = {1};
-        for (int extractId : extractIdArray) {
+        for (ExtractEntity entity : extractsToProcess) {
             try {
                 // Getting the extract config from the extract table of the database
-                ExtractConfig config = ExtractCache.getExtractConfig(extractId);
+                ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
                 // System.out.println(config.getName());
                 LOG.info(config.getName());
 
                 // Getting the files for SFTP upload from the file_transactions table of the database
-                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(extractId);
+                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(entity.getExtractId());
                 if (toProcess == null || toProcess.size() == 0) {
                     // System.out.println("No files for transfer to SFTP");
                     LOG.info("No files for transfer to SFTP");

@@ -8,6 +8,7 @@ import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,12 @@ public class EncryptFiles implements Job {
             LOG.error("Certificate file not found. " + e.getMessage());
         }
 
-        List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+        List<ExtractEntity> extractsToProcess = null;
+        try {
+            extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+        } catch (SchedulerException e) {
+            LOG.error("Unknown error encountered in encrypt handling. " + e.getMessage());
+        }
 
         List<FileTransactionsEntity> toProcess;
         String location = null;

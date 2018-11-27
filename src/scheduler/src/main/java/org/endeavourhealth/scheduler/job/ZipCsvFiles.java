@@ -10,6 +10,7 @@ import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,12 @@ public class ZipCsvFiles implements Job {
 
         LOG.info("Zipping CSV files contained in folders");
 
-        List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+        List<ExtractEntity> extractsToProcess = null;
+        try {
+            extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+        } catch (SchedulerException e) {
+            LOG.error("Unknown error encountered in zip handling. " + e.getMessage());
+        }
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID:" + entity.getExtractId());
