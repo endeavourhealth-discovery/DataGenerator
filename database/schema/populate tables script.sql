@@ -1,5 +1,6 @@
 -- delete some dataset data
 delete from data_generator.dataset where dataset_id = 1;
+delete from data_generator.dataset where dataset_id = 2;
 
 -- insert into the dataset table
 insert into data_generator.dataset
@@ -59,6 +60,137 @@ select 1, '{
 {"codeSetId" : 3, "extractType" : "earliest"},
 {"codeSetId" : 4, "extractType" : "latest_each"},
 {"codeSetId" : 5, "extractType" : "earliest_each"}]
+}]
+}';
+
+-- insert into the dataset table
+insert into data_generator.dataset
+select 2, '{
+ "name": "Health Check",
+ "id": "2",
+ "extract": [{
+  		"type": "patient",
+  		"fields": [
+{"header" : "id", "index" : "0"},
+{"header" : "organisation id", "index" : "1"},
+{"header" : "nhs number", "index" : "2"},
+{"header" : "date of birth", "index" : "4"},
+{"header" : "date of death", "index" : "5"},
+{"header" : "gender concept id", "index": "6"},
+{"header" : "usual practitioner id", "index": "7"},
+{"header" : "care provider id", "index" : "8"},
+{"header" : "entered by practitioner id", "index" : "9"},
+{"header" : "title", "index" : "10"},
+{"header" : "first name", "index" : "11"},
+{"header" : "middle names", "index" : "12"},
+{"header" : "last name", "index" : "13"},
+{"header" : "previous last name", "index" : "14"},
+{"header" : "home address id", "index" : "15"},
+{"header" : "is spine sensitive", "index" : "16"},
+{"header" : "ethnic code", "index" : "17"}]
+},{
+  		"type": "allergy",
+  		"fields": [
+{"header" : "id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "concept id", "index" : "2"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "effective practitioner id", "index" : "5"},
+{"header" : "entered by practitioner id", "index" : "6"},
+{"header" : "care activity id", "index" : "7"},
+{"header" : "care activity heading concept id", "index" : "8"},
+{"header" : "owning organisation id", "index" : "9"},
+{"header" : "status concept id", "index" : "10"},
+{"header" : "is confidential", "index" : "11"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"},
+{"header" : "original code scheme", "index" : "14"},
+{"header" : "original system", "index" : "15"},
+{"header" : "substance concept id", "index" : "16"},
+{"header" : "manifestation concept id", "index" : "17"},
+{"header" : "manifestation free text id", "index" : "18"},
+{"header" : "is consent", "index" : "19"}],
+ 		"codeSets": [
+{"codeSetId": 1, "extractType": "all"},
+{"codeSetId": 2, "extractType": "latest"},
+{"codeSetId": 3, "extractType": "earliest"},
+{"codeSetId": 4, "extractType": "latest_each"},
+{"codeSetId": 5, "extractType": "earliest_each"}]
+},{
+  		"type": "immunisation",
+  		"fields": [
+{"header" : "id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "concept id", "index" : "2"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "effective practitioner id", "index" : "5"},
+{"header" : "entered by practitioner id", "index" : "6"},
+{"header" : "care activity id", "index" : "7"},
+{"header" : "care activity heading concept id", "index" : "8"},
+{"header" : "owning organisation id", "index" : "9"},
+{"header" : "status concept id", "index" : "10"},
+{"header" : "is confidential", "index" : "11"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"},
+{"header" : "original code scheme", "index" : "14"},
+{"header" : "original system", "index" : "15"},
+{"header" : "dose", "index" : "16"},
+{"header" : "body location concept id", "index" : "17"},
+{"header" : "method concept id", "index" : "18"},
+{"header" : "batch number", "index" : "19"},
+{"header" : "expiry date", "index" : "20"},
+{"header" : "manufacturer", "index" : "21"},
+{"header" : "dose ordinal", "index" : "22"},
+{"header" : "doses required", "index" : "23"},
+{"header" : "is consent", "index" : "24"}],
+ 		"codeSets": [
+{"codeSetId" : 1, "extractType" : "all"},
+{"codeSetId" : 2, "extractType" : "latest"},
+{"codeSetId" : 3, "extractType" : "earliest"},
+{"codeSetId" : 4, "extractType" : "latest_each"},
+{"codeSetId" : 5, "extractType" : "earliest_each"}]
+},{
+  		"type": "medication",
+  		"fields": [
+{"header" : "id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "concept id", "index" : "2"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "is consent", "index" : "19"}],
+ 		"codeSets": [
+{"codeSetId": 1, "extractType": "all"},
+{"codeSetId": 2, "extractType": "latest"},
+{"codeSetId": 3, "extractType": "earliest"},
+{"codeSetId": 4, "extractType": "latest_each"},
+{"codeSetId": 5, "extractType": "earliest_each"}]
+},{
+  		"type": "observation",
+  		"fields": [
+{"header" : "id", "index" : "0"},
+{"header" : "patient id", "index" : "1"},
+{"header" : "concept id", "index" : "2"},
+{"header" : "effective date", "index" : "3"},
+{"header" : "effective practitioner id", "index" : "5"},
+{"header" : "entered by practitioner id", "index" : "6"},
+{"header" : "care activity id", "index" : "7"},
+{"header" : "care activity heading concept id", "index" : "8"},
+{"header" : "owning organisation id", "index" : "9"},
+{"header" : "is confidential", "index" : "10"},
+{"header" : "original code", "index" : "11"},
+{"header" : "original term", "index" : "12"},
+{"header" : "original code scheme", "index" : "13"},
+{"header" : "original system", "index" : "14"},
+{"header" : "episodicity concept id", "index" : "15"},
+{"header" : "free text id", "index" : "16"},
+{"header" : "data entry prompt id", "index" : "17"},
+{"header" : "significance concept id", "index" : "18"},
+{"header" : "is consent", "index" : "19"}],
+ 		"codeSets": [
+{"codeSetId": 1, "extractType": "all"},
+{"codeSetId": 2, "extractType": "latest"},
+{"codeSetId": 3, "extractType": "earliest"},
+{"codeSetId": 4, "extractType": "latest_each"},
+{"codeSetId": 5, "extractType": "earliest_each"}]
 }]
 }';
 
