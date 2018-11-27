@@ -1,3 +1,5 @@
+-- delete some dataset data
+delete from data_generator.dataset where dataset_id = 1;
 
 -- insert into the dataset table
 insert into data_generator.dataset
@@ -7,59 +9,59 @@ select 1, '{
  "extract": [{
   		"type": "patient",
   		"fields": [
-{"header" : "observation id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"}]
+{"header" : "id", "index" : "0"},
+{"header" : "organisation id", "index" : "1"},
+{"header" : "nhs number", "index" : "2"},
+{"header" : "date of birth", "index" : "4"},
+{"header" : "date of death", "index" : "5"},
+{"header" : "gender concept id", "index": "6"},
+{"header" : "usual practitioner id", "index": "7"},
+{"header" : "care provider id", "index" : "8"},
+{"header" : "entered by practitioner id", "index" : "9"},
+{"header" : "title", "index" : "10"},
+{"header" : "first name", "index" : "11"},
+{"header" : "middle names", "index" : "12"},
+{"header" : "last name", "index" : "13"},
+{"header" : "previous last name", "index" : "14"},
+{"header" : "home address id", "index" : "15"},
+{"header" : "is spine sensitive", "index" : "16"},
+{"header" : "ethnic code", "index" : "17"}]
 },{
-
   		"type": "immunisation",
   		"fields": [
-{"header" : "observation id", "index" : "0"},
+{"header" : "id", "index" : "0"},
 {"header" : "patient id", "index" : "1"},
+{"header" : "concept id", "index" : "2"},
 {"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"}],
+{"header" : "effective practitioner id", "index" : "5"},
+{"header" : "entered by practitioner id", "index" : "6"},
+{"header" : "care activity id", "index" : "7"},
+{"header" : "care activity heading concept id", "index" : "8"},
+{"header" : "owning organisation id", "index" : "9"},
+{"header" : "status concept id", "index" : "10"},
+{"header" : "is confidential", "index" : "11"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"},
+{"header" : "original code scheme", "index" : "14"},
+{"header" : "original system", "index" : "15"},
+{"header" : "dose", "index" : "16"},
+{"header" : "body location concept id", "index" : "17"},
+{"header" : "method concept id", "index" : "18"},
+{"header" : "batch number", "index" : "19"},
+{"header" : "expiry date", "index" : "20"},
+{"header" : "manufacturer", "index" : "21"},
+{"header" : "dose ordinal", "index" : "22"},
+{"header" : "doses required", "index" : "23"},
+{"header" : "is consent", "index" : "24"}]
+},{
  		"codeSets": [
- {"codeSetId": 1, "extractType": "all"},
- {"codeSetId": 2, "extractType": "latest"},
- {"codeSetId": 3, "extractType": "earliest"},
- {"codeSetId": 4, "extractType": "latest_each"},
- {"codeSetId": 5, "extractType": "earliest_each"}]
-  	},
-  		{
-  		"type": "observation",
-  		"fields": [
-{"header" : "observation id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"}],
- 		"codeSets": [
- {"codeSetId": 1, "extractType": "all"},
- {"codeSetId": 2, "extractType": "latest"},
- {"codeSetId": 3, "extractType": "earliest"},
- {"codeSetId": 4, "extractType": "latest_each"},
- {"codeSetId": 5, "extractType": "earliest_each"}]
-  	},
-  		{
-  		"type": "allergy",
-  		"fields": [
-{"header" : "observation id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"}],
- 		"codeSets": [
- {"codeSetId": 1, "extractType": "all"},
- {"codeSetId": 2, "extractType": "latest"},
- {"codeSetId": 3, "extractType": "earliest"},
- {"codeSetId": 4, "extractType": "latest_each"},
- {"codeSetId": 5, "extractType": "earliest_each"}]
-  	}]
- }';
-
+{"codeSetId" : 1, "extractType" : "all"},
+{"codeSetId" : 2, "extractType" : "latest"},
+{"codeSetId" : 3, "extractType" : "earliest"},
+{"codeSetId" : 4, "extractType" : "latest_each"},
+{"codeSetId" : 5, "extractType" : "earliest_each"}]
+}]
+}';
 
 -- delete some extract data
 delete from data_generator.extract where extract_id <= 4;
