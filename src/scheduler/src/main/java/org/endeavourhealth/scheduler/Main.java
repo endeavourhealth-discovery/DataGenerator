@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler;
 
+import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.*;
@@ -14,17 +15,24 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static Scheduler buildCohortScheduler;
     private static Scheduler generateDataScheduler;
-    private static Scheduler extractSQLtoCSVScheduler;
-    private static Scheduler zipCSVFilesScheduler;
-    private static Scheduler encryptCSVFilesScheduler;
-    private static Scheduler moveCSVtoSFTPScheduler;
+    private static Scheduler zipFilesScheduler;
+    private static Scheduler encryptFilesScheduler;
+    private static Scheduler moveFilesToSFTPScheduler;
     private static Scheduler housekeepFilesScheduler;
 
     public static void main(String[] args) throws Exception {
 
+        LOG.info("Checking for extractions");
+
+        List<ExtractEntity> extractsToProcess = ExtractEntity.getAllExtracts();
+        if (extractsToProcess.size() == 0) {
+            LOG.info("No extracts to process. Exiting.");
+            return;
+        }
+
         if (args.length == 0) {
             // Run the whole process
-            generateData();
+            generateData(extractsToProcess);
             return;
 
         }
@@ -32,7 +40,7 @@ public class Main {
         String step = args[0];
 
         if (step.equals("buildCohort")) {
-            buildCohort(false);
+            buildCohort(false, extractsToProcess);
         }
 
         if (step.equals("getData")) {
@@ -42,50 +50,36 @@ public class Main {
                     limitCols = true;
                 }
             }
-            getData(false, limitCols);
+            getData(false, limitCols, extractsToProcess);
         }
 
-        if (step.equals("extractSQL")) {
-            extractSQLtoCSV(false);
+        if (step.equals("zipFiles")){
+            zipFiles(false, extractsToProcess);
         }
 
-        if (step.equals("zipCSV")){
-            zipCSVFiles(false);
+        if (step.equals("encryptFiles")) {
+            encryptFiles(false, extractsToProcess);
         }
 
-        if (step.equals("encryptCSV")) {
-            encryptCSVFiles(false);
+        if (step.equals("moveFiles")) {
+            moveFilesToSFTP(false, extractsToProcess);
         }
 
-        if (step.equals("moveCSV")) {
-            moveCSVtoSFTP(false);
+        if (step.equals("housekeepFiles")) {
+            housekeepFiles(false, extractsToProcess);
         }
-
-        if (step.equals("housekeepCSV")) {
-            housekeepCSV(false);
-        }
-
-        LOG.info("Checking for extractions");
-        System.out.println("Generating cohorts");
-
-        // Get list of extracts that we need to run
-        // Call Darren's code to generate the cohorts
-        // Figure out when that job has been completed...timed task that checks a SQL table every 30 seconds?
-        // Run the data extractor SQL to move the data into new temporary tables
-        // Export the SQL into CSV
-        // Encrypt the CSV files
-        // Push CSV files into SFTP
-
     }
 
-    private static void generateData() throws Exception {
-        System.out.println("Running full process");
-        buildCohort(true);
-        getData(true, false);
-        extractSQLtoCSV(true);
-        encryptCSVFiles(true);
-        moveCSVtoSFTP(true);
-        housekeepCSV(true);
+    private static void generateData(List<ExtractEntity> extractsToProcess) throws Exception {
+
+        LOG.info("Running full process");
+
+        buildCohort(true, extractsToProcess);
+        getData(true, false, extractsToProcess);
+        zipFiles(true, extractsToProcess);
+        encryptFiles(true, extractsToProcess);
+        moveFilesToSFTP(true, extractsToProcess);
+        housekeepFiles(true, extractsToProcess);
 
         //TODO implementation needed to determine if everything is done
         //TODO testing job scheduling for 100s
@@ -93,59 +87,50 @@ public class Main {
         if (buildCohortScheduler != null) {
             buildCohortScheduler.shutdown();
         }
+
         if (generateDataScheduler != null) {
             generateDataScheduler.shutdown();
         }
-        if (extractSQLtoCSVScheduler != null) {
-            extractSQLtoCSVScheduler.shutdown();
+
+        if (encryptFilesScheduler != null) {
+            encryptFilesScheduler.shutdown();
         }
-        if (encryptCSVFilesScheduler != null) {
-            encryptCSVFilesScheduler.shutdown();
+
+        if (moveFilesToSFTPScheduler != null) {
+            moveFilesToSFTPScheduler.shutdown();
         }
-        if (moveCSVtoSFTPScheduler != null) {
-            moveCSVtoSFTPScheduler.shutdown();
-        }
+
         if (housekeepFilesScheduler != null) {
             housekeepFilesScheduler.shutdown();
         }
     }
 
-    public static void buildCohort(boolean isScheduled) throws Exception {
-        List<ExtractEntity> extractsToProcess = ExtractEntity.getAllExtracts();
-        extractsToProcess.add(new ExtractEntity());
+    public static void buildCohort(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Building cohort information");
+        if (isScheduled) {
+            JobDetail buildCohortJob = JobBuilder.newJob(BuildCohort.class).build();
 
-        if (extractsToProcess.size() == 0) {
-            System.out.println("No extracts to process. Exiting");
-            return;
-        }
-        System.out.println("The following extracts have been found");
-        for (ExtractEntity extract : extractsToProcess) {
-            System.out.println(extract.getExtractName());
-            System.out.println("Calling Darren's cohort generator code");
-            // Call the Cohort Generator code
+            //TODO determine timing
+            //TODO temporarily run job every 5 seconds
+            Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/5 * * * * ?"))
+                    .build();
 
-            if (isScheduled) {
-                JobDetail buildCohortJob = JobBuilder.newJob(BuildCohort.class).build();
+            buildCohortScheduler = new StdSchedulerFactory().getScheduler();
+            buildCohortScheduler.getContext().put("extractsToProcess", extractsToProcess);
+            buildCohortScheduler.start();
+            buildCohortScheduler.scheduleJob(buildCohortJob, buildCohortTrigger);
 
-                //TODO determine timing
-                //TODO temporarily run job every 5 seconds
-                Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
-                        .withSchedule(CronScheduleBuilder.cronSchedule("0/5 * * * * ?"))
-                        .build();
-
-                buildCohortScheduler = new StdSchedulerFactory().getScheduler();
-                buildCohortScheduler.start();
-                buildCohortScheduler.scheduleJob(buildCohortJob, buildCohortTrigger);
-
-            } else {
-                BuildCohort buildCohort = new BuildCohort();
-                buildCohort.execute(null);
-            }
+        } else {
+            BuildCohort buildCohort = new BuildCohort();
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            buildCohort.execute(context);
         }
     }
 
-    private static void getData(boolean isScheduled, boolean limitCols) throws Exception {
-        System.out.println("Running the extracts of the data into new SQL tables");
+    private static void getData(boolean isScheduled, boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Generating CSV data files");
         if (isScheduled) {
             JobDetail generateDataJob = JobBuilder.newJob(GenerateData.class).build();
 
@@ -156,102 +141,93 @@ public class Main {
                     .build();
 
             generateDataScheduler = new StdSchedulerFactory().getScheduler();
+            generateDataScheduler.getContext().put("extractsToProcess", extractsToProcess);
             generateDataScheduler.start();
             generateDataScheduler.scheduleJob(generateDataJob, generateDataTrigger);
 
         } else {
             GenerateData generateData = new GenerateData();
             generateData.setLimitCols(limitCols);
-            generateData.execute(null);
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            generateData.execute(context);
         }
     }
 
-    private static void extractSQLtoCSV(boolean isScheduled) throws Exception {
-        System.out.println("Extracting the new SQL files to CSV");
-		if (isScheduled) {
-            JobDetail extractSQLtoCSVJob = JobBuilder.newJob(ExtractSQLToCsv.class).build();
-
-            //TODO determine timing
-            //TODO temporarily run job every 15 seconds
-            Trigger extractSQLtoCSVTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/15 * * * * ?"))
-                    .build();
-
-            extractSQLtoCSVScheduler = new StdSchedulerFactory().getScheduler();
-            extractSQLtoCSVScheduler.start();
-            extractSQLtoCSVScheduler.scheduleJob(extractSQLtoCSVJob, extractSQLtoCSVTrigger);
-
-        } else {
-            ExtractSQLToCsv extractSQLToCsv = new ExtractSQLToCsv();
-            extractSQLToCsv.execute(null);
-        }
-    }
-
-    private static void zipCSVFiles(boolean isScheduled) throws Exception {
-        System.out.println("Zipping the CSV files");
+    private static void zipFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Zipping the files");
         if (isScheduled) {
-            JobDetail zipCSVFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
+            JobDetail zipFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
 
             //TODO determine timing
             //TODO temporarily run job every 20 seconds
-            Trigger zipCSVFilesTrigger = TriggerBuilder.newTrigger()
+            Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
                     .build();
 
-            zipCSVFilesScheduler = new StdSchedulerFactory().getScheduler();
-            zipCSVFilesScheduler.start();
-            zipCSVFilesScheduler.scheduleJob(zipCSVFilesJob, zipCSVFilesTrigger);
+            zipFilesScheduler = new StdSchedulerFactory().getScheduler();
+            zipFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
+            zipFilesScheduler.start();
+            zipFilesScheduler.scheduleJob(zipFilesJob, zipFilesTrigger);
 
         } else {
-            ZipCsvFiles zipCsvFiles = new ZipCsvFiles();
-            zipCsvFiles.execute(null);
+            ZipCsvFiles zipFiles = new ZipCsvFiles();
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            zipFiles.execute(context);
         }
     }
 
-    private static void encryptCSVFiles(boolean isScheduled) throws Exception {
-        System.out.println("Encrypting the CSV files");
+    private static void encryptFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Encrypting the files");
         if (isScheduled) {
             JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
 
             //TODO determine timing
-            //TODO temporarily run job every 20 seconds
-            Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
-                    .build();
-
-            encryptCSVFilesScheduler = new StdSchedulerFactory().getScheduler();
-            encryptCSVFilesScheduler.start();
-            encryptCSVFilesScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
-
-        } else {
-            EncryptFiles encryptCsvFiles = new EncryptFiles();
-            encryptCsvFiles.execute(null);
-        }
-    }
-
-    private static void moveCSVtoSFTP(boolean isScheduled) throws Exception {
-        System.out.println("Transferring encrypted files to SFTP");
-        if (isScheduled) {
-            JobDetail moveCSVtoSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
-
-            //TODO determine timing
             //TODO temporarily run job every 25 seconds
-            Trigger moveCSVtoSFTPTrigger = TriggerBuilder.newTrigger()
+            Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/25 * * * * ?"))
                     .build();
 
-            moveCSVtoSFTPScheduler = new StdSchedulerFactory().getScheduler();
-            moveCSVtoSFTPScheduler.start();
-            moveCSVtoSFTPScheduler.scheduleJob(moveCSVtoSFTPJob, moveCSVtoSFTPTrigger);
+            encryptFilesScheduler = new StdSchedulerFactory().getScheduler();
+            encryptFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
+            encryptFilesScheduler.start();
+            encryptFilesScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
 
         } else {
-            TransferEncryptedFilesToSftp sendCsvFilesSFTP = new TransferEncryptedFilesToSftp();
-            sendCsvFilesSFTP.execute(null);
+            EncryptFiles encryptFiles = new EncryptFiles();
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            encryptFiles.execute(context);
         }
     }
 
-    private static void housekeepCSV(boolean isScheduled) throws Exception {
-        System.out.println("Housekeeping encrypted files");
+    private static void moveFilesToSFTP(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Transferring encrypted files to SFTP");
+        if (isScheduled) {
+            JobDetail moveFilesToSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
+
+            //TODO determine timing
+            //TODO temporarily run job every 30 seconds
+            Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0/30 * * * * ?"))
+                    .build();
+
+            moveFilesToSFTPScheduler = new StdSchedulerFactory().getScheduler();
+            moveFilesToSFTPScheduler.getContext().put("extractsToProcess", extractsToProcess);
+            moveFilesToSFTPScheduler.start();
+            moveFilesToSFTPScheduler.scheduleJob(moveFilesToSFTPJob, moveFilesToSFTPTrigger);
+
+        } else {
+            TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            sendFilesSFTP.execute(context);
+        }
+    }
+
+    private static void housekeepFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+        LOG.info("Housekeeping encrypted files");
         if (isScheduled) {
             JobDetail housekeepFilesJob = JobBuilder.newJob(HousekeepFiles.class).build();
 
@@ -262,12 +238,15 @@ public class Main {
                     .build();
 
             housekeepFilesScheduler = new StdSchedulerFactory().getScheduler();
+            housekeepFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
             housekeepFilesScheduler.start();
             housekeepFilesScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
 
         } else {
             HousekeepFiles housekeepFiles = new HousekeepFiles();
-            housekeepFiles.execute(null);
+            PlainJobExecutionContext context = new PlainJobExecutionContext();
+            context.put("extractsToProcess", extractsToProcess);
+            housekeepFiles.execute(context);
         }
     }
 }

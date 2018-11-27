@@ -3,6 +3,7 @@ package org.endeavourhealth.scheduler.job;
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
+import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -21,58 +22,57 @@ public class HousekeepFiles implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        try {
-            //TODO determine logic to pass or obtain from tables the value/s needed for extractId
-            int extractId = 1;
+        List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+        for (ExtractEntity entity : extractsToProcess) {
 
-            ExtractConfig config = ExtractCache.getExtractConfig(extractId);
-            String location = config.getFileLocationDetails().getSource();
-            if (!location.endsWith(File.separator)) {
-                location += File.separator;
-            }
-
-            String housekeep = config.getFileLocationDetails().getHousekeep();
-            if (!housekeep.endsWith(File.separator)) {
-                housekeep += File.separator;
-            }
-
-            LOG.debug("location:" + location);
-            LOG.debug("housekeep:" + housekeep);
-
-            //retrieve files for housekeeping
-            List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForHousekeeping(extractId);
-            if (toProcess == null || toProcess.size() == 0) {
-                LOG.info("No file/s for housekeeping.");
-                return;
-            }
-
-            File src = null;
-            File dest = null;
-
-            for (FileTransactionsEntity entry : toProcess) {
-
-                src = new File(location + entry.getFilename());
-                dest = new File(housekeep + entry.getFilename());
-
-                try {
-                    FileUtils.moveFile(src, dest);
-
-                    LOG.info("File:" + src.getName() + " moved to " + housekeep);
-
-                    //update the file's encryption date
-                    entry.setHousekeepingDate(new Timestamp(System.currentTimeMillis()));
-                    FileTransactionsEntity.update(entry);
-
-                    LOG.info("File:" + src.getName() + " record updated.");
-
-                } catch (IOException e) {
-                    LOG.error("Error encountered in moving the file. " + e.getMessage());
+            LOG.info("Extract ID:" + entity.getExtractId());
+            try {
+                ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
+                String location = config.getFileLocationDetails().getSource();
+                if (!location.endsWith(File.separator)) {
+                    location += File.separator;
                 }
+
+                String housekeep = config.getFileLocationDetails().getHousekeep();
+                if (!housekeep.endsWith(File.separator)) {
+                    housekeep += File.separator;
+                }
+
+                LOG.debug("location:" + location);
+                LOG.debug("housekeep:" + housekeep);
+
+                //retrieve files for housekeeping
+                List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForHousekeeping(entity.getExtractId());
+                if (toProcess == null || toProcess.size() == 0) {
+                    LOG.info("No file/s for housekeeping.");
+                } else {
+                    File src = null;
+                    File dest = null;
+
+                    for (FileTransactionsEntity entry : toProcess) {
+
+                        src = new File(location + entry.getFilename());
+                        dest = new File(housekeep + entry.getFilename());
+
+                        try {
+                            FileUtils.moveFile(src, dest);
+
+                            LOG.info("File:" + src.getName() + " moved to " + housekeep);
+
+                            //update the file's encryption date
+                            entry.setHousekeepingDate(new Timestamp(System.currentTimeMillis()));
+                            FileTransactionsEntity.update(entry);
+
+                            LOG.info("File:" + src.getName() + " record updated.");
+
+                        } catch (IOException e) {
+                            LOG.error("Error encountered in moving the file. " + e.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error encountered in housekeeping files. " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOG.error("Error encountered in housekeeping files. " + e.getMessage());
-            e.printStackTrace();
-            return;
         }
     }
 }

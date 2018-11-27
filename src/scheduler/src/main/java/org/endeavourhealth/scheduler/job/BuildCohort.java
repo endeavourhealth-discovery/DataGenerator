@@ -1,9 +1,12 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class BuildCohort implements Job {
 
@@ -11,10 +14,8 @@ public class BuildCohort implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        System.out.println("Build Cohort");
+        List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
 
-        //TODO Call Darren's code for the rules regarding Cohort Generation
 
-        System.out.println("End of Build Cohort");
     }
 }
