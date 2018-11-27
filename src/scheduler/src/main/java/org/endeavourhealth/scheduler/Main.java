@@ -111,6 +111,10 @@ public class Main {
             JobDetail buildCohortJob = JobBuilder.newJob(BuildCohort.class).build();
 
             //TODO determine timing
+            //Fire at 1am everyday
+            //Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+            //        .build();
             //TODO temporarily run job every minute
             Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
@@ -135,6 +139,10 @@ public class Main {
             JobDetail generateDataJob = JobBuilder.newJob(GenerateData.class).build();
 
             //TODO determine timing
+            //Fire at 2am everyday
+            //Trigger generateDataTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 * * ?"))
+            //        .build();
             //TODO temporarily run job every 30 seconds
             Trigger generateDataTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/30 * * * * ?"))
@@ -160,6 +168,10 @@ public class Main {
             JobDetail zipFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
 
             //TODO determine timing
+            //Fire every 10 minutes every hour between 03am and 06am, of every day
+            //Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0/10 3-6 ? * * *"))
+            //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
@@ -184,6 +196,10 @@ public class Main {
             JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
 
             //TODO determine timing
+            //Fire every 10 minutes starting at minute :05, every hour between 03am and 06am, of every day
+            //Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 5/10 3-6 ? * * *"))
+            //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
@@ -208,6 +224,10 @@ public class Main {
             JobDetail moveFilesToSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
 
             //TODO determine timing
+            //Fire every 10 minutes starting at minute :10, every hour between 03am and 06am, of every day
+            //Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 10/10 3-6 ? * * *"))
+            //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
@@ -232,6 +252,10 @@ public class Main {
             JobDetail housekeepFilesJob = JobBuilder.newJob(HousekeepFiles.class).build();
 
             //TODO determine timing
+            //Fire every 10 minutes starting at minute :15, every hour between 03am and 06am, of every day
+            //Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
+            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 15/10 3-6 ? * * *"))
+            //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
