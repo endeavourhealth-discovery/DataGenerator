@@ -52,8 +52,7 @@ select 1, '{
 {"header" : "manufacturer", "index" : "21"},
 {"header" : "dose ordinal", "index" : "22"},
 {"header" : "doses required", "index" : "23"},
-{"header" : "is consent", "index" : "24"}]
-},{
+{"header" : "is consent", "index" : "24"}],
  		"codeSets": [
 {"codeSetId" : 1, "extractType" : "all"},
 {"codeSetId" : 2, "extractType" : "latest"},
