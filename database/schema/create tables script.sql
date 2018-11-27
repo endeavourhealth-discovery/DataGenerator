@@ -24,7 +24,7 @@ create table data_generator.extract (
     transaction_id bigint not null comment 'The latest transaction Id that was extracted',
     
     constraint data_generator_extract_id_pk primary key (extract_id),
-    foreign key data_generator_extract_dataset_id_fk (dataset_id) references data_generator.dataset(dataset_id) on delete cascade    
+    foreign key data_generator_extract_dataset_id_fk (dataset_id) references data_generator.dataset(dataset_id)    
 );
 
 create table data_generator.cohort_results (

@@ -42,7 +42,7 @@ public class ImmunisationExtracts {
                     " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr.event_log e " +
-                    "       where e.table_id = 32 " +
+                    "       where e.table_id = 40 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "       group by item_id) log on log.item_id = o.id " +
                     " where cr.bulked = 1;";
@@ -105,7 +105,7 @@ public class ImmunisationExtracts {
                     "    and (o.effective_date < oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
                     " join (select item_id from pcr.event_log e " +
-                    " where e.table_id = 32 " +
+                    " where e.table_id = 40 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "  group by item_id) log on log.item_id = o.id " +
                     " where cr.bulked = 1 " +
@@ -169,7 +169,7 @@ public class ImmunisationExtracts {
                     "    and (o.effective_date > oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
                     " join (select item_id from pcr.event_log e " +
-                    " where e.table_id = 32 " +
+                    " where e.table_id = 40 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "  group by item_id) log on log.item_id = o.id " +
                     " where cr.bulked = 1 " +
@@ -330,7 +330,7 @@ public class ImmunisationExtracts {
                     " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr.event_log e " +
-                    "       where e.table_id = 32 " +
+                    "       where e.table_id = 40 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "       group by item_id) log on log.item_id = o.id " +
                     " where cr.bulked = 1;";

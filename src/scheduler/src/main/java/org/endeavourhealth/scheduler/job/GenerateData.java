@@ -7,11 +7,8 @@ import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetFields;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
-import org.endeavourhealth.scheduler.models.CustomExtracts.AllergyExtracts;
-import org.endeavourhealth.scheduler.models.CustomExtracts.GeneralQueries;
-import org.endeavourhealth.scheduler.models.CustomExtracts.ImmunisationExtracts;
+import org.endeavourhealth.scheduler.models.CustomExtracts.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
-import org.endeavourhealth.scheduler.models.CustomExtracts.ObservationExtracts;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -62,7 +59,7 @@ public class GenerateData implements Job {
                 System.out.println(extract.getType());
                 switch (extract.getType()) {
                     case "patient":
-                        // runObservationExtractForCodeSets(extract.getCodeSets(), extractId, "observation", maxTransactionId);
+                        runPatientExtract(extract, extractId, "patient", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "medication":
                         /*if (limitCols) {
@@ -86,6 +83,23 @@ public class GenerateData implements Job {
 
             runFinaliseExtract(extractId, maxTransactionId);
         }
+
+    }
+
+    private void runPatientExtract(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
+
+        List<String> fieldHeaders = extractConfig.getFields().stream().map(DatasetFields::getHeader).collect(Collectors.toList());
+        List<Integer> fieldIndexes = extractConfig.getFields().stream().map(DatasetFields::getIndex).collect(Collectors.toList());
+
+        // create the headers and the actual file
+        createCSV(fieldHeaders, sectionName, extractId);
+
+        List results;
+
+        results = PatientExtracts.runBulkPatientExtract(extractId);
+        saveToCSV(results, sectionName, fieldIndexes, extractId);
+        results = PatientExtracts.runDeltaPatientExtract(extractId, currentTransactionId, maxTransactionId);
+        saveToCSV(results, sectionName, fieldIndexes, extractId);
 
     }
 
