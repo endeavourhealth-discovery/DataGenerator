@@ -39,6 +39,7 @@ public class GenerateData implements Job {
             int extractId = 1;
             processExtracts(extractId);
         } catch (Exception e) {
+
             System.out.println("Error: " + e.getMessage());
         }
 
@@ -62,12 +63,7 @@ public class GenerateData implements Job {
                         runPatientExtract(extract, extractId, "patient", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "medication":
-                        /*if (limitCols) {
-                            runGenericStatusExtract(extract, extractId, "generate_medication");
-                        } else {
-                            runGenericStatusExtractAll(extract, extractId, "generate_medication_all_col",
-                                    extractDetails.getCodeSetId(), maxTransactionId);
-                        }*/
+                        runMedicationExtractForCodeSets(extract, extractId, "medication", extractDetails.getTransactionId(), maxTransactionId);
                         break;
                     case "observation":
                         runObservationExtractForCodeSets(extract, extractId, "observation", extractDetails.getTransactionId(), maxTransactionId);
@@ -263,6 +259,62 @@ public class GenerateData implements Job {
                         results = ImmunisationExtracts.runBulkImmunisationLatestCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes, extractId);
                         results = ImmunisationExtracts.runDeltaImmunisationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        break;
+                }
+            }
+        }
+    }
+
+    private void runMedicationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
+
+        List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
+
+        List<String> fieldHeaders = extractConfig.getFields().stream().map(DatasetFields::getHeader).collect(Collectors.toList());
+        List<Integer> fieldIndexes = extractConfig.getFields().stream().map(DatasetFields::getIndex).collect(Collectors.toList());
+
+        if (codeSets != null && codeSets.size() > 0) {
+
+            // create the headers and the actual file
+            createCSV(fieldHeaders, sectionName, extractId);
+
+            for (DatasetCodeSet codeSet : codeSets) {
+                List results;
+                switch (codeSet.getExtractType())
+                {
+                    case "all":
+                        results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        results = MedicationExtracts.runDeltaMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        break;
+                    case "earliest_each":
+                        results = MedicationExtracts.runBulkMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        results = MedicationExtracts.runDeltaMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        break;
+                    case "latest_each":
+                        results = MedicationExtracts.runBulkMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        results = MedicationExtracts.runDeltaMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        break;
+                    case "earliest":
+                        results = MedicationExtracts.runBulkMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        results = MedicationExtracts.runDeltaMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
+                                currentTransactionId, maxTransactionId);
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        break;
+                    case "latest":
+                        results = MedicationExtracts.runBulkMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId());
+                        saveToCSV(results, sectionName, fieldIndexes, extractId);
+                        results = MedicationExtracts.runDeltaMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
                                 currentTransactionId, maxTransactionId);
                         saveToCSV(results, sectionName, fieldIndexes, extractId);
                         break;
