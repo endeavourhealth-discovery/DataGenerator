@@ -7,9 +7,9 @@ delete from data_generator.dataset where dataset_id = 2;
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 1, '{
+select 2, '{
  "name": "Child Imms",
- "id": "1",
+ "id": "2",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -60,7 +60,7 @@ select 1, '{
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 2, '{
+select 1, '{
  "name": "Health Check",
  "id": "2",
  "extract": [{
@@ -70,18 +70,15 @@ select 2, '{
 {"header" : "organisation id", "index" : "1"},
 {"header" : "nhs number", "index" : "2"},
 {"header" : "date of birth", "index" : "4"},
-{"header" : "date of death", "index" : "5"},
 {"header" : "gender concept id", "index": "6"},
 {"header" : "usual practitioner id", "index": "7"},
 {"header" : "care provider id", "index" : "8"},
-{"header" : "entered by practitioner id", "index" : "9"},
 {"header" : "title", "index" : "10"},
 {"header" : "first name", "index" : "11"},
 {"header" : "middle names", "index" : "12"},
 {"header" : "last name", "index" : "13"},
 {"header" : "previous last name", "index" : "14"},
 {"header" : "home address id", "index" : "15"},
-{"header" : "is spine sensitive", "index" : "16"},
 {"header" : "ethnic code", "index" : "17"}]
 },{
   		"type": "allergy",
@@ -119,7 +116,6 @@ select 2, '{
 {"header" : "concept id", "index" : "2"},
 {"header" : "effective date", "index" : "3"},
 {"header" : "effective practitioner id", "index" : "5"},
-{"header" : "entered by practitioner id", "index" : "6"},
 {"header" : "care activity id", "index" : "7"},
 {"header" : "care activity heading concept id", "index" : "8"},
 {"header" : "owning organisation id", "index" : "9"},
@@ -139,11 +135,7 @@ select 2, '{
 {"header" : "doses required", "index" : "23"},
 {"header" : "is consent", "index" : "24"}],
  		"codeSets": [
-{"codeSetId" : 1, "extractType" : "all"},
-{"codeSetId" : 2, "extractType" : "latest"},
-{"codeSetId" : 3, "extractType" : "earliest"},
-{"codeSetId" : 4, "extractType" : "latest_each"},
-{"codeSetId" : 5, "extractType" : "earliest_each"}]
+{"codeSetId" : 1, "extractType" : "latest_each"}]
 },{
   		"type": "medication",
   		"fields": [
@@ -153,11 +145,8 @@ select 2, '{
 {"header" : "effective date", "index" : "3"},
 {"header" : "is consent", "index" : "19"}],
  		"codeSets": [
-{"codeSetId": 1, "extractType": "all"},
-{"codeSetId": 2, "extractType": "latest"},
-{"codeSetId": 3, "extractType": "earliest"},
-{"codeSetId": 4, "extractType": "latest_each"},
-{"codeSetId": 5, "extractType": "earliest_each"}]
+{"codeSetId": 19, "extractType": "latest_each"},
+{"codeSetId": 25, "extractType": "latest_each"}]
 },{
   		"type": "observation",
   		"fields": [
@@ -181,11 +170,70 @@ select 2, '{
 {"header" : "significance concept id", "index" : "18"},
 {"header" : "is consent", "index" : "19"}],
  		"codeSets": [
-{"codeSetId": 1, "extractType": "all"},
-{"codeSetId": 2, "extractType": "latest"},
-{"codeSetId": 3, "extractType": "earliest"},
-{"codeSetId": 4, "extractType": "latest_each"},
-{"codeSetId": 5, "extractType": "earliest_each"}]
+{"codeSetId": 2, "extractType": "all"},
+{"codeSetId": 3, "extractType": "all"},
+{"codeSetId": 4, "extractType": "all"},
+{"codeSetId": 5, "extractType": "all"},
+{"codeSetId": 6, "extractType": "all"},
+{"codeSetId": 7, "extractType": "all"},
+{"codeSetId": 8, "extractType": "all"},
+{"codeSetId": 9, "extractType": "all"},
+{"codeSetId": 10, "extractType": "all"},
+{"codeSetId": 11, "extractType": "all"},
+{"codeSetId": 12, "extractType": "all"},
+{"codeSetId": 13, "extractType": "all"},
+{"codeSetId": 14, "extractType": "all"},
+{"codeSetId": 15, "extractType": "all"},
+{"codeSetId": 16, "extractType": "all"},
+{"codeSetId": 17, "extractType": "all"},
+{"codeSetId": 18, "extractType": "all"},
+{"codeSetId": 20, "extractType": "all"},
+{"codeSetId": 21, "extractType": "all"},
+{"codeSetId": 22, "extractType": "all"},
+{"codeSetId": 23, "extractType": "all"},
+{"codeSetId": 24, "extractType": "all"},
+{"codeSetId": 26, "extractType": "all"},
+{"codeSetId": 27, "extractType": "all"},
+{"codeSetId": 28, "extractType": "all"},
+{"codeSetId": 29, "extractType": "all"},
+{"codeSetId": 30, "extractType": "all"},
+{"codeSetId": 31, "extractType": "all"},
+{"codeSetId": 32, "extractType": "all"},
+{"codeSetId": 33, "extractType": "all"},
+{"codeSetId": 34, "extractType": "all"},
+{"codeSetId": 35, "extractType": "all"},
+{"codeSetId": 36, "extractType": "all"},
+{"codeSetId": 37, "extractType": "all"},
+{"codeSetId": 38, "extractType": "all"},
+{"codeSetId": 39, "extractType": "all"},
+{"codeSetId": 40, "extractType": "all"},
+{"codeSetId": 41, "extractType": "all"},
+{"codeSetId": 42, "extractType": "all"},
+{"codeSetId": 43, "extractType": "all"},
+{"codeSetId": 44, "extractType": "all"},
+{"codeSetId": 45, "extractType": "all"},
+{"codeSetId": 46, "extractType": "all"},
+{"codeSetId": 47, "extractType": "all"},
+{"codeSetId": 48, "extractType": "all"},
+{"codeSetId": 49, "extractType": "all"},
+{"codeSetId": 50, "extractType": "all"},
+{"codeSetId": 51, "extractType": "all"},
+{"codeSetId": 52, "extractType": "all"},
+{"codeSetId": 53, "extractType": "all"},
+{"codeSetId": 54, "extractType": "all"},
+{"codeSetId": 55, "extractType": "all"},
+{"codeSetId": 56, "extractType": "all"},
+{"codeSetId": 57, "extractType": "all"},
+{"codeSetId": 58, "extractType": "all"},
+{"codeSetId": 59, "extractType": "all"},
+{"codeSetId": 60, "extractType": "all"},
+{"codeSetId": 61, "extractType": "all"},
+{"codeSetId": 62, "extractType": "all"},
+{"codeSetId": 63, "extractType": "all"},
+{"codeSetId": 64, "extractType": "all"},
+{"codeSetId": 65, "extractType": "all"},
+{"codeSetId": 66, "extractType": "all"},
+{"codeSetId": 67, "extractType": "all"}]
 }]
 }';
 
