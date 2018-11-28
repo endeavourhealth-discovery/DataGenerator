@@ -9,7 +9,7 @@ drop table if exists data_generator.file_transactions;
 
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
-    definition varchar(6000) not null comment 'The json definition of the extract',
+    definition mediumtext not null comment 'The json definition of the extract',
     
     constraint data_generator_dataset_dataset_id_pk primary key (dataset_id)
 );

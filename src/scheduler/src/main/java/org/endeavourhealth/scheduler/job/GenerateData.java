@@ -362,8 +362,10 @@ public class GenerateData implements Job {
                 for (Integer idx : fieldIndexes) {
                     if (result[idx] != null) {
                         fw.append(result[idx].toString());
-                        fw.append(',');
+                    } else {
+                        fw.append("");
                     }
+                    fw.append(',');
                 }
                 fw.append(System.getProperty("line.separator"));
             }

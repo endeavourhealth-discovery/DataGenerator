@@ -1,3 +1,7 @@
+
+-- delete the extract data to allow the datasets to be deleted
+delete from data_generator.extract where extract_id <= 4;
+
 -- delete some dataset data
 delete from data_generator.dataset where dataset_id = 1;
 delete from data_generator.dataset where dataset_id = 2;
@@ -195,7 +199,6 @@ select 2, '{
 }';
 
 -- delete some extract data
-delete from data_generator.extract where extract_id <= 4;
 
 -- create some extract data for extract 1
 insert into data_generator.extract
