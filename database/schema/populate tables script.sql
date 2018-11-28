@@ -7,9 +7,9 @@ delete from data_generator.dataset where dataset_id = 2;
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 2, '{
- "name": "Child Health",
- "id": "2",
+select 1, '{
+ "name": "Child Imms",
+ "id": "1",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -17,18 +17,15 @@ select 2, '{
 {"header" : "organisation id", "index" : "1"},
 {"header" : "nhs number", "index" : "2"},
 {"header" : "date of birth", "index" : "4"},
-{"header" : "date of death", "index" : "5"},
 {"header" : "gender concept id", "index": "6"},
 {"header" : "usual practitioner id", "index": "7"},
 {"header" : "care provider id", "index" : "8"},
-{"header" : "entered by practitioner id", "index" : "9"},
 {"header" : "title", "index" : "10"},
 {"header" : "first name", "index" : "11"},
 {"header" : "middle names", "index" : "12"},
 {"header" : "last name", "index" : "13"},
 {"header" : "previous last name", "index" : "14"},
 {"header" : "home address id", "index" : "15"},
-{"header" : "is spine sensitive", "index" : "16"},
 {"header" : "ethnic code", "index" : "17"}]
 },{
   		"type": "immunisation",
@@ -38,7 +35,6 @@ select 2, '{
 {"header" : "concept id", "index" : "2"},
 {"header" : "effective date", "index" : "3"},
 {"header" : "effective practitioner id", "index" : "5"},
-{"header" : "entered by practitioner id", "index" : "6"},
 {"header" : "care activity id", "index" : "7"},
 {"header" : "care activity heading concept id", "index" : "8"},
 {"header" : "owning organisation id", "index" : "9"},
@@ -58,19 +54,15 @@ select 2, '{
 {"header" : "doses required", "index" : "23"},
 {"header" : "is consent", "index" : "24"}],
  		"codeSets": [
-{"codeSetId" : 1, "extractType" : "all"},
-{"codeSetId" : 2, "extractType" : "latest"},
-{"codeSetId" : 3, "extractType" : "earliest"},
-{"codeSetId" : 4, "extractType" : "latest_each"},
-{"codeSetId" : 5, "extractType" : "earliest_each"}]
+{"codeSetId" : 1, "extractType" : "latest_each"}]
 }]
 }';
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 1, '{
+select 2, '{
  "name": "Health Check",
- "id": "1",
+ "id": "2",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -222,7 +214,7 @@ select 1, 'Child Imms', 1, 1, 1, '{
 
 -- create some extract data for extract 2
 insert into data_generator.extract
-select 2, 'Health check', 1, 1, 1, '{
+select 2, 'Health Check', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 2",
  "id": "2",
  "fileLocationDetails": {
@@ -262,7 +254,7 @@ select 3, 'Child Imms', 1, 1, 1, '{
 
 -- create some extract data for extract 4
 insert into data_generator.extract
-select 4, 'Health check', 1, 1, 1, '{
+select 4, 'Health Check', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 4",
  "id": "4",
  "fileLocationDetails": {

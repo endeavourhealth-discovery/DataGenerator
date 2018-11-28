@@ -338,7 +338,7 @@ public class GenerateData implements Job {
         FileWriter fw = new FileWriter(filename);
         try {
             int counter = 0;
-            for (String field: fieldHeaders) {
+            for (String field : fieldHeaders) {
                 fw.append("\"" + field + "\"");
                 counter ++;
                 if (counter < fieldHeaders.size()){
