@@ -40,6 +40,8 @@ public class PersistenceManager {
         properties.put("hibernate.hikari.dataSource.url", url);
         properties.put("hibernate.hikari.dataSource.user", user);
         properties.put("hibernate.hikari.dataSource.password", pass);
+        properties.put("javax.persistence.provider", "org.hibernate.jpa.HibernatePersistenceProvider");
+        properties.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
 
         entityManagerFactory = Persistence.createEntityManagerFactory("data_generator", properties);
     }

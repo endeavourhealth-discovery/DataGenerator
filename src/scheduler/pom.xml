@@ -18,16 +18,15 @@
         <!-- dependent on EDS modules -->
         <dependency>
             <groupId>org.endeavourhealth.common</groupId>
-            <artifactId>core</artifactId>
-            <version>${eds-core.version}</version>
+            <artifactId>fhir</artifactId>
+            <version>${eds-fhir.version}</version>
         </dependency>
-        <!--
         <dependency>
-            <groupId>org.endeavourhealth.sftpreader</groupId>
-            <artifactId>sftpreader</artifactId>
-            <version>${eds-sftp.version}</version>
+            <groupId>org.endeavourhealth.configmanager</groupId>
+            <artifactId>configmanager</artifactId>
+            <version>${endeavour-config.version}</version>
         </dependency>
-        -->
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -72,6 +71,27 @@
             <groupId>net.lingala.zip4j</groupId>
             <artifactId>zip4j</artifactId>
             <version>${lingala.zip4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.endeavourhealth.configmanager</groupId>
+            <artifactId>configmanager</artifactId>
+            <version>${endeavour-config.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

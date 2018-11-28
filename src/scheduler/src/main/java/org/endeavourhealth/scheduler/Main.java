@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler;
 
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
@@ -21,6 +22,8 @@ public class Main {
     private static Scheduler housekeepFilesScheduler;
 
     public static void main(String[] args) throws Exception {
+
+        ConfigManager.Initialize("data-generator");
 
         LOG.info("Checking for extractions");
 
