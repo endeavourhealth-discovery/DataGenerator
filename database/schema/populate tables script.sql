@@ -1,4 +1,3 @@
-
 -- delete the extract data to allow the datasets to be deleted
 delete from data_generator.extract where extract_id <= 4;
 
@@ -8,9 +7,9 @@ delete from data_generator.dataset where dataset_id = 2;
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 1, '{
+select 2, '{
  "name": "Child Health",
- "id": "1",
+ "id": "2",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -69,9 +68,9 @@ select 1, '{
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 2, '{
+select 1, '{
  "name": "Health Check",
- "id": "2",
+ "id": "1",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -199,6 +198,7 @@ select 2, '{
 }';
 
 -- delete some extract data
+delete from data_generator.extract where extract_id <= 4;
 
 -- create some extract data for extract 1
 insert into data_generator.extract

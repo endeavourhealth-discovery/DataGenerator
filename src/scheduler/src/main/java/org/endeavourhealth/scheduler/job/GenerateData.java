@@ -337,9 +337,13 @@ public class GenerateData implements Job {
 
         FileWriter fw = new FileWriter(filename);
         try {
+            int counter = 0;
             for (String field: fieldHeaders) {
-                fw.append(field);
-                fw.append(',');
+                fw.append("\"" + field + "\"");
+                counter ++;
+                if (counter < fieldHeaders.size()){
+                    fw.append(',');
+                }
             }
             fw.append(System.getProperty("line.separator"));
         } finally {
@@ -353,19 +357,22 @@ public class GenerateData implements Job {
 
         ExtractConfig config = ExtractCache.getExtractConfig(extractId);
 
-        String filename = config.getFileLocationDetails().getSource()  + tableName + ".csv";
+        String filename = config.getFileLocationDetails().getSource() + tableName + ".csv";
 
         FileWriter fw = new FileWriter(filename, true);
         try {
             for (Object[] result : results) {
-
+                int counter = 0;
                 for (Integer idx : fieldIndexes) {
                     if (result[idx] != null) {
-                        fw.append(result[idx].toString());
+                        fw.append("\"" + result[idx].toString() + "\"");
                     } else {
-                        fw.append("");
+                        fw.append("\"\"");
                     }
-                    fw.append(',');
+                    counter ++;
+                    if (counter < fieldIndexes.size()){
+                        fw.append(',');
+                    }
                 }
                 fw.append(System.getProperty("line.separator"));
             }
