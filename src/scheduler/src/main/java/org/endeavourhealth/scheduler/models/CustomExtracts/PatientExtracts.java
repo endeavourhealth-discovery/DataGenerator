@@ -13,7 +13,7 @@ public class PatientExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT p.*, a.* FROM pcr.patient p " +
+            String sql = "SELECT p.* FROM pcr.patient p " +
                     " left outer join pcr.patient_address pa on pa.address_id = p.home_address_id " +
                     " left outer join pcr.address a on a.id = pa.address_id " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
