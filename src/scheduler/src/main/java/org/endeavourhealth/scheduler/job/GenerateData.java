@@ -29,21 +29,18 @@ public class GenerateData implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        System.out.println("Generate Data");
-
-        //TODO Run the data extractor Stored Proc to move the data into new temporary tables
+        LOG.info("Generate Data");
 
         try {
-
-            // TODO figure out which extracts are ready to run (after cohort has been defined)
-            int extractId = 1;
-            processExtracts(extractId);
+            List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            for (ExtractEntity entity : extractsToProcess) {
+                processExtracts(entity.getExtractId());
+            }
         } catch (Exception e) {
-
-            System.out.println("Error: " + e.getMessage());
+            LOG.error("Error: " + e.getMessage());
         }
 
-        System.out.println("End of Generate Data");
+        LOG.info("End of Generate Data");
     }
 
     private void processExtracts(int extractId) throws Exception {
