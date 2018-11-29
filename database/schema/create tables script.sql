@@ -33,7 +33,7 @@ create table data_generator.cohort_results (
     organisation_id bigint not null comment 'The organisation Id the patient is related to',
     bulked boolean not null default 0 comment 'Whether the patient has been bulked',
     
-    constraint data_generator_cohort_results_patient_id_pk primary key (patient_id),
+    constraint data_generator_cohort_results_patient_id_pk primary key (extract_id, patient_id, organisation_id),
     foreign key data_generator_cohort_results_extract_id_fk (extract_id) references data_generator.extract(extract_id) on delete cascade
 );
 

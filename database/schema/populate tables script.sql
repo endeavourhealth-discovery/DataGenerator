@@ -324,6 +324,9 @@ select 4, 'Health Check', 1, 1, 1, '{
 insert into data_generator.cohort_results
 select 1, id, organisation_id, 0 from pcr.patient;
 
+insert into data_generator.cohort_results
+select 2, id, organisation_id, 0 from pcr.patient;
+
 -- look at the state of the file-transactions queue for the Java class processes 
 -- ZipCSVFiles, EncryptFiles, TransferEncryptedFilesToSftp & HousekeepFiles    
 select * from data_generator.file_transactions;

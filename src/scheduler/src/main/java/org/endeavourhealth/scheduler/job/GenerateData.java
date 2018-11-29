@@ -38,6 +38,7 @@ public class GenerateData implements Job {
             }
         } catch (Exception e) {
             LOG.error("Error: " + e.getMessage());
+            System.out.println("Error:" + e.getMessage());
         }
 
         LOG.info("End of Generate Data");
