@@ -38,18 +38,13 @@ public class EncryptFiles implements Job {
         try {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
-            Path path =
-                    Paths.get(EncryptFiles.class.getClassLoader().getResource("endeavour.cer").toURI());
             certificate =
-                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(path.toFile()));
+                    (X509Certificate) certFactory.generateCertificate(
+                            EncryptFiles.class.getClassLoader().getResourceAsStream("endeavour.cer"));
         } catch (CertificateException e) {
             LOG.error("Error encountered in certificate generation. " + e.getMessage());
         } catch (NoSuchProviderException e) {
             LOG.error("Error encountered in certificate provider. " + e.getMessage());
-        } catch (URISyntaxException e) {
-            LOG.error("Certificate file not found. " + e.getMessage());
-        } catch (FileNotFoundException e) {
-            LOG.error("Certificate file not found. " + e.getMessage());
         }
 
         List<ExtractEntity> extractsToProcess = null;
