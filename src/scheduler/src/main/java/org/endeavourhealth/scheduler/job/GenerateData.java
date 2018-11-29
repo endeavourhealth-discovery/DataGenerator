@@ -9,12 +9,19 @@ import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetFields;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.CustomExtracts.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
+import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileWriter;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +42,19 @@ public class GenerateData implements Job {
             List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             for (ExtractEntity entity : extractsToProcess) {
                 processExtracts(entity.getExtractId());
+
+                // add the row to the file_transactions table of the
+                // database for each extractId set of files that is run
+                FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
+                newFileTransEntityForCreation.setExtractId(entity.getExtractId());
+                newFileTransEntityForCreation.setExtractDate(new Timestamp(System.currentTimeMillis()));
+                Date todayDate = Calendar.getInstance().getTime();
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                String strTodayDate = dateFormat.format(todayDate);
+                String extractIdAndTodayDate = entity.getExtractId() + "_" + strTodayDate;
+                newFileTransEntityForCreation.setFilename(extractIdAndTodayDate);
+                FileTransactionsEntity.create(newFileTransEntityForCreation);
+                LOG.info("File (folder): " + extractIdAndTodayDate + " record created");
             }
         } catch (Exception e) {
             LOG.error("Error: " + e.getMessage());
@@ -331,7 +351,43 @@ public class GenerateData implements Job {
 
         ExtractConfig config = ExtractCache.getExtractConfig(extractId);
 
-        String filename = config.getFileLocationDetails().getSource()  + tableName + ".csv";
+        // creates directory named by sourceLocation pathname, and any necessary non-existent
+        // parent directories, so useful for first run of any new extract added to the database
+        String sourceLocation = config.getFileLocationDetails().getSource();
+        if (!(sourceLocation.endsWith(File.separator))) {
+            sourceLocation += File.separator;
+        }
+        File sourceLocDir = new File(sourceLocation);
+        if (!(sourceLocDir.exists())) {
+            sourceLocDir.mkdirs();
+        }
+
+        // creates directory named by housekeepLocation pathname, only creating that directory,
+        // as the rest of the folder structure, within which it sits, has been created above
+        String housekeepLocation = config.getFileLocationDetails().getHousekeep();
+        if (!(housekeepLocation.endsWith(File.separator))) {
+            housekeepLocation += File.separator;
+        }
+        File houseLocDir = new File(housekeepLocation);
+        if (!(houseLocDir.exists())) {
+            houseLocDir.mkdir();
+        }
+
+        // creates directory for today's csv files, if not already created
+        Date todayDate = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String strTodayDate = dateFormat.format(todayDate);
+        String extractIdAndTodayDate = extractId + "_" + strTodayDate;
+        String strTodayDir = sourceLocation + extractIdAndTodayDate;
+        if (!(strTodayDir.endsWith(File.separator))) {
+            strTodayDir += File.separator;
+        }
+        File todayDir = new File(strTodayDir);
+        if (!(todayDir.exists())) {
+            todayDir.mkdir();
+        }
+
+        String filename = strTodayDir + "_" + tableName + ".csv";
 
         FileWriter fw = new FileWriter(filename);
         try {
@@ -355,7 +411,19 @@ public class GenerateData implements Job {
 
         ExtractConfig config = ExtractCache.getExtractConfig(extractId);
 
-        String filename = config.getFileLocationDetails().getSource() + tableName + ".csv";
+        String sourceLocation = config.getFileLocationDetails().getSource();
+
+        Date todayDate = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String strTodayDate = dateFormat.format(todayDate);
+        String extractIdAndTodayDate = extractId + "_" + strTodayDate;
+
+        String strTodayDir = sourceLocation + extractIdAndTodayDate;
+        if (!(strTodayDir.endsWith(File.separator))) {
+            strTodayDir += File.separator;
+        }
+
+        String filename = strTodayDir + "_" + tableName + ".csv";
 
         FileWriter fw = new FileWriter(filename, true);
         try {

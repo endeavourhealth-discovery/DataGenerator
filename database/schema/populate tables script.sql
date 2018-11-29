@@ -7,9 +7,9 @@ delete from data_generator.dataset where dataset_id = 2;
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 2, '{
+select 1, '{
  "name": "Child Imms",
- "id": "2",
+ "id": "1",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -60,9 +60,9 @@ select 2, '{
 
 -- insert into the dataset table
 insert into data_generator.dataset
-select 1, '{
+select 2, '{
  "name": "Health Check",
- "id": "1",
+ "id": "2",
  "extract": [{
   		"type": "patient",
   		"fields": [
@@ -242,13 +242,13 @@ delete from data_generator.extract where extract_id <= 4;
 
 -- create some extract data for extract 1
 insert into data_generator.extract
-select 1, 'Child Imms', 1, 1, 1, '{
+select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 1",
  "id": "1",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberA/Source/",
-          "destination": "/endeavour/ftp/SubscriberA/",
-          "housekeep": "C:/DataGenerator/SubscriberA/Housekeep/"
+          "source": "C:/DataGenerator/SubscriberA/ChildImms/Source/",
+          "destination": "/endeavour/ftp/SubscriberA/ChildImms/",
+          "housekeep": "C:/DataGenerator/SubscriberA/ChildImms/Housekeep/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -262,13 +262,13 @@ select 1, 'Child Imms', 1, 1, 1, '{
 
 -- create some extract data for extract 2
 insert into data_generator.extract
-select 2, 'Health Check', 1, 1, 1, '{
+select 2, 'Subscriber B Health Check', 1, 1, 2, '{
 "name": "Data Generator Extract Definition 2",
  "id": "2",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberA/Source/",
-          "destination": "/endeavour/ftp/SubscriberA/",
-          "housekeep": "C:/DataGenerator/SubscriberA/Housekeep/"
+          "source": "C:/DataGenerator/SubscriberA/HealthCheck/Source/",
+          "destination": "/endeavour/ftp/SubscriberA/HealthCheck/",
+          "housekeep": "C:/DataGenerator/SubscriberA/HealthCheck/Housekeep/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -282,13 +282,13 @@ select 2, 'Health Check', 1, 1, 1, '{
 
 -- create some extract data for extract 3
 insert into data_generator.extract
-select 3, 'Child Imms', 1, 1, 1, '{
+select 3, 'Subscriber B Child Imms', 1, 1, 1, '{
 "name": "Data Generator Extract Definition 3",
  "id": "3",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberB/Source/",
-          "destination": "/endeavour/ftp/SubscriberB/",
-          "housekeep": "C:/DataGenerator/SubscriberB/Housekeep/"
+          "source": "C:/DataGenerator/SubscriberB/ChildImms/Source/",
+          "destination": "/endeavour/ftp/SubscriberB/ChildImms/",
+          "housekeep": "C:/DataGenerator/SubscriberB/ChildImms/Housekeep/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -302,13 +302,13 @@ select 3, 'Child Imms', 1, 1, 1, '{
 
 -- create some extract data for extract 4
 insert into data_generator.extract
-select 4, 'Health Check', 1, 1, 1, '{
+select 4, 'Subscriber B Health Check', 1, 1, 2, '{
 "name": "Data Generator Extract Definition 4",
  "id": "4",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberB/Source/",
-          "destination": "/endeavour/ftp/SubscriberB/",
-          "housekeep": "C:/DataGenerator/SubscriberB/Housekeep/"
+          "source": "C:/DataGenerator/SubscriberB/HealthCheck/Source/",
+          "destination": "/endeavour/ftp/SubscriberB/HealthCheck/",
+          "housekeep": "C:/DataGenerator/SubscriberB/HealthCheck/Housekeep/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -332,21 +332,21 @@ select 2, id, organisation_id, 0 from pcr.patient;
 select * from data_generator.file_transactions;
 
 -- delete some file_transactions data
-delete from data_generator.file_transactions where extract_id = 1;
-delete from data_generator.file_transactions where extract_id = 2;
+-- delete from data_generator.file_transactions where extract_id = 1;
+-- delete from data_generator.file_transactions where extract_id = 2;
 
 -- create some file_transactions data 
-insert into data_generator.file_transactions
-select 1, '1_20181126', null, null, null, null, null;
-insert into data_generator.file_transactions
-select 2, '2_20181126', null, null, null, null, null;
+-- insert into data_generator.file_transactions
+-- select 1, '1_20181126', null, null, null, null, null;
+-- insert into data_generator.file_transactions
+-- select 2, '2_20181126', null, null, null, null, null;
 
 -- set extract_date to now() for the two records above, in order to kick off all 
 -- subsequent Java processes, i.e. where file_transactions is being used as a queue 
-update data_generator.file_transactions
-set extract_date = now() where extract_id = 1 and filename = '1_20181126';
-update data_generator.file_transactions
-set extract_date = now() where extract_id = 2 and filename = '2_20181126';
+-- update data_generator.file_transactions
+-- set extract_date = now() where extract_id = 1 and filename = '1_20181126';
+-- update data_generator.file_transactions
+-- set extract_date = now() where extract_id = 2 and filename = '2_20181126';
 
 -- update data_generator.file_transactions
 -- set encrypt_date = now() where extract_id = 2 and filename = '2_20181126.z01';
