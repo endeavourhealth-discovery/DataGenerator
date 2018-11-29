@@ -21,7 +21,7 @@ create table data_generator.extract (
     code_set_id int not null comment 'The code set to be used for this extract',
     dataset_id int not null comment 'The dataset to be used for this extract',
     definition varchar(5000) not null comment 'The json definition of the extract',
-    transaction_id bigint not null comment 'The latest transaction Id that was extracted',
+    transaction_id bigint not null comment 'The latest transaction id that was extracted',
     
     constraint data_generator_extract_id_pk primary key (extract_id),
     foreign key data_generator_extract_dataset_id_fk (dataset_id) references data_generator.dataset(dataset_id)    

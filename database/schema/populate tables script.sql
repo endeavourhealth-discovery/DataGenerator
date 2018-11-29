@@ -62,7 +62,7 @@ select 2, '{
 insert into data_generator.dataset
 select 1, '{
  "name": "Health Check",
- "id": "2",
+ "id": "1",
  "extract": [{
   		"type": "patient",
   		"fields": [
