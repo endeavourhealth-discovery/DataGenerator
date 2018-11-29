@@ -30,7 +30,11 @@ public class ZipCsvFiles implements Job {
 
         List<ExtractEntity> extractsToProcess = null;
         try {
-            extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+            if (jobExecutionContext.getScheduler() != null) {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+            } else {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            }
         } catch (SchedulerException e) {
             LOG.error("Unknown error encountered in zip handling. " + e.getMessage());
         }

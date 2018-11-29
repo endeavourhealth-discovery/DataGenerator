@@ -39,7 +39,12 @@ public class GenerateData implements Job {
         LOG.info("Generate Data");
 
         try {
-            List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            List<ExtractEntity> extractsToProcess = null;
+            if (jobExecutionContext.getScheduler() != null) {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+            } else {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            }
             for (ExtractEntity entity : extractsToProcess) {
                 processExtracts(entity.getExtractId());
 

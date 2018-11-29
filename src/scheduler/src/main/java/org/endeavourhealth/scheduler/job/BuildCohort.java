@@ -3,6 +3,7 @@ package org.endeavourhealth.scheduler.job;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,16 @@ public class BuildCohort implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        List<ExtractEntity> extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+        List<ExtractEntity> extractsToProcess = null;
+        try {
+            if (jobExecutionContext.getScheduler() != null) {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+            } else {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            }
+        } catch (SchedulerException e) {
+            LOG.error("Unknown error encountered in cohort handling. " + e.getMessage());
+        }
 
 
     }
