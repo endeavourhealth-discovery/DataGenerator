@@ -8,9 +8,7 @@ import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +16,8 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
 
+@DisallowConcurrentExecution
+@PersistJobDataAfterExecution
 public class ZipCsvFiles implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZipCsvFiles.class);

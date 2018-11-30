@@ -10,8 +10,10 @@ import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.CustomExtracts.*;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@DisallowConcurrentExecution
+@PersistJobDataAfterExecution
 public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);

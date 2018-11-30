@@ -10,9 +10,7 @@ import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionActivator;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +20,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 
+@DisallowConcurrentExecution
+@PersistJobDataAfterExecution
 public class TransferEncryptedFilesToSftp implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransferEncryptedFilesToSftp.class);

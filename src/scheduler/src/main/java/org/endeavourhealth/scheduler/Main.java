@@ -118,9 +118,9 @@ public class Main {
             //Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
             //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
             //        .build();
-            //TODO temporarily run job every minute
+            //TODO run job only once
             Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
+                    .startNow()
                     .build();
 
             buildCohortScheduler = new StdSchedulerFactory().getScheduler();
@@ -146,9 +146,9 @@ public class Main {
             //Trigger generateDataTrigger = TriggerBuilder.newTrigger()
             //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 * * ?"))
             //        .build();
-            //TODO temporarily run job every 30 seconds
+            //TODO run job only once
             Trigger generateDataTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/30 * * * * ?"))
+                    .startNow()
                     .build();
 
             generateDataScheduler = new StdSchedulerFactory().getScheduler();
@@ -177,6 +177,7 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
+                    .withIdentity("zipFiles","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
@@ -205,6 +206,7 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
+                    .withIdentity("encryptFiles","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
@@ -233,6 +235,7 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
+                    .withIdentity("moveFilesToSFTP","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
@@ -261,6 +264,7 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
+                    .withIdentity("housekeep","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
