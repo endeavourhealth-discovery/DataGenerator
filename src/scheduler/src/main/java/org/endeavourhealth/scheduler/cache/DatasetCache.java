@@ -18,7 +18,7 @@ public class DatasetCache {
 
         if (config == null) {
             // get the config from the DB
-            DatasetEntity dataset = DatasetEntity.getDatasetDefinition(1);
+            DatasetEntity dataset = DatasetEntity.getDatasetDefinition(datasetId);
 
             String definition = dataset.getDefinition();
             if (!StringUtils.isEmpty(definition)) {
