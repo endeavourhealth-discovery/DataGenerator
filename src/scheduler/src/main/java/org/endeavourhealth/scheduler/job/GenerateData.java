@@ -50,17 +50,19 @@ public class GenerateData implements Job {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
             for (ExtractEntity entity : extractsToProcess) {
-                processExtracts(entity.getExtractId());
+
+                int extractId = entity.getExtractId();
+                this.createSourceAndHousekeepDirectories(extractId);
+                String sourceLocation = this.createSourceDirectoryString(extractId);
+                String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
+                this.createTodayDirectory(sourceLocation, extractIdAndTodayDate);
+                this.processExtracts(extractId);
 
                 // add the row to the file_transactions table of the
                 // database for each extractId set of files that is run
                 FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
-                newFileTransEntityForCreation.setExtractId(entity.getExtractId());
+                newFileTransEntityForCreation.setExtractId(extractId);
                 newFileTransEntityForCreation.setExtractDate(new Timestamp(System.currentTimeMillis()));
-                Date todayDate = Calendar.getInstance().getTime();
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                String strTodayDate = dateFormat.format(todayDate);
-                String extractIdAndTodayDate = entity.getExtractId() + "_" + strTodayDate;
                 newFileTransEntityForCreation.setFilename(extractIdAndTodayDate);
                 FileTransactionsEntity.create(newFileTransEntityForCreation);
                 LOG.info("File (folder): " + extractIdAndTodayDate + " record created");
@@ -358,45 +360,9 @@ public class GenerateData implements Job {
 
     private void createCSV(List<String> fieldHeaders, String tableName, int extractId) throws Exception {
 
-        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
-
-        // creates directory named by sourceLocation pathname, and any necessary non-existent
-        // parent directories, so useful for first run of any new extract added to the database
-        String sourceLocation = config.getFileLocationDetails().getSource();
-        if (!(sourceLocation.endsWith(File.separator))) {
-            sourceLocation += File.separator;
-        }
-        File sourceLocDir = new File(sourceLocation);
-        if (!(sourceLocDir.exists())) {
-            sourceLocDir.mkdirs();
-        }
-
-        // creates directory named by housekeepLocation pathname, only creating that directory,
-        // as the rest of the folder structure, within which it sits, has been created above
-        String housekeepLocation = config.getFileLocationDetails().getHousekeep();
-        if (!(housekeepLocation.endsWith(File.separator))) {
-            housekeepLocation += File.separator;
-        }
-        File houseLocDir = new File(housekeepLocation);
-        if (!(houseLocDir.exists())) {
-            houseLocDir.mkdir();
-        }
-
-        // creates directory for today's csv files, if not already created
-        Date todayDate = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String strTodayDate = dateFormat.format(todayDate);
-        String extractIdAndTodayDate = extractId + "_" + strTodayDate;
-        String strTodayDir = sourceLocation + extractIdAndTodayDate;
-        if (!(strTodayDir.endsWith(File.separator))) {
-            strTodayDir += File.separator;
-        }
-        File todayDir = new File(strTodayDir);
-        if (!(todayDir.exists())) {
-            todayDir.mkdir();
-        }
-
-        String filename = strTodayDir + extractIdAndTodayDate + "_" + tableName + ".csv";
+        String sourceLocation = this.createSourceDirectoryString(extractId);
+        String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
+        String filename = this.createFilename(sourceLocation, extractIdAndTodayDate, tableName);
 
         FileWriter fw = new FileWriter(filename);
         try {
@@ -418,21 +384,9 @@ public class GenerateData implements Job {
 
     private void saveToCSV(List<Object[]> results,  String tableName, List<Integer> fieldIndexes, int extractId) throws Exception {
 
-        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
-
-        String sourceLocation = config.getFileLocationDetails().getSource();
-
-        Date todayDate = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String strTodayDate = dateFormat.format(todayDate);
-        String extractIdAndTodayDate = extractId + "_" + strTodayDate;
-
-        String strTodayDir = sourceLocation + extractIdAndTodayDate;
-        if (!(strTodayDir.endsWith(File.separator))) {
-            strTodayDir += File.separator;
-        }
-
-        String filename = strTodayDir + extractIdAndTodayDate + "_" + tableName + ".csv";
+        String sourceLocation = this.createSourceDirectoryString(extractId);
+        String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
+        String filename = this.createFilename(sourceLocation, extractIdAndTodayDate, tableName);
 
         FileWriter fw = new FileWriter(filename, true);
         try {
@@ -456,5 +410,70 @@ public class GenerateData implements Job {
             fw.close();
             System.out.println("data added to " + tableName);
         }
+    }
+
+    private void createSourceAndHousekeepDirectories (int extractId) throws Exception {
+
+        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
+
+        // creates directory named by sourceLocation pathname, and any necessary non-existent
+        // parent directories, so useful for first run of any new extract added to the database
+        String sourceLocation = this.createSourceDirectoryString(extractId);
+        File sourceLocDir = new File(sourceLocation);
+        if (!(sourceLocDir.exists())) {
+            sourceLocDir.mkdirs();
+        }
+
+        // creates directory named by housekeepLocation pathname, only creating that directory,
+        // as the rest of the folder structure, within which it sits, has been created above
+        String housekeepLocation = config.getFileLocationDetails().getHousekeep();
+        if (!(housekeepLocation.endsWith(File.separator))) {
+            housekeepLocation += File.separator;
+        }
+        File houseLocDir = new File(housekeepLocation);
+        if (!(houseLocDir.exists())) {
+            houseLocDir.mkdir();
+        }
+    }
+
+    private String createSourceDirectoryString(int extractId) throws Exception {
+
+        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
+        String sourceLocation = config.getFileLocationDetails().getSource();
+        if (!(sourceLocation.endsWith(File.separator))) {
+            sourceLocation += File.separator;
+        }
+        return sourceLocation;
+    }
+
+    private void createTodayDirectory (String sourceLocation, String extractIdAndTodayDate) {
+
+        String strTodayDir = sourceLocation + extractIdAndTodayDate;
+        if (!(strTodayDir.endsWith(File.separator))) {
+            strTodayDir += File.separator;
+        }
+        File todayDir = new File(strTodayDir);
+        if (!(todayDir.exists())) {
+            todayDir.mkdir();
+        }
+    }
+
+    private String createExtractIdAndTodayDateString(int extractId){
+
+        Date todayDate = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String strTodayDate = dateFormat.format(todayDate);
+        String extractIdAndTodayDate = extractId + "_" + strTodayDate;
+        return extractIdAndTodayDate;
+    }
+
+    private String createFilename (String sourceLocation, String extractIdAndTodayDate, String tableName){
+
+        String strTodayDir = sourceLocation + extractIdAndTodayDate;
+        if (!(strTodayDir.endsWith(File.separator))) {
+            strTodayDir += File.separator;
+        }
+        String filename = strTodayDir + extractIdAndTodayDate + "_" + tableName + ".csv";
+        return filename;
     }
 }
