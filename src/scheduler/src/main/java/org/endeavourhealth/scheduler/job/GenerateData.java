@@ -392,7 +392,7 @@ public class GenerateData implements Job {
             todayDir.mkdir();
         }
 
-        String filename = strTodayDir + "_" + tableName + ".csv";
+        String filename = strTodayDir + extractIdAndTodayDate + "_" + tableName + ".csv";
 
         FileWriter fw = new FileWriter(filename);
         try {
@@ -428,7 +428,7 @@ public class GenerateData implements Job {
             strTodayDir += File.separator;
         }
 
-        String filename = strTodayDir + "_" + tableName + ".csv";
+        String filename = strTodayDir + extractIdAndTodayDate + "_" + tableName + ".csv";
 
         FileWriter fw = new FileWriter(filename, true);
         try {

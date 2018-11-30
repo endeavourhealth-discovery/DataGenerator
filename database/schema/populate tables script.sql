@@ -337,18 +337,15 @@ select * from data_generator.file_transactions;
 
 -- create some file_transactions data 
 -- insert into data_generator.file_transactions
--- select 1, '1_20181126', null, null, null, null, null;
+-- select 1, '1_20181130', now(), null, null, null, null;
 -- insert into data_generator.file_transactions
--- select 2, '2_20181126', null, null, null, null, null;
-
--- set extract_date to now() for the two records above, in order to kick off all 
--- subsequent Java processes, i.e. where file_transactions is being used as a queue 
--- update data_generator.file_transactions
--- set extract_date = now() where extract_id = 1 and filename = '1_20181126';
--- update data_generator.file_transactions
--- set extract_date = now() where extract_id = 2 and filename = '2_20181126';
+-- select 2, '2_20181130', now(), null, null, null, null;
+-- insert into data_generator.file_transactions
+-- select 3, '3_20181130', now(), null, null, null, null;
+-- insert into data_generator.file_transactions
+-- select 4, '4_20181130', now(), null, null, null, null;
 
 -- update data_generator.file_transactions
--- set encrypt_date = now() where extract_id = 2 and filename = '2_20181126.z01';
+-- set encrypt_date = now() where extract_id = 1 and filename = '1_20181126.z01';
 -- update data_generator.file_transactions
--- set encrypt_date = now() where extract_id = 2 and filename = '2_20181126.zip';
+-- set encrypt_date = now() where extract_id = 1 and filename = '2_20181126.zip';
