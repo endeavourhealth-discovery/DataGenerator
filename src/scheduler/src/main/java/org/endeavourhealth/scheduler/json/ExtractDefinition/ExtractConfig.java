@@ -3,6 +3,7 @@ package org.endeavourhealth.scheduler.json.ExtractDefinition;
 public class ExtractConfig {
     private String name = null;
     private Integer id = null;
+    private String projectId = null;
     private FileLocationDetails fileLocationDetails;
     private SftpConnectionDetails sftpConnectionDetails;
 
@@ -31,6 +32,14 @@ public class ExtractConfig {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     public FileLocationDetails getFileLocationDetails() {

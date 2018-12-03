@@ -93,6 +93,12 @@
             <version>${endeavour-config.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.endeavourhealth.dataSharingManager</groupId>
+            <artifactId>Models</artifactId>
+            <version>${data-sharing-manager-models.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

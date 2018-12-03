@@ -1,14 +1,18 @@
 package org.endeavourhealth.scheduler;
 
 import org.endeavourhealth.common.config.ConfigManager;
+import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
+import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
+import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -27,7 +31,21 @@ public class Main {
 
         LOG.info("Checking for extractions");
 
-        List<ExtractEntity> extractsToProcess = ExtractEntity.getAllExtracts();
+        List<ExtractEntity> extractsToProcess = new ArrayList<>();
+        List<ExtractEntity> allExtracts = ExtractEntity.getAllExtracts();
+
+        for (ExtractEntity extract : allExtracts) {
+            ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
+            System.out.println("Checking project status for extract : " + extract.getExtractId()
+                    + ", projectId : " + config.getProjectId());
+            if (ProjectEntity.checkProjectIsActive(config.getProjectId())) {
+                System.out.println("project exists and is active, adding...");
+                extractsToProcess.add(extract);
+            } else {
+                System.out.println("no active project exists, rejecting");
+            }
+        }
+
         if (extractsToProcess.size() == 0) {
             LOG.info("No extracts to process. Exiting.");
             return;
