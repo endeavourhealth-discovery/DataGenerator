@@ -118,8 +118,8 @@ public class Main {
         housekeepFilesScheduler.start();
 
         //TODO implementation needed to determine if everything is done
-        //TODO testing job scheduling for 100s
-        Thread.sleep(100000);
+        //TODO testing job scheduling for 200s
+        Thread.sleep(200000);
         if (buildCohortScheduler != null) {
             buildCohortScheduler.shutdown();
         }
