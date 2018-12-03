@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 // import java.io.*;
 import java.io.File;
 import java.sql.Timestamp;
-import java.util.Calendar;
+// import java.util.Calendar;
 import java.util.List;
 
 @DisallowConcurrentExecution
@@ -26,6 +26,7 @@ public class TransferEncryptedFilesToSftp implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransferEncryptedFilesToSftp.class);
 
+    @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
         List<ExtractEntity> extractsToProcess = null;
@@ -36,16 +37,20 @@ public class TransferEncryptedFilesToSftp implements Job {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
         } catch (SchedulerException e) {
-            LOG.error("Unknown error encountered in ftp handling. " + e.getMessage());
+            LOG.error("Unknown error encountered in SFTP handling. " + e.getMessage());
         }
         // System.out.println("Transferring encrypted files");
-        LOG.info("Transferring encrypted files");
+        LOG.info("Beginning of transferring encrypted files to SFTP");
+
         for (ExtractEntity entity : extractsToProcess) {
+
+            LOG.info("Extract ID: " + entity.getExtractId());
+
             try {
                 // Getting the extract config from the extract table of the database
                 ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
                 // System.out.println(config.getName());
-                LOG.info(config.getName());
+                // LOG.info(config.getName());
 
                 // Getting the files for SFTP upload from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(entity.getExtractId());
@@ -118,6 +123,7 @@ public class TransferEncryptedFilesToSftp implements Job {
                 LOG.error("Exception occurred with using the database: " + e);
             }
         }
+        LOG.info("End of transferring encrypted files to SFTP");
     }
 
     public ConnectionDetails setExtractConfigSftpConnectionDetails(ExtractConfig config) {
@@ -185,20 +191,25 @@ public class TransferEncryptedFilesToSftp implements Job {
     }
 
     public void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
-        Calendar startCalendar = Calendar.getInstance();
-        // System.out.println("Tried starting upload of file " + source + " on " + startCalendar.getTime()
+        // Calendar startCalendar = Calendar.getInstance();
+        // System.out.println("Tried starting upload of file " + source
+        //        + " on " + startCalendar.getTime()
         //        + " to SFTP: " + destination);
-        LOG.info("Tried starting upload of file " + source + " on " + startCalendar.getTime()
+        LOG.info("Tried starting upload of file " + source
+                // + " on " + startCalendar.getTime()
                 + " to SFTP: " + destination);
 
         // Uploading a file to the SFTP
         sftpConnection.put(source, destination);
 
-        Calendar endCalendar = Calendar.getInstance();
-        // System.out.println("Finished uploading file " + source + " on " + endCalendar.getTime()
+        // Calendar endCalendar = Calendar.getInstance();
+        // System.out.println("Finished uploading file " + source
+        //        + " on " + endCalendar.getTime()
         //        + " to SFTP: " + destination);
-        LOG.info("Finished uploading file " + source + " on " + endCalendar.getTime()
-                + " to SFTP: " + destination);
+        LOG.info("Finished uploading file " + source
+                // + " on " + endCalendar.getTime()
+                // + " to SFTP: " + destination
+                );
     }
 
     /* private void downloadFileFromSftp(Connection sftpConnection) throws Exception {

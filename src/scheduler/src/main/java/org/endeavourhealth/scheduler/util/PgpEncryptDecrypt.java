@@ -25,7 +25,7 @@ public class PgpEncryptDecrypt {
                                       String provider) {
 
         LOG.debug("File:" + file +
-                ", X509Certificate:" + encryptionCertificate +
+                // ", X509Certificate:" + encryptionCertificate +
                 ", Provider:" + provider);
 
         try {

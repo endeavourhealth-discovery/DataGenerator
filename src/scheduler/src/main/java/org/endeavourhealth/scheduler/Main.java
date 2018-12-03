@@ -184,7 +184,7 @@ public class Main {
     }
 
     private static void zipFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
-        LOG.info("Zipping the files");
+        LOG.info("Zipping CSV files");
         if (isScheduled) {
             JobDetail zipFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
 
@@ -213,7 +213,7 @@ public class Main {
     }
 
     private static void encryptFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
-        LOG.info("Encrypting the files");
+        LOG.info("Encrypting zip files");
         if (isScheduled) {
             JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
 

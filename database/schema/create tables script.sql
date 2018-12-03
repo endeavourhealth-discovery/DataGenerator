@@ -30,7 +30,7 @@ create table data_generator.extract (
 create table data_generator.cohort_results (
 	extract_id int not null comment 'The extract that this patient is related to',
     patient_id bigint not null comment 'The patient id to be extracted',
-    organisation_id bigint not null comment 'The organisation Id the patient is related to',
+    organisation_id bigint not null comment 'The organisation id the patient is related to',
     bulked boolean not null default 0 comment 'Whether the patient has been bulked',
     
     constraint data_generator_cohort_results_patient_id_pk primary key (extract_id, patient_id, organisation_id),

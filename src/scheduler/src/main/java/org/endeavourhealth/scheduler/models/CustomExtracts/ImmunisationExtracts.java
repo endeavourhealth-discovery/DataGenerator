@@ -5,11 +5,17 @@ import org.endeavourhealth.scheduler.models.PersistenceManager;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImmunisationExtracts {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ImmunisationExtracts.class);
+
     public static List runBulkImmunisationAllCodesQuery(int extractId, int codeSetId) throws Exception {
-        System.out.println("bulk all");
+        // System.out.println("bulk all");
+        // LOG.info("Bulk immunisation all codes");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -32,7 +38,9 @@ public class ImmunisationExtracts {
     }
 
     public static List runDeltaImmunisationAllCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
-        System.out.println("delta all");
+        // System.out.println("delta all");
+        // LOG.info("Delta immunisation all codes");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -62,7 +70,9 @@ public class ImmunisationExtracts {
     }
 
     public static List runBulkImmunisationEarliestEachCodesQuery(int extractId, int codeSetId) throws Exception {
-        System.out.println("bulk earliest each");
+        // System.out.println("bulk earliest each");
+        // LOG.info("Bulk immunisation earliest for each code");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -91,7 +101,9 @@ public class ImmunisationExtracts {
     }
 
     public static List runDeltaImmunisationEarliestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
-        System.out.println("delta earliest each");
+        // System.out.println("delta earliest each");
+        // LOG.info("Delta immunisation earliest for each code");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -126,7 +138,9 @@ public class ImmunisationExtracts {
     }
 
     public static List runBulkImmunisationLatestEachCodesQuery(int extractId, int codeSetId) throws Exception {
-        System.out.println("bulk latest each");
+        // System.out.println("bulk latest each");
+        // LOG.info("Bulk immunisation latest for each code");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -155,7 +169,9 @@ public class ImmunisationExtracts {
     }
 
     public static List runDeltaImmunisationLatestEachCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
-        System.out.println("delta latest each");
+        // System.out.println("delta latest each");
+        // LOG.info("Delta immunisation latest for each code");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -190,8 +206,10 @@ public class ImmunisationExtracts {
     }
 
     public static List runBulkImmunisationLatestCodesQuery(int extractId, int codeSetId) throws Exception {
+        // System.out.println("bulk latest");
+        // LOG.info("Bulk immunisation latest of all codes");
+
         // build the temp table to use for subsequent query
-        System.out.println("bulk latest");
         createMatchingImmunisationCodesTempTable(extractId, codeSetId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -216,8 +234,10 @@ public class ImmunisationExtracts {
     }
 
     public static List runDeltaImmunisationLatestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+        // System.out.println("delta latest");
+        // LOG.info("Delta immunisation latest of all codes");
+
         // build the temp table to use for subsequent query
-        System.out.println("delta latest");
         createDeltaMatchingImmunisationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -242,8 +262,10 @@ public class ImmunisationExtracts {
     }
 
     public static List runBulkImmunisationEarliestCodesQuery(int extractId, int codeSetId) throws Exception {
+        // System.out.println("bulk earliest");
+        // LOG.info("Bulk immunisation earliest of all codes");
+
         // build the temp table to use for subsequent query
-        System.out.println("bulk earliest");
         createMatchingImmunisationCodesTempTable(extractId, codeSetId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -268,8 +290,10 @@ public class ImmunisationExtracts {
     }
 
     public static List runDeltaImmunisationEarliestCodesQuery(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+        // System.out.println("delta earliest");
+        // LOG.info("Delta immunisation earliest of all codes");
+
         // build the temp table to use for subsequent query
-        System.out.println("delta earliest");
         createDeltaMatchingImmunisationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -294,8 +318,10 @@ public class ImmunisationExtracts {
     }
 
     public static void createMatchingImmunisationCodesTempTable(int extractId, int codeSetId) throws Exception {
+        // System.out.println("matching codes");
+        // LOG.info("Matching codes immunisation temp table");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
-        System.out.println("matching codes");
 
         try {
             String sql = "create table matching_codes as " +
@@ -319,8 +345,10 @@ public class ImmunisationExtracts {
     }
 
     public static void createDeltaMatchingImmunisationCodesTempTable(int extractId, int codeSetId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+        // System.out.println("delta matching codes");
+        // LOG.info("Delta matching codes immunisation temp table");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
-        System.out.println("delta matching codes");
 
         try {
             String sql = "create table matching_codes as " +
@@ -350,7 +378,9 @@ public class ImmunisationExtracts {
     }
 
     public static void deleteMatchingImmunisationCodesTempTable() throws Exception {
-        System.out.println("delete matching codes");
+        // System.out.println("delete matching codes");
+        // LOG.info("Delete matching codes immunisation temp table");
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
