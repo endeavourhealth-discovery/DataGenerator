@@ -1,10 +1,13 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.apache.commons.io.FileDeleteStrategy;
 import org.apache.commons.io.FileUtils;
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
+import org.endeavourhealth.scheduler.util.JobUtil;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +33,20 @@ public class HousekeepFiles implements Job {
             } else {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
-        } catch (SchedulerException e) {
+            if (JobUtil.isJobRunning(jobExecutionContext,
+                    new String[] {
+                            Main.ZIP_FILES_JOB,
+                            Main.ENCRYPT_FILES_JOB,
+                            Main.SFTP_FILES_JOB},
+                    Main.FILE_JOB_GROUP)) {
+
+                LOG.info("Conflicting job is still running");
+                return;
+            }
+        } catch (Exception e) {
             LOG.error("Unknown error encountered in housekeep handling. " + e.getMessage());
         }
+
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID:" + entity.getExtractId());
@@ -65,7 +79,10 @@ public class HousekeepFiles implements Job {
                         dest = new File(housekeep + entry.getFilename());
 
                         try {
-                            FileUtils.moveFile(src, dest);
+                            FileUtils.copyFile(src, dest);
+                            System.gc();
+                            Thread.sleep(1000);
+                            FileDeleteStrategy.FORCE.delete(src);
 
                             LOG.info("File:" + src.getName() + " moved to " + housekeep);
 

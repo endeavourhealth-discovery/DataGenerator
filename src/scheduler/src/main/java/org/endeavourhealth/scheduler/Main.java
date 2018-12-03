@@ -25,6 +25,12 @@ public class Main {
     private static Scheduler moveFilesToSFTPScheduler;
     private static Scheduler housekeepFilesScheduler;
 
+    public static final String FILE_JOB_GROUP = "fileJobGroup";
+    public static final String ZIP_FILES_JOB = "zipFiles";
+    public static final String ENCRYPT_FILES_JOB = "encryptFiles";
+    public static final String SFTP_FILES_JOB = "sftpFiles";
+    public static final String HOUSEKEEP_FILES_JOB = "housekeepFiles";
+
     public static void main(String[] args) throws Exception {
 
         ConfigManager.Initialize("data-generator");
@@ -102,6 +108,15 @@ public class Main {
         moveFilesToSFTP(true, extractsToProcess);
         housekeepFiles(true, extractsToProcess);
 
+        Thread.sleep(1000);
+        zipFilesScheduler.start();
+        Thread.sleep(1000);
+        encryptFilesScheduler.start();
+        Thread.sleep(1000);
+        moveFilesToSFTPScheduler.start();
+        Thread.sleep(1000);
+        housekeepFilesScheduler.start();
+
         //TODO implementation needed to determine if everything is done
         //TODO testing job scheduling for 100s
         Thread.sleep(100000);
@@ -111,6 +126,10 @@ public class Main {
 
         if (generateDataScheduler != null) {
             generateDataScheduler.shutdown();
+        }
+
+        if (zipFilesScheduler != null) {
+            zipFilesScheduler.shutdown();
         }
 
         if (encryptFilesScheduler != null) {
@@ -186,7 +205,9 @@ public class Main {
     private static void zipFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Zipping the files");
         if (isScheduled) {
-            JobDetail zipFilesJob = JobBuilder.newJob(ZipCsvFiles.class).build();
+            JobDetail zipFilesJob =
+                    JobBuilder.newJob(ZipCsvFiles.class).withIdentity
+                            (JobKey.jobKey(ZIP_FILES_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire every 10 minutes every hour between 03am and 06am, of every day
@@ -195,13 +216,11 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
-                    .withIdentity("zipFiles","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             zipFilesScheduler = new StdSchedulerFactory().getScheduler();
             zipFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            zipFilesScheduler.start();
             zipFilesScheduler.scheduleJob(zipFilesJob, zipFilesTrigger);
 
         } else {
@@ -215,7 +234,9 @@ public class Main {
     private static void encryptFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Encrypting the files");
         if (isScheduled) {
-            JobDetail encryptFilesJob = JobBuilder.newJob(EncryptFiles.class).build();
+            JobDetail encryptFilesJob =
+                    JobBuilder.newJob(EncryptFiles.class).withIdentity(
+                            JobKey.jobKey(ENCRYPT_FILES_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire every 10 minutes starting at minute :05, every hour between 03am and 06am, of every day
@@ -224,13 +245,11 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
-                    .withIdentity("encryptFiles","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             encryptFilesScheduler = new StdSchedulerFactory().getScheduler();
             encryptFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            encryptFilesScheduler.start();
             encryptFilesScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
 
         } else {
@@ -244,7 +263,9 @@ public class Main {
     private static void moveFilesToSFTP(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Transferring encrypted files to SFTP");
         if (isScheduled) {
-            JobDetail moveFilesToSFTPJob = JobBuilder.newJob(TransferEncryptedFilesToSftp.class).build();
+            JobDetail moveFilesToSFTPJob =
+                    JobBuilder.newJob(TransferEncryptedFilesToSftp.class).withIdentity(
+                            JobKey.jobKey(SFTP_FILES_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire every 10 minutes starting at minute :10, every hour between 03am and 06am, of every day
@@ -253,13 +274,11 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
-                    .withIdentity("moveFilesToSFTP","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             moveFilesToSFTPScheduler = new StdSchedulerFactory().getScheduler();
             moveFilesToSFTPScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            moveFilesToSFTPScheduler.start();
             moveFilesToSFTPScheduler.scheduleJob(moveFilesToSFTPJob, moveFilesToSFTPTrigger);
 
         } else {
@@ -273,7 +292,9 @@ public class Main {
     private static void housekeepFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Housekeeping encrypted files");
         if (isScheduled) {
-            JobDetail housekeepFilesJob = JobBuilder.newJob(HousekeepFiles.class).build();
+            JobDetail housekeepFilesJob =
+                    JobBuilder.newJob(HousekeepFiles.class).withIdentity(
+                            JobKey.jobKey(HOUSEKEEP_FILES_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire every 10 minutes starting at minute :15, every hour between 03am and 06am, of every day
@@ -282,13 +303,11 @@ public class Main {
             //        .build();
             //TODO temporarily run job every 10 seconds
             Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
-                    .withIdentity("housekeep","fileGroup")
                     .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
                     .build();
 
             housekeepFilesScheduler = new StdSchedulerFactory().getScheduler();
             housekeepFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            housekeepFilesScheduler.start();
             housekeepFilesScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
 
         } else {

@@ -1,10 +1,12 @@
 package org.endeavourhealth.scheduler.job;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
+import org.endeavourhealth.scheduler.util.JobUtil;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -28,8 +30,28 @@ public class EncryptFiles implements Job {
 
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        X509Certificate certificate = null;
+        List<ExtractEntity> extractsToProcess = null;
+        try {
+            if (jobExecutionContext.getScheduler() != null) {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+            } else {
+                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
+            }
+            if (JobUtil.isJobRunning(jobExecutionContext,
+                    new String[] {
+                            Main.ZIP_FILES_JOB,
+                            Main.SFTP_FILES_JOB,
+                            Main.HOUSEKEEP_FILES_JOB},
+                    Main.FILE_JOB_GROUP)) {
 
+                LOG.info("Conflicting job is still running");
+                return;
+            }
+        } catch (Exception e) {
+            LOG.error("Unknown error encountered in encrypt handling. " + e.getMessage());
+        }
+
+        X509Certificate certificate = null;
         try {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
@@ -40,17 +62,6 @@ public class EncryptFiles implements Job {
             LOG.error("Error encountered in certificate generation. " + e.getMessage());
         } catch (NoSuchProviderException e) {
             LOG.error("Error encountered in certificate provider. " + e.getMessage());
-        }
-
-        List<ExtractEntity> extractsToProcess = null;
-        try {
-            if (jobExecutionContext.getScheduler() != null) {
-                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
-            } else {
-                extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
-            }
-        } catch (SchedulerException e) {
-            LOG.error("Unknown error encountered in encrypt handling. " + e.getMessage());
         }
 
         List<FileTransactionsEntity> toProcess;

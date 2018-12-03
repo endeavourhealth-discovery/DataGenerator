@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 // import org.endeavourhealth.sftpreader.sources.Connection;
@@ -10,6 +11,7 @@ import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
 import org.endeavourhealth.scheduler.util.ConnectionActivator;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
+import org.endeavourhealth.scheduler.util.JobUtil;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +37,20 @@ public class TransferEncryptedFilesToSftp implements Job {
             } else {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
-        } catch (SchedulerException e) {
+            if (JobUtil.isJobRunning(jobExecutionContext,
+                    new String[] {
+                            Main.ZIP_FILES_JOB,
+                            Main.ENCRYPT_FILES_JOB,
+                            Main.HOUSEKEEP_FILES_JOB},
+                    Main.FILE_JOB_GROUP)) {
+
+                LOG.info("Conflicting job is still running");
+                return;
+            }
+        } catch (Exception e) {
             LOG.error("Unknown error encountered in ftp handling. " + e.getMessage());
         }
+
         // System.out.println("Transferring encrypted files");
         LOG.info("Transferring encrypted files");
         for (ExtractEntity entity : extractsToProcess) {

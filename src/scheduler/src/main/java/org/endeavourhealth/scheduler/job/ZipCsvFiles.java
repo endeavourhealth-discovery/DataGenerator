@@ -4,10 +4,12 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
+import org.endeavourhealth.scheduler.util.JobUtil;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +37,20 @@ public class ZipCsvFiles implements Job {
             } else {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
-        } catch (SchedulerException e) {
+            if (JobUtil.isJobRunning(jobExecutionContext,
+                    new String[] {
+                            Main.ENCRYPT_FILES_JOB,
+                            Main.SFTP_FILES_JOB,
+                            Main.HOUSEKEEP_FILES_JOB},
+                    Main.FILE_JOB_GROUP)) {
+
+                LOG.info("Conflicting job is still running");
+                return;
+            }
+        } catch (Exception e) {
             LOG.error("Unknown error encountered in zip handling. " + e.getMessage());
         }
+
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID:" + entity.getExtractId());
