@@ -28,6 +28,7 @@ public class EncryptFiles implements Job {
     private static final Logger LOG = LoggerFactory.getLogger(EncryptFiles.class);
     private static final String PROVIDER = "BC";
 
+    @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
         List<ExtractEntity> extractsToProcess = null;
@@ -64,20 +65,24 @@ public class EncryptFiles implements Job {
             LOG.error("Error encountered in certificate provider. " + e.getMessage());
         }
 
+        LOG.info("Beginning of encrypting zip files");
+
         List<FileTransactionsEntity> toProcess;
         String location = null;
         for (ExtractEntity entity : extractsToProcess) {
 
-            LOG.info("Extract ID:" + entity.getExtractId());
+            LOG.info("Extract ID: " + entity.getExtractId());
 
             try {
                 //TODO determine logic to pass or obtain from tables the value/s needed for extractId
                 ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
+                // LOG.info(config.getName());
+
                 location = config.getFileLocationDetails().getSource();
                 if (!location.endsWith(File.separator)) {
                     location += File.separator;
                 }
-                LOG.debug("location:" + location);
+                LOG.debug("Location: " + location);
 
                 //retrieve files for encryption
                 toProcess = FileTransactionsEntity.getFilesForEncryption(entity.getExtractId());
@@ -95,17 +100,17 @@ public class EncryptFiles implements Job {
                         if (success) {
 
                             if (entry.getFilename().contains(".zip")) {
-                                LOG.info("File:" + entry.getFilename() + " encrypted.");
+                                LOG.info("File: " + entry.getFilename() + " encrypted.");
                             }
 
                             //update the file's encryption date
                             entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
                             FileTransactionsEntity.update(entry);
 
-                            LOG.info("File:" + entry.getFilename() + " record updated.");
+                            LOG.info("File: " + entry.getFilename() + " record updated.");
 
                         } else {
-                            LOG.error("File:" + entry.getFilename() + " failed encryption.");
+                            LOG.error("File: " + entry.getFilename() + " failed encryption.");
                             return;
                         }
                     }
@@ -114,5 +119,6 @@ public class EncryptFiles implements Job {
                 LOG.error("Unknown error encountered in encryption handling. " + e.getMessage());
             }
         }
+        LOG.info("End of encrypting zip files");
     }
 }

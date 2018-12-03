@@ -26,9 +26,8 @@ public class ZipCsvFiles implements Job {
 
     private static final long ZIP_SPLIT_SIZE = 10485760;
 
+    @Override
     public void execute(JobExecutionContext jobExecutionContext) {
-
-        LOG.info("Zipping CSV files contained in folders");
 
         List<ExtractEntity> extractsToProcess = null;
         try {
@@ -50,15 +49,16 @@ public class ZipCsvFiles implements Job {
         } catch (Exception e) {
             LOG.error("Unknown error encountered in zip handling. " + e.getMessage());
         }
+        LOG.info("Beginning of zipping CSV files");
 
         for (ExtractEntity entity : extractsToProcess) {
 
-            LOG.info("Extract ID:" + entity.getExtractId());
+            LOG.info("Extract ID: " + entity.getExtractId());
 
             try {
                 // Getting the extract config from the extract table of the database
                 ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
-                LOG.info(config.getName());
+                // LOG.info(config.getName());
 
                 // Getting the folder to be zipped from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForZip(entity.getExtractId());
@@ -130,5 +130,6 @@ public class ZipCsvFiles implements Job {
                 LOG.error("Exception occurred with using the database: " + e);
             }
         }
+        LOG.info("End of zipping CSV files");
     }
 }

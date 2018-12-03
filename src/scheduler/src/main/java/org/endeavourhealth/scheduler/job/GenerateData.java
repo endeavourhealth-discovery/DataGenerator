@@ -38,9 +38,10 @@ public class GenerateData implements Job {
         this.limitCols = limit;
     }
 
+    @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        LOG.info("Generate Data");
+        LOG.info("Beginning of generating data extracts to CSV files");
 
         try {
             List<ExtractEntity> extractsToProcess = null;
@@ -52,6 +53,7 @@ public class GenerateData implements Job {
             for (ExtractEntity entity : extractsToProcess) {
 
                 int extractId = entity.getExtractId();
+                LOG.info("Extract ID: " + extractId);
                 this.createSourceAndHousekeepDirectories(extractId);
                 String sourceLocation = this.createSourceDirectoryString(extractId);
                 String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
@@ -69,10 +71,9 @@ public class GenerateData implements Job {
             }
         } catch (Exception e) {
             LOG.error("Error: " + e.getMessage());
-            System.out.println("Error:" + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
-
-        LOG.info("End of Generate Data");
+        LOG.info("End of generating data extracts to CSV files");
     }
 
     private void processExtracts(int extractId) throws Exception {
@@ -86,29 +87,32 @@ public class GenerateData implements Job {
             Long maxTransactionId = GeneralQueries.getMaxTransactionId();
 
             for (DatasetConfigExtract extract : datasetConfig.getExtract()) {
-                System.out.println(extract.getType());
+                // System.out.println(extract.getType());
                 switch (extract.getType()) {
                     case "patient":
                         runPatientExtract(extract, extractId, "patient", extractDetails.getTransactionId(), maxTransactionId);
+                        LOG.info("Finished writing data rows to " + extract.getType() + " CSV file");
                         break;
                     case "medication":
                         runMedicationExtractForCodeSets(extract, extractId, "medication", extractDetails.getTransactionId(), maxTransactionId);
+                        LOG.info("Finished writing data rows to " + extract.getType() + " CSV file");
                         break;
                     case "observation":
                         runObservationExtractForCodeSets(extract, extractId, "observation", extractDetails.getTransactionId(), maxTransactionId);
+                        LOG.info("Finished writing data rows to " + extract.getType() + " CSV file");
                         break;
                     case "allergy":
                         runAllergyExtractForCodeSets(extract, extractId, "allergy", extractDetails.getTransactionId(), maxTransactionId);
+                        LOG.info("Finished writing data rows to " + extract.getType() + " CSV file");
                         break;
                     case "immunisation":
                         runImmunisationExtractForCodeSets(extract, extractId, "immunisation", extractDetails.getTransactionId(), maxTransactionId);
+                        LOG.info("Finished writing data rows to " + extract.getType() + " CSV file");
                         break;
                 }
             }
-
             runFinaliseExtract(extractId, maxTransactionId);
         }
-
     }
 
     private void runPatientExtract(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
@@ -125,7 +129,6 @@ public class GenerateData implements Job {
         saveToCSV(results, sectionName, fieldIndexes, extractId);
         results = PatientExtracts.runDeltaPatientExtract(extractId, currentTransactionId, maxTransactionId);
         saveToCSV(results, sectionName, fieldIndexes, extractId);
-
     }
 
     private void runObservationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
@@ -378,7 +381,8 @@ public class GenerateData implements Job {
         } finally {
             fw.flush();
             fw.close();
-            System.out.println("Headers saved in " + tableName + ".csv");
+            // System.out.println("Headers saved in " + tableName + ".csv");
+            LOG.info(filename + " file created, with headers only");
         }
     }
 
@@ -408,13 +412,12 @@ public class GenerateData implements Job {
         } finally {
             fw.flush();
             fw.close();
-            System.out.println("data added to " + tableName);
+            // System.out.println("data added to " + tableName);
+            // LOG.info("All rows of data added to " + filename);
         }
     }
 
-    private void createSourceAndHousekeepDirectories (int extractId) throws Exception {
-
-        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
+    private void createSourceAndHousekeepDirectories(int extractId) throws Exception {
 
         // creates directory named by sourceLocation pathname, and any necessary non-existent
         // parent directories, so useful for first run of any new extract added to the database
@@ -426,6 +429,7 @@ public class GenerateData implements Job {
 
         // creates directory named by housekeepLocation pathname, only creating that directory,
         // as the rest of the folder structure, within which it sits, has been created above
+        ExtractConfig config = ExtractCache.getExtractConfig(extractId);
         String housekeepLocation = config.getFileLocationDetails().getHousekeep();
         if (!(housekeepLocation.endsWith(File.separator))) {
             housekeepLocation += File.separator;
@@ -446,7 +450,7 @@ public class GenerateData implements Job {
         return sourceLocation;
     }
 
-    private void createTodayDirectory (String sourceLocation, String extractIdAndTodayDate) {
+    private void createTodayDirectory(String sourceLocation, String extractIdAndTodayDate) {
 
         String strTodayDir = sourceLocation + extractIdAndTodayDate;
         if (!(strTodayDir.endsWith(File.separator))) {
@@ -467,7 +471,7 @@ public class GenerateData implements Job {
         return extractIdAndTodayDate;
     }
 
-    private String createFilename (String sourceLocation, String extractIdAndTodayDate, String tableName){
+    private String createFilename(String sourceLocation, String extractIdAndTodayDate, String tableName){
 
         String strTodayDir = sourceLocation + extractIdAndTodayDate;
         if (!(strTodayDir.endsWith(File.separator))) {

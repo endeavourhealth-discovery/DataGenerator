@@ -5,11 +5,16 @@ import org.endeavourhealth.scheduler.models.PersistenceManager;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PatientExtracts {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PatientExtracts.class);
+
     public static List runBulkPatientExtract(int extractId) throws Exception {
-        System.out.println("bulk all patients");
+        // System.out.println("bulk all patients");
+        // LOG.info("Bulk all patients");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -58,7 +63,8 @@ public class PatientExtracts {
     }
 
     public static List runDeltaPatientExtract(int extractId, Long currentTransactionId, Long maxTransactionId) throws Exception {
-        System.out.println("delta all patients");
+        // System.out.println("delta all patients");
+        // LOG.info("Delta all patients");
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {

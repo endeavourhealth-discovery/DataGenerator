@@ -243,7 +243,7 @@ delete from data_generator.extract where extract_id <= 4;
 -- create some extract data for extract 1
 insert into data_generator.extract
 select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
-"name": "Data Generator Extract Definition 1",
+ "name": "Data Generator Extract Definition 1",
  "id": "1",
  "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
  "fileLocationDetails": {
@@ -264,7 +264,7 @@ select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
 -- create some extract data for extract 2
 insert into data_generator.extract
 select 2, 'Subscriber B Health Check', 1, 1, 2, '{
-"name": "Data Generator Extract Definition 2",
+ "name": "Data Generator Extract Definition 2",
  "id": "2",
  "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
  "fileLocationDetails": {
@@ -285,7 +285,7 @@ select 2, 'Subscriber B Health Check', 1, 1, 2, '{
 -- create some extract data for extract 3
 insert into data_generator.extract
 select 3, 'Subscriber B Child Imms', 1, 1, 1, '{
-"name": "Data Generator Extract Definition 3",
+ "name": "Data Generator Extract Definition 3",
  "id": "3",
  "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
  "fileLocationDetails": {
@@ -306,7 +306,7 @@ select 3, 'Subscriber B Child Imms', 1, 1, 1, '{
 -- create some extract data for extract 4
 insert into data_generator.extract
 select 4, 'Subscriber B Health Check', 1, 1, 2, '{
-"name": "Data Generator Extract Definition 4",
+ "name": "Data Generator Extract Definition 4",
  "id": "4",
  "projectId": "f0bc6f4a-8f18-11e8-839e-80fa5b320513",
  "fileLocationDetails": {
