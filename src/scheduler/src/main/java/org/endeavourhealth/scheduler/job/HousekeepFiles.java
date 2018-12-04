@@ -99,6 +99,7 @@ public class HousekeepFiles implements Job {
                             LOG.error("Error encountered in moving the file to housekeep. " + e.getMessage());
                         }
                     }
+                    Main.endSchedulers(++Main.extractsProcessed);
                 }
             } catch (Exception e) {
                 LOG.error("Error encountered in housekeeping files. " + e.getMessage());

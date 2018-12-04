@@ -31,6 +31,9 @@ public class Main {
     public static final String SFTP_FILES_JOB = "sftpFiles";
     public static final String HOUSEKEEP_FILES_JOB = "housekeepFiles";
 
+    private static int totalExtracts = 0;
+    public static int extractsProcessed = 0;
+
     public static void main(String[] args) throws Exception {
 
         ConfigManager.Initialize("data-generator");
@@ -55,6 +58,8 @@ public class Main {
         if (extractsToProcess.size() == 0) {
             LOG.info("No extracts to process. Exiting.");
             return;
+        } else {
+            totalExtracts = extractsToProcess.size();
         }
 
         if (args.length == 0) {
@@ -116,32 +121,37 @@ public class Main {
         moveFilesToSFTPScheduler.start();
         Thread.sleep(1000);
         housekeepFilesScheduler.start();
+    }
 
-        //TODO implementation needed to determine if everything is done
-        //TODO testing job scheduling for 200s
-        Thread.sleep(200000);
-        if (buildCohortScheduler != null) {
-            buildCohortScheduler.shutdown();
-        }
+    public static void endSchedulers(int processed) {
+        try {
+            if (processed == totalExtracts) {
+                if (buildCohortScheduler != null) {
+                    buildCohortScheduler.shutdown();
+                }
 
-        if (generateDataScheduler != null) {
-            generateDataScheduler.shutdown();
-        }
+                if (generateDataScheduler != null) {
+                    generateDataScheduler.shutdown();
+                }
 
-        if (zipFilesScheduler != null) {
-            zipFilesScheduler.shutdown();
-        }
+                if (zipFilesScheduler != null) {
+                    zipFilesScheduler.shutdown();
+                }
 
-        if (encryptFilesScheduler != null) {
-            encryptFilesScheduler.shutdown();
-        }
+                if (encryptFilesScheduler != null) {
+                    encryptFilesScheduler.shutdown();
+                }
 
-        if (moveFilesToSFTPScheduler != null) {
-            moveFilesToSFTPScheduler.shutdown();
-        }
+                if (moveFilesToSFTPScheduler != null) {
+                    moveFilesToSFTPScheduler.shutdown();
+                }
 
-        if (housekeepFilesScheduler != null) {
-            housekeepFilesScheduler.shutdown();
+                if (housekeepFilesScheduler != null) {
+                    housekeepFilesScheduler.shutdown();
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
         }
     }
 

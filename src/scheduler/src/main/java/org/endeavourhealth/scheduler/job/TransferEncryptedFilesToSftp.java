@@ -70,66 +70,65 @@ public class TransferEncryptedFilesToSftp implements Job {
                 if (toProcess == null || toProcess.size() == 0) {
                     // System.out.println("No files for transfer to SFTP");
                     LOG.info("No files for transfer to SFTP");
-                    return;
-                }
+                } else {
+                    // Setting up the connection details
+                    ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
 
-                // Setting up the connection details
-                ConnectionDetails sftpConnectionDetails = this.setExtractConfigSftpConnectionDetails(config);
+                    // Creating the sftpConnection object
+                    Connection sftpConnection = null;
 
-                // Creating the sftpConnection object
-                Connection sftpConnection = null;
+                    try {
+                        // Opening a connection to the SFTP
+                        sftpConnection = this.openSftpConnection(sftpConnectionDetails);
 
-                try {
-                    // Opening a connection to the SFTP
-                    sftpConnection = this.openSftpConnection(sftpConnectionDetails);
+                        for (FileTransactionsEntity entry : toProcess) {
 
-                    for (FileTransactionsEntity entry : toProcess) {
+                            /*  // Getting a set of files from the extract definition, file location details,
+                             *  // specified source folder, and uploading them to the similarly specified
+                             *  // SFTP destination folder
+                             *
+                             *  String sourceLocation = config.getFileLocationDetails().getSource();
+                             *  File sourceFolder = new File(sourceLocation);
+                             *  String[] folderFilenamesStringArray = sourceFolder.list();
+                             *  for (String filename : folderFilenamesStringArray) {
+                             *      String sourcePath = sourceLocation + filename;
+                             *      String destinationPath = config.getFileLocationDetails().getDestination()
+                             *              + filename;
+                             *       this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+                             *  }
+                             */
 
-                        /*  // Getting a set of files from the extract definition, file location details,
-                         *  // specified source folder, and uploading them to the similarly specified
-                         *  // SFTP destination folder
-                         *
-                         *  String sourceLocation = config.getFileLocationDetails().getSource();
-                         *  File sourceFolder = new File(sourceLocation);
-                         *  String[] folderFilenamesStringArray = sourceFolder.list();
-                         *  for (String filename : folderFilenamesStringArray) {
-                         *      String sourcePath = sourceLocation + filename;
-                         *      String destinationPath = config.getFileLocationDetails().getDestination()
-                         *              + filename;
-                         *       this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
-                         *  }
-                         */
+                            // Getting one file at a time and uploading it to the SFTP
+                            String sourceLocation = config.getFileLocationDetails().getSource();
+                            if (!(sourceLocation.endsWith(File.separator))) {
+                                sourceLocation += File.separator;
+                            }
+                            String sourcePath = sourceLocation + entry.getFilename();
 
-                        // Getting one file at a time and uploading it to the SFTP
-                        String sourceLocation = config.getFileLocationDetails().getSource();
-                        if (!(sourceLocation.endsWith(File.separator))) {
-                            sourceLocation += File.separator;
+                            String destinationLocation = config.getFileLocationDetails().getDestination();
+                            if (!(destinationLocation.endsWith(File.separator))) {
+                                destinationLocation += File.separator;
+                            }
+                            String destinationPath = destinationLocation + entry.getFilename();
+
+                            // Uploading the file to the SFTP
+                            this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
+
+                            // Update, in the file_transactions table of the database,
+                            // the entry for the file that has been now uploaded to the SFTP
+                            entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
+                            FileTransactionsEntity.update(entry);
+                            // System.out.println("File: " + entry.getFilename() + " record updated");
+                            LOG.info("File: " + entry.getFilename() + " record updated");
                         }
-                        String sourcePath = sourceLocation + entry.getFilename();
-
-                        String destinationLocation = config.getFileLocationDetails().getDestination();
-                        if (!(destinationLocation.endsWith(File.separator))) {
-                            destinationLocation += File.separator;
-                        }
-                        String destinationPath = destinationLocation + entry.getFilename();
-
-                        // Uploading the file to the SFTP
-                        this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
-
-                        // Update, in the file_transactions table of the database,
-                        // the entry for the file that has been now uploaded to the SFTP
-                        entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
-                        FileTransactionsEntity.update(entry);
-                        // System.out.println("File: " + entry.getFilename() + " record updated");
-                        LOG.info("File: " + entry.getFilename() + " record updated");
+                    } catch (Exception e) {
+                        // System.out.println("Exception occurred with using the SFTP: " + e);
+                        LOG.error("Exception occurred with using the SFTP: " + e);
+                    } finally {
+                        // Close the connection to the SFTP
+                        if (sftpConnection != null)
+                            sftpConnection.close();
                     }
-                } catch (Exception e) {
-                    // System.out.println("Exception occurred with using the SFTP: " + e);
-                    LOG.error("Exception occurred with using the SFTP: " + e);
-                } finally {
-                    // Close the connection to the SFTP
-                    if (sftpConnection != null)
-                        sftpConnection.close();
                 }
             } catch (Exception e) {
                 // System.out.println("Exception occurred with using the database: " + e);
