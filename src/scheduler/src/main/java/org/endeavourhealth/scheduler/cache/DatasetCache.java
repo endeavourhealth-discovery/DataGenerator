@@ -3,7 +3,7 @@ package org.endeavourhealth.scheduler.cache;
 import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
-import org.endeavourhealth.scheduler.models.database.DatasetEntity;
+import org.endeavourhealth.scheduler.models.database.DataSetEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class DatasetCache {
 
         if (config == null) {
             // get the config from the DB
-            DatasetEntity dataset = DatasetEntity.getDatasetDefinition(datasetId);
+            DataSetEntity dataset = DataSetEntity.getDatasetDefinition(datasetId);
 
             String definition = dataset.getDefinition();
             if (!StringUtils.isEmpty(definition)) {
