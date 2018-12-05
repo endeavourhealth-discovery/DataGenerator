@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.CustomExtracts;
 
-import org.endeavourhealth.scheduler.models.DGPersistenceManager;
+import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -15,7 +15,7 @@ public class PatientExtracts {
     public static List runBulkPatientExtract(int extractId) throws Exception {
         // System.out.println("bulk all patients");
         // LOG.info("Bulk all patients");
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT " +
@@ -65,7 +65,7 @@ public class PatientExtracts {
     public static List runDeltaPatientExtract(int extractId, Long currentTransactionId, Long maxTransactionId) throws Exception {
         // System.out.println("delta all patients");
         // LOG.info("Delta all patients");
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT p.* FROM pcr.patient p " +

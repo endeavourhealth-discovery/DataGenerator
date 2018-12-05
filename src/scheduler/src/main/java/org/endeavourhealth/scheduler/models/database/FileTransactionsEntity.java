@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.database;
 
-import org.endeavourhealth.scheduler.models.DGPersistenceManager;
+import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -124,21 +124,21 @@ public class FileTransactionsEntity {
     }
 
     public static void create(FileTransactionsEntity entry) throws Exception {
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.persist(entry);
         entityManager.getTransaction().commit();
     }
 
     public static void update(FileTransactionsEntity entry) throws Exception {
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.merge(entry);
         entityManager.getTransaction().commit();
     }
 
     public static void delete(FileTransactionsEntity entry) throws Exception {
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
         entry = entityManager.merge(entry);
         entityManager.remove(entry);
@@ -174,7 +174,7 @@ public class FileTransactionsEntity {
         boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
         boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<FileTransactionsEntity> query = builder.createQuery(FileTransactionsEntity.class);

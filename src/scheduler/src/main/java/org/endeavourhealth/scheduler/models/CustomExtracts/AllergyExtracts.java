@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.CustomExtracts;
 
-import org.endeavourhealth.scheduler.models.DGPersistenceManager;
+import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -16,7 +16,7 @@ public class AllergyExtracts {
         // System.out.println("bulk all");
         // LOG.info("Bulk allergy all codes");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
@@ -41,7 +41,7 @@ public class AllergyExtracts {
         // System.out.println("delta all");
         // LOG.info("Delta allergy all codes");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -73,7 +73,7 @@ public class AllergyExtracts {
         // System.out.println("bulk earliest each");
         // LOG.info("Bulk allergy earliest for each code");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
@@ -104,7 +104,7 @@ public class AllergyExtracts {
         // System.out.println("delta earliest each");
         // LOG.info("Delta allergy earliest for each code");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -141,7 +141,7 @@ public class AllergyExtracts {
         // System.out.println("bulk latest each");
         // LOG.info("Bulk allergy latest for each code");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
@@ -172,7 +172,7 @@ public class AllergyExtracts {
         // System.out.println("delta latest each");
         // LOG.info("Delta allergy latest for each code");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -212,7 +212,7 @@ public class AllergyExtracts {
         // build the temp table to use for subsequent query
         createMatchingAllergyCodesTempTable(extractId, codeSetId);
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -240,7 +240,7 @@ public class AllergyExtracts {
         // build the temp table to use for subsequent query
         createDeltaMatchingAllergyCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -268,7 +268,7 @@ public class AllergyExtracts {
         // build the temp table to use for subsequent query
         createMatchingAllergyCodesTempTable(extractId, codeSetId);
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -296,7 +296,7 @@ public class AllergyExtracts {
         // build the temp table to use for subsequent query
         createDeltaMatchingAllergyCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -321,7 +321,7 @@ public class AllergyExtracts {
         // System.out.println("matching codes");
         // LOG.info("Matching codes allergy temp table");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "create table matching_codes as " +
@@ -348,7 +348,7 @@ public class AllergyExtracts {
         // System.out.println("delta matching codes");
         // LOG.info("Delta matching codes allergy temp table");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "create table matching_codes as " +
@@ -381,7 +381,7 @@ public class AllergyExtracts {
         // System.out.println("delete matching codes");
         // LOG.info("Delete matching codes allergy temp table");
 
-        EntityManager entityManager = DGPersistenceManager.getEntityManager();
+        EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
             String sql = "drop table matching_codes;";
