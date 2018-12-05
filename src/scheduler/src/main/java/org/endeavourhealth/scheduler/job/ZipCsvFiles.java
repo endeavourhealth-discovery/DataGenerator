@@ -99,6 +99,7 @@ public class ZipCsvFiles implements Job {
                             LOG.info("Contents of folder zipped to multi-part zip file "
                                     + splitZipFileList);
 
+                            try {
                             // Add, to the file_transactions table of the database,
                             // the entries for each part of the multi-part zip file
                             for (String filePathAndName : splitZipFileList) {
@@ -112,14 +113,20 @@ public class ZipCsvFiles implements Job {
                                 FileTransactionsEntity.create(newFileTransEntityForCreation);
                                 LOG.info("File: " + fileName + " record created");
                             }
+                            } catch (Exception e) {
+                                LOG.error("Exception occurred with using the database: " + e);
+                            }
 
                             File file = new File(sourceLocation);
                             FileUtils.deleteDirectory(file);
                             LOG.info(sourceLocation + " folder deleted");
-
+                            try {
                             // Delete, from the file_transactions table, the entry for the folder to be zipped
                             FileTransactionsEntity.delete(entry);
                             LOG.info("File (folder): " + file.getName() + " record deleted");
+                            } catch (Exception e) {
+                                LOG.error("Exception occurred with using the database: " + e);
+                            }
 
                         } catch (Exception e) {
                             LOG.error("Exception occurred with creating the zip file: " + e);

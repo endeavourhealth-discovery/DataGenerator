@@ -39,7 +39,7 @@ public class EncryptFiles implements Job {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
             if (JobUtil.isJobRunning(jobExecutionContext,
-                    new String[] {
+                    new String[]{
                             Main.ZIP_FILES_JOB,
                             Main.SFTP_FILES_JOB,
                             Main.HOUSEKEEP_FILES_JOB},
@@ -74,7 +74,6 @@ public class EncryptFiles implements Job {
             LOG.info("Extract ID: " + entity.getExtractId());
 
             try {
-                //TODO determine logic to pass or obtain from tables the value/s needed for extractId
                 ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
                 // LOG.info(config.getName());
 
@@ -102,13 +101,14 @@ public class EncryptFiles implements Job {
                             if (entry.getFilename().contains(".zip")) {
                                 LOG.info("File: " + entry.getFilename() + " encrypted.");
                             }
-
-                            //update the file's encryption date
-                            entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
-                            FileTransactionsEntity.update(entry);
-
-                            LOG.info("File: " + entry.getFilename() + " record updated.");
-
+                            try {
+                                //update the file's encryption date
+                                entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
+                                FileTransactionsEntity.update(entry);
+                                LOG.info("File: " + entry.getFilename() + " record updated.");
+                            } catch (Exception e) {
+                                LOG.error("Exception occurred with using the database: " + e);
+                            }
                         } else {
                             LOG.error("File: " + entry.getFilename() + " failed encryption.");
                             return;
@@ -116,7 +116,7 @@ public class EncryptFiles implements Job {
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Unknown error encountered in encryption handling. " + e.getMessage());
+                LOG.error("Unknown error encountered in encryption handling: " + e.getMessage());
             }
         }
         LOG.info("End of encrypting zip files");

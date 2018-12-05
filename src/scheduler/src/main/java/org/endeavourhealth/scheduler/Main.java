@@ -45,13 +45,13 @@ public class Main {
 
         for (ExtractEntity extract : allExtracts) {
             ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
-            System.out.println("Checking project status for extract : " + extract.getExtractId()
+            LOG.info("Checking project status for extract : " + extract.getExtractId()
                     + ", projectId : " + config.getProjectId());
             if (ProjectEntity.checkProjectIsActive(config.getProjectId())) {
-                System.out.println("project exists and is active, adding...");
+                LOG.info("Project exists and is active, adding...");
                 extractsToProcess.add(extract);
             } else {
-                System.out.println("no active project exists, rejecting");
+                LOG.info("No active project exists, rejecting...");
             }
         }
 
@@ -66,7 +66,6 @@ public class Main {
             // Run the whole process
             generateData(extractsToProcess);
             return;
-
         }
 
         String step = args[0];

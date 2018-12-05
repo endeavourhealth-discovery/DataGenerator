@@ -41,39 +41,48 @@ public class GenerateData implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
-        LOG.info("Beginning of generating data extracts to CSV files");
-
+        List<ExtractEntity> extractsToProcess = null;
         try {
-            List<ExtractEntity> extractsToProcess = null;
             if (jobExecutionContext.getScheduler() != null) {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
             } else {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
-            for (ExtractEntity entity : extractsToProcess) {
+        } catch (Exception e) {
+            LOG.error("Unknown error encountered in generating data handling. " + e.getMessage());
+        }
+        LOG.info("Beginning of generating data extracts to CSV files");
 
-                int extractId = entity.getExtractId();
-                LOG.info("Extract ID: " + extractId);
+        for (ExtractEntity entity : extractsToProcess) {
+
+            int extractId = entity.getExtractId();
+            LOG.info("Extract ID: " + extractId);
+
+            try {
                 this.createSourceAndHousekeepDirectories(extractId);
                 String sourceLocation = this.createSourceDirectoryString(extractId);
                 String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
                 this.createTodayDirectory(sourceLocation, extractIdAndTodayDate);
                 this.processExtracts(extractId);
-
+            } catch (Exception e) {
+                LOG.error("Exception occurred with generating data extracts: " + e);
+                // System.out.println("Error: " + e.getMessage());
+            }
+            try {
                 // add the row to the file_transactions table of the
                 // database for each extractId set of files that is run
+                String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
                 FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
                 newFileTransEntityForCreation.setExtractId(extractId);
                 newFileTransEntityForCreation.setExtractDate(new Timestamp(System.currentTimeMillis()));
                 newFileTransEntityForCreation.setFilename(extractIdAndTodayDate);
                 FileTransactionsEntity.create(newFileTransEntityForCreation);
                 LOG.info("File (folder): " + extractIdAndTodayDate + " record created");
+            } catch (Exception e) {
+                LOG.error("Exception occurred with using the database: " + e);
             }
-        } catch (Exception e) {
-            LOG.error("Error: " + e.getMessage());
-            System.out.println("Error: " + e.getMessage());
+            LOG.info("End of generating data extracts to CSV files");
         }
-        LOG.info("End of generating data extracts to CSV files");
     }
 
     private void processExtracts(int extractId) throws Exception {

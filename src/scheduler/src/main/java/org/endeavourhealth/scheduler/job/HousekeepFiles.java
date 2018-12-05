@@ -34,7 +34,7 @@ public class HousekeepFiles implements Job {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
             if (JobUtil.isJobRunning(jobExecutionContext,
-                    new String[] {
+                    new String[]{
                             Main.ZIP_FILES_JOB,
                             Main.ENCRYPT_FILES_JOB,
                             Main.SFTP_FILES_JOB},
@@ -86,15 +86,15 @@ public class HousekeepFiles implements Job {
                             System.gc();
                             Thread.sleep(1000);
                             FileDeleteStrategy.FORCE.delete(src);
-
                             LOG.info("File: " + src.getName() + " moved to " + housekeep);
-
-                            //update the file's encryption date
-                            entry.setHousekeepingDate(new Timestamp(System.currentTimeMillis()));
-                            FileTransactionsEntity.update(entry);
-
-                            LOG.info("File: " + src.getName() + " record updated");
-
+                            try {
+                                //update the file's encryption date
+                                entry.setHousekeepingDate(new Timestamp(System.currentTimeMillis()));
+                                FileTransactionsEntity.update(entry);
+                                LOG.info("File: " + src.getName() + " record updated");
+                            } catch (Exception e) {
+                                LOG.error("Exception occurred with using the database: " + e);
+                            }
                         } catch (IOException e) {
                             LOG.error("Error encountered in moving the file to housekeep. " + e.getMessage());
                         }
@@ -102,7 +102,7 @@ public class HousekeepFiles implements Job {
                     Main.endSchedulers(++Main.extractsProcessed);
                 }
             } catch (Exception e) {
-                LOG.error("Error encountered in housekeeping files. " + e.getMessage());
+                LOG.error("Exception occurred with using the database. " + e);
             }
         }
         LOG.info("End of housekeeping files");

@@ -39,7 +39,7 @@ public class TransferEncryptedFilesToSftp implements Job {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
             }
             if (JobUtil.isJobRunning(jobExecutionContext,
-                    new String[] {
+                    new String[]{
                             Main.ZIP_FILES_JOB,
                             Main.ENCRYPT_FILES_JOB,
                             Main.HOUSEKEEP_FILES_JOB},
@@ -52,7 +52,6 @@ public class TransferEncryptedFilesToSftp implements Job {
             LOG.error("Unknown error encountered in SFTP handling. " + e.getMessage());
         }
 
-        // System.out.println("Transferring encrypted files");
         LOG.info("Beginning of transferring encrypted files to SFTP");
 
         for (ExtractEntity entity : extractsToProcess) {
@@ -63,12 +62,10 @@ public class TransferEncryptedFilesToSftp implements Job {
                 // Getting the extract config from the extract table of the database
                 ExtractConfig config = ExtractCache.getExtractConfig(entity.getExtractId());
                 // System.out.println(config.getName());
-                // LOG.info(config.getName());
 
                 // Getting the files for SFTP upload from the file_transactions table of the database
                 List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForSftp(entity.getExtractId());
                 if (toProcess == null || toProcess.size() == 0) {
-                    // System.out.println("No files for transfer to SFTP");
                     LOG.info("No files for transfer to SFTP");
                 } else {
                     // Setting up the connection details
@@ -113,16 +110,17 @@ public class TransferEncryptedFilesToSftp implements Job {
 
                             // Uploading the file to the SFTP
                             this.uploadFileToSftp(sftpConnection, sourcePath, destinationPath);
-
-                            // Update, in the file_transactions table of the database,
-                            // the entry for the file that has been now uploaded to the SFTP
-                            entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
-                            FileTransactionsEntity.update(entry);
-                            // System.out.println("File: " + entry.getFilename() + " record updated");
-                            LOG.info("File: " + entry.getFilename() + " record updated");
+                            try {
+                                // Update, in the file_transactions table of the database,
+                                // the entry for the file that has been now uploaded to the SFTP
+                                entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
+                                FileTransactionsEntity.update(entry);
+                                LOG.info("File: " + entry.getFilename() + " record updated");
+                            } catch (Exception e) {
+                                LOG.error("Exception occurred with using the database: " + e);
+                            }
                         }
                     } catch (Exception e) {
-                        // System.out.println("Exception occurred with using the SFTP: " + e);
                         LOG.error("Exception occurred with using the SFTP: " + e);
                     } finally {
                         // Close the connection to the SFTP
@@ -188,10 +186,6 @@ public class TransferEncryptedFilesToSftp implements Job {
         // Opening a connection to the SFTP
         Connection sftpConnection = null;
         sftpConnection = ConnectionActivator.createConnection(sftpConnectionDetails);
-        // System.out.println("Opening SFTP Connection" // + sftpConnection.getClass().getName()
-        //        + " to " + sftpConnectionDetails.getHostname()
-        //        + " on Port " + sftpConnectionDetails.getPort()
-        //        + " with Username " + sftpConnectionDetails.getUsername());
         LOG.info("Opening SFTP Connection" // + sftpConnection.getClass().getName()
                 + " to " + sftpConnectionDetails.getHostname()
                 + " on port " + sftpConnectionDetails.getPort()
@@ -204,9 +198,6 @@ public class TransferEncryptedFilesToSftp implements Job {
 
     public void uploadFileToSftp(Connection sftpConnection, String source, String destination) throws Exception {
         // Calendar startCalendar = Calendar.getInstance();
-        // System.out.println("Tried starting upload of file " + source
-        //        + " on " + startCalendar.getTime()
-        //        + " to SFTP: " + destination);
         LOG.info("Tried starting upload of file " + source
                 // + " on " + startCalendar.getTime()
                 + " to SFTP: " + destination);
@@ -215,13 +206,10 @@ public class TransferEncryptedFilesToSftp implements Job {
         sftpConnection.put(source, destination);
 
         // Calendar endCalendar = Calendar.getInstance();
-        // System.out.println("Finished uploading file " + source
-        //        + " on " + endCalendar.getTime()
-        //        + " to SFTP: " + destination);
         LOG.info("Finished uploading file " + source
                 // + " on " + endCalendar.getTime()
                 // + " to SFTP: " + destination
-                );
+        );
     }
 
     /* private void downloadFileFromSftp(Connection sftpConnection) throws Exception {
