@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "dataset", schema = "data_generator")
-public class DatasetEntity {
+public class DataSetEntity {
     private int datasetId;
     private String definition;
 
@@ -35,7 +35,7 @@ public class DatasetEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DatasetEntity that = (DatasetEntity) o;
+        DataSetEntity that = (DataSetEntity) o;
         return datasetId == that.datasetId &&
                 Objects.equals(definition, that.definition);
     }
@@ -46,10 +46,10 @@ public class DatasetEntity {
         return Objects.hash(datasetId, definition);
     }
 
-    public static DatasetEntity getDatasetDefinition(int datasetId) throws Exception {
+    public static DataSetEntity getDatasetDefinition(int datasetId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
-        DatasetEntity ret = entityManager.find(DatasetEntity.class, datasetId);
+        DataSetEntity ret = entityManager.find(DataSetEntity.class, datasetId);
 
         entityManager.close();
 
