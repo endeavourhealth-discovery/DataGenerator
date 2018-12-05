@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.CustomExtracts;
 
-import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.endeavourhealth.scheduler.models.DGPersistenceManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -9,7 +9,7 @@ import java.math.BigInteger;
 public class GeneralQueries {
 
     public static Long getMaxTransactionId() throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select max(id) from pcr.event_log;";
@@ -25,7 +25,7 @@ public class GeneralQueries {
     }
 
     public static void setBulkedStatus(int extractId) throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "update data_generator.cohort_results " +
@@ -45,7 +45,7 @@ public class GeneralQueries {
     }
 
     public static void setTransactionId(int extractId, Long maxTransactionId) throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "update data_generator.extract " +

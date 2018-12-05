@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.database;
 
-import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.endeavourhealth.scheduler.models.DGPersistenceManager;
 
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -111,7 +111,7 @@ public class ExtractEntity {
     }
 
     public static List<ExtractEntity> getAllExtracts() throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<ExtractEntity> cq = cb.createQuery(ExtractEntity.class);
@@ -130,7 +130,7 @@ public class ExtractEntity {
     }
 
     public static ExtractEntity getExtract(int extractId) throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         ExtractEntity ret = entityManager.find(ExtractEntity.class, extractId);
 

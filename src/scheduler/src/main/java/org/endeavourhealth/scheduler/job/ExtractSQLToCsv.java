@@ -3,7 +3,7 @@ package org.endeavourhealth.scheduler.job;
 import org.endeavourhealth.scheduler.cache.DatasetCache;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfig;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetConfigExtract;
-import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.endeavourhealth.scheduler.models.DGPersistenceManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class ExtractSQLToCsv implements Job {
 
     private List<Object[]> executeSQLBatch(String sql, int pageNumber, int pageSize) throws Exception {
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             Query query = entityManager.createNativeQuery(sql);

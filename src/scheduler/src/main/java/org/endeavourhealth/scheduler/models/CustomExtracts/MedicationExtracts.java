@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.CustomExtracts;
 
-import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.endeavourhealth.scheduler.models.DGPersistenceManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -16,7 +16,7 @@ public class MedicationExtracts {
         // System.out.println("bulk all");
         // LOG.info("Bulk medication all codes");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
@@ -41,7 +41,7 @@ public class MedicationExtracts {
         // System.out.println("delta all");
         // LOG.info("Delta medication all codes");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -73,7 +73,7 @@ public class MedicationExtracts {
         // System.out.println("bulk earliest each");
         // LOG.info("Bulk medication earliest for each code");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
@@ -104,7 +104,7 @@ public class MedicationExtracts {
         // System.out.println("delta earliest each");
         // LOG.info("Delta medication earliest for each code");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -141,7 +141,7 @@ public class MedicationExtracts {
         // System.out.println("bulk latest each");
         // LOG.info("Bulk medication latest for each code");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct o.* " +
@@ -172,7 +172,7 @@ public class MedicationExtracts {
         // System.out.println("delta latest each");
         // LOG.info("Delta medication latest for each code");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "SELECT distinct o.* " +
@@ -212,7 +212,7 @@ public class MedicationExtracts {
         // build the temp table to use for subsequent query
         createMatchingMedicationCodesTempTable(extractId, codeSetId);
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -240,7 +240,7 @@ public class MedicationExtracts {
         // build the temp table to use for subsequent query
         createDeltaMatchingMedicationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -268,7 +268,7 @@ public class MedicationExtracts {
         // build the temp table to use for subsequent query
         createMatchingMedicationCodesTempTable(extractId, codeSetId);
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -296,7 +296,7 @@ public class MedicationExtracts {
         // build the temp table to use for subsequent query
         createDeltaMatchingMedicationCodesTempTable(extractId, codeSetId, currentTransactionId, maxTransactionId);
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "select distinct mc.* " +
@@ -321,7 +321,7 @@ public class MedicationExtracts {
         // System.out.println("matching codes");
         // LOG.info("Matching codes medication temp table");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "create table matching_codes as " +
@@ -348,7 +348,7 @@ public class MedicationExtracts {
         // System.out.println("delta matching codes");
         // LOG.info("Delta matching codes medication temp table");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "create table matching_codes as " +
@@ -381,7 +381,7 @@ public class MedicationExtracts {
         // System.out.println("delete matching codes");
         // LOG.info("Delete matching codes medication temp table");
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         try {
             String sql = "drop table matching_codes;";

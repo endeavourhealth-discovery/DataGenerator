@@ -9,7 +9,7 @@ import javax.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PersistenceManager {
+public class DGPersistenceManager {
     private static EntityManagerFactory entityManagerFactory;
 
 

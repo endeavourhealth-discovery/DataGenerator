@@ -1,6 +1,6 @@
 package org.endeavourhealth.scheduler.models.database;
 
-import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.endeavourhealth.scheduler.models.DGPersistenceManager;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -47,7 +47,7 @@ public class DatasetEntity {
     }
 
     public static DatasetEntity getDatasetDefinition(int datasetId) throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = DGPersistenceManager.getEntityManager();
 
         DatasetEntity ret = entityManager.find(DatasetEntity.class, datasetId);
 
