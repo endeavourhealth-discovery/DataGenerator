@@ -45,9 +45,9 @@ public class PatientExtracts {
                     " a.uprn," +
                     " a.approximation_concept_id," +
                     " a.property_type_concept_id" +
-                    " FROM pcr.patient p " +
-                    " left outer join pcr.patient_address pa on pa.address_id = p.home_address_id " +
-                    " left outer join pcr.address a on a.id = pa.address_id " +
+                    " FROM pcr2.patient p " +
+                    " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id " +
+                    " left outer join pcr2.address a on a.id = pa.address_id " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -68,9 +68,9 @@ public class PatientExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT p.* FROM pcr.patient p " +
+            String sql = "SELECT p.* FROM pcr2.patient p " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
-                    " join (select item_id from pcr.event_log e " +
+                    " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 8 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "        group by item_id) log on log.item_id = p.id " +

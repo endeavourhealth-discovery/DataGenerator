@@ -12,7 +12,7 @@ public class GeneralQueries {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select max(id) from pcr.event_log;";
+            String sql = "select max(id) from pcr2.event_log;";
             Query query = entityManager.createNativeQuery(sql);
 
             BigInteger result = (BigInteger)query.getSingleResult();

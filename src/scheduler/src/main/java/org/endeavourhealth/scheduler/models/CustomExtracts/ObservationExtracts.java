@@ -20,8 +20,8 @@ public class ObservationExtracts {
 
         try {
             String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -46,10 +46,10 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " join (select item_id from pcr.event_log e " +
+                    " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 32 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "       group by item_id) log on log.item_id = o.id " +
@@ -78,10 +78,10 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date < oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
@@ -109,14 +109,14 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date < oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
-                    " join (select item_id from pcr.event_log e " +
+                    " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 32 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "  group by item_id) log on log.item_id = o.id " +
@@ -146,10 +146,10 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date > oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
@@ -177,14 +177,14 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct o.* " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr.observation oo on oo.patient_id = o.patient_id " +
+                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date > oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
-                    " join (select item_id from pcr.event_log e " +
+                    " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 32 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "  group by item_id) log on log.item_id = o.id " +
@@ -327,8 +327,8 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -354,10 +354,10 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select o.* " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " join (select item_id from pcr.event_log e " +
+                    " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 32 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "       group by item_id) log on log.item_id = o.id " +
