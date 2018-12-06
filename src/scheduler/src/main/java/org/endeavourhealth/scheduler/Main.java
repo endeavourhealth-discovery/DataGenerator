@@ -43,17 +43,19 @@ public class Main {
         List<ExtractEntity> extractsToProcess = new ArrayList<>();
         List<ExtractEntity> allExtracts = ExtractEntity.getAllExtracts();
 
-        for (ExtractEntity extract : allExtracts) {
-            ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
-            LOG.info("Checking project status for extract : " + extract.getExtractId()
-                    + ", projectId : " + config.getProjectId());
-            if (ProjectEntity.checkProjectIsActive(config.getProjectId())) {
-                LOG.info("Project exists and is active, adding...");
-                extractsToProcess.add(extract);
-            } else {
-                LOG.info("No active project exists, rejecting...");
-            }
-        }
+        //TODO: uncomment after testing
+//        for (ExtractEntity extract : allExtracts) {
+//            ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
+//            LOG.info("Checking project status for extract : " + extract.getExtractId()
+//                    + ", projectId : " + config.getProjectId());
+//            if (ProjectEntity.checkProjectIsActive(config.getProjectId())) {
+//                LOG.info("Project exists and is active, adding...");
+//                extractsToProcess.add(extract);
+//            } else {
+//                LOG.info("No active project exists, rejecting...");
+//            }
+//        }
+        extractsToProcess.addAll(allExtracts);
 
         if (extractsToProcess.size() == 0) {
             LOG.info("No extracts to process. Exiting.");
