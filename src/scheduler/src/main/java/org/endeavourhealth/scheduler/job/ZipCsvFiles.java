@@ -33,18 +33,18 @@ public class ZipCsvFiles implements Job {
         try {
             if (jobExecutionContext.getScheduler() != null) {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.getScheduler().getContext().get("extractsToProcess");
+                if (JobUtil.isJobRunning(jobExecutionContext,
+                        new String[] {
+                                Main.ENCRYPT_FILES_JOB,
+                                Main.SFTP_FILES_JOB,
+                                Main.HOUSEKEEP_FILES_JOB},
+                        Main.FILE_JOB_GROUP)) {
+
+                    LOG.info("Conflicting job is still running");
+                    return;
+                }
             } else {
                 extractsToProcess = (List<ExtractEntity>) jobExecutionContext.get("extractsToProcess");
-            }
-            if (JobUtil.isJobRunning(jobExecutionContext,
-                    new String[] {
-                            Main.ENCRYPT_FILES_JOB,
-                            Main.SFTP_FILES_JOB,
-                            Main.HOUSEKEEP_FILES_JOB},
-                    Main.FILE_JOB_GROUP)) {
-
-                LOG.info("Conflicting job is still running");
-                return;
             }
         } catch (Exception e) {
             LOG.error("Unknown error encountered in zip handling. " + e.getMessage());
