@@ -403,6 +403,7 @@ public class GenerateData implements Job {
 
         FileWriter fw = new FileWriter(filename, true);
         try {
+            LOG.info(results.size() + " records returned" );
             for (Object[] result : results) {
                 int counter = 0;
                 for (Integer idx : fieldIndexes) {
