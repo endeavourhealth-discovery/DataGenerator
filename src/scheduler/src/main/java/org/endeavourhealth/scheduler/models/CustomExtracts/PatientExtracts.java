@@ -36,7 +36,7 @@ public class PatientExtracts {
                     " p.previous_last_name," +
                     " p.home_address_id," +
                     " p.is_spine_sensitive," +
-                    " p.ethnic_code," +
+                    // " p.ethnic_code," +
                     " a.address_line_1," +
                     " a.address_line_2," +
                     " a.address_line_3," +
