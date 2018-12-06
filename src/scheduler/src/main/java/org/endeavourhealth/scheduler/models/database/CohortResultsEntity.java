@@ -1,5 +1,7 @@
 package org.endeavourhealth.scheduler.models.database;
 
+import org.endeavourhealth.scheduler.models.PersistenceManager;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -55,4 +57,36 @@ public class CohortResultsEntity {
 
         return Objects.hash(extractId, patientId, organisationId);
     }
+
+    public static void saveCohortPatients(CohortResultsEntity result) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+
+        entityManager.persist(result);
+
+        entityManager.getTransaction().commit();
+
+        entityManager.close();
+    }
+
+    public static void clearCohortResults(Integer extractId) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        try {
+            String sql = "delete from cohort_results " +
+                    " where extract_id = :extractId";
+
+            Query query = entityManager.createNativeQuery(sql)
+                    .setParameter("extractId", extractId);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } finally {
+            entityManager.close();
+        }
+    }
+
+
 }

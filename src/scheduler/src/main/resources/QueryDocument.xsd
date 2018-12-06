@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="queryDocument" type="queryDocument"/>
+    <xs:element name="libraryItem" type="libraryItem"/>
+    <xs:complexType name="queryDocument">
+        <xs:sequence>
+            <xs:element name="folder" type="folder" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="libraryItem" type="libraryItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="folder">
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="parentUuid" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="libraryItem">
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="folderUuid" type="xs:string"/>
+            <xs:choice>
+                <xs:element name="query" type="query"/>
+                <xs:element name="codeSet" type="codeSet"/>
+                <xs:element name="report" type="report"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="query">
+        <xs:sequence>
+            <xs:element name="parentQueryUuid" type="xs:string" minOccurs="0"/>
+            <xs:element name="startingRules">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="ruleId" type="xs:int" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="rule" type="rule" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="rule">
+        <xs:sequence>
+            <xs:element name="description" type="xs:string"/>
+            <xs:element name="id" type="xs:int"/>
+            <xs:element name="type" type="xs:int"/>
+            <xs:choice>
+                <xs:element name="test" type="test"/>
+                <xs:element name="testLibraryItemUUID" type="xs:string"/>
+                <xs:element name="queryLibraryItemUUID" type="xs:string"/>
+                <xs:element name="expression" type="expressionType"/>
+            </xs:choice>
+            <xs:element name="onPass" type="ruleAction"/>
+            <xs:element name="onFail" type="ruleAction"/>
+            <xs:element name="layout" type="layoutType"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ruleAction">
+        <xs:sequence>
+            <xs:element name="action" type="ruleActionOperator"/>
+            <xs:element name="ruleId" type="xs:int" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ruleActionOperator">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="include"/>
+            <xs:enumeration value="noAction"/>
+            <xs:enumeration value="gotoRules"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="filter">
+        <xs:sequence>
+            <xs:element name="field" type="xs:string"/>
+            <xs:choice>
+                <xs:element name="valueFrom" type="valueFrom"/>
+                <xs:element name="valueTo" type="valueTo"/>
+                <xs:element name="codeSet" type="codeSet"/>
+                <xs:element name="codeSetLibraryItemUuid" type="xs:string" maxOccurs="unbounded"/>
+                <xs:element name="valueSet" type="valueSet"/>
+            </xs:choice>
+            <xs:element name="negate" type="xs:boolean"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="value">
+        <xs:sequence>
+            <xs:element name="constant" type="xs:string"/>
+            <xs:choice>
+                <xs:element name="absoluteUnit" type="valueAbsoluteUnit"/>
+                <xs:element name="relativeUnit" type="valueRelativeUnit"/>
+            </xs:choice>
+            <xs:element name="testField" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="valueAbsoluteUnit">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="numeric"/>
+            <xs:enumeration value="date"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="valueRelativeUnit">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="month"/>
+            <xs:enumeration value="year"/>
+            <xs:enumeration value="week"/>
+            <xs:enumeration value="day"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="valueFrom">
+        <xs:complexContent>
+            <xs:extension base="value">
+                <xs:sequence>
+                    <xs:element name="operator" type="valueFromOperator"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="valueFromOperator">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="greaterThan"/>
+            <xs:enumeration value="greaterThanOrEqualTo"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="valueTo">
+        <xs:complexContent>
+            <xs:extension base="value">
+                <xs:sequence>
+                    <xs:element name="operator" type="valueToOperator"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="valueToOperator">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="lessThan"/>
+            <xs:enumeration value="lessThanOrEqualTo"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="codeSet">
+        <xs:sequence>
+            <xs:element name="codingSystem" type="codingSystem"/>
+            <xs:element name="codeSetValue" type="codeSetValue" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="codingSystem">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="EMISReadV2"/>
+            <xs:enumeration value="DMD"/>
+            <xs:enumeration value="SnomedCt"/>
+            <xs:enumeration value="CTV3"/>
+            <xs:enumeration value="Endeavour"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="codeSetValue">
+        <xs:sequence>
+            <xs:element name="code" type="xs:string"/>
+            <xs:element name="term" type="xs:string"/>
+            <xs:element name="dataType" type="xs:string"/>
+            <xs:element name="parentType" type="xs:string"/>
+            <xs:element name="baseType" type="xs:string"/>
+            <xs:element name="present" type="xs:string"/>
+            <xs:element name="valueFrom" type="xs:string"/>
+            <xs:element name="valueTo" type="xs:string"/>
+            <xs:element name="units" type="xs:string"/>
+            <xs:element name="includeChildren" type="xs:boolean"/>
+            <xs:element name="exclusion" type="codeSetValue" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="restriction">
+        <xs:sequence>
+            <xs:element name="restriction" type="xs:string"/>
+            <xs:element name="count" type="xs:int"/>
+            <xs:element name="prefix" type="xs:string"/>
+            <xs:element name="field" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="test">
+        <xs:sequence>
+            <xs:element name="filter" type="filter" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="restriction" type="restriction" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="layoutType">
+        <xs:sequence>
+            <xs:element name="x" type="xs:int"/>
+            <xs:element name="y" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="expressionType">
+        <xs:sequence>
+            <xs:element name="expressionText" type="xs:string"/>
+            <xs:element name="variable" type="variableType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="variableType">
+        <xs:sequence>
+            <xs:element name="variableName" type="xs:string"/>
+            <xs:element name="ruleId" type="xs:int"/>
+            <xs:element name="restriction" type="restriction" minOccurs="0"/>
+            <xs:element name="fieldName" type="xs:string"/>
+            <xs:element name="function" type="variableFunction" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="variableFunction">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="count"/>
+            <xs:enumeration value="average"/>
+            <xs:enumeration value="minimum"/>
+            <xs:enumeration value="maximum"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="valueSet">
+        <xs:sequence>
+            <xs:element name="value" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="report">
+        <xs:sequence>
+            <xs:element name="cohortFeature" type="reportCohortFeature" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="lastRunDate" type="xs:long" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="reportCohortFeature">
+        <xs:sequence>
+            <xs:element name="cohortFeatureUuid" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="fieldName" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

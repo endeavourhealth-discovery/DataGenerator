@@ -49,3 +49,11 @@ create table data_generator.file_transactions (
 	primary key (extract_id,filename),
 	unique key filename_unique (filename)
 );
+
+CREATE TABLE data_generator.cohort (
+  id int NOT NULL,
+  title varchar(255) NOT NULL,
+  xml_content longtext NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
