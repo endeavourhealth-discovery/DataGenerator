@@ -390,3 +390,177 @@ select * from data_generator.file_transactions;
 -- set encrypt_date = now() where extract_id = 1 and filename = '1_20181126.z01';
 -- update data_generator.file_transactions
 -- set encrypt_date = now() where extract_id = 1 and filename = '2_20181126.zip';
+
+insert into data_generator.cohort (id, title, xml_content)
+values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>PCR All Patients</name>
+    <description>PCR All Patients</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Date of Birth</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>8833263929279</code>
+                            <term>Date of Birth</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom>1800-01-01</valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>547</x>
+                <y>202</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (2, 'Example Cohort with Multiple Rules', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>Example Cohort with Multiple Rules</name>
+    <description>Example Cohort with Multiple Rules</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Date of Birth</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>8833263929279</code>
+                            <term>Date of Birth</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom>1967-01-01</valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>gotoRules</action>
+                <ruleId>2</ruleId>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>194</x>
+                <y>5</y>
+            </layout>
+        </rule>
+        <rule>
+            <description>Asthma</description>
+            <id>2</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>H33..</code>
+                            <term>Asthma</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>gotoRules</action>
+                <ruleId>3</ruleId>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+        <rule>
+            <description>Co-codamol 30mg/500mg capsules</description>
+            <id>3</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>XYZ..</code>
+                            <term>Co-codamol 30mg/500mg capsules</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Medication Statement</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>547</x>
+                <y>202</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
