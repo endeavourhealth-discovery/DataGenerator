@@ -510,6 +510,18 @@ values (2, 'Example Cohort with Multiple Rules', '<?xml version="1.0" encoding="
                             <units></units>
                             <includeChildren>true</includeChildren>
                         </codeSetValue>
+                        <codeSetValue>
+                            <code>C10..</code>
+                            <term>Diabetes mellitus (disorder)</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
                     </codeSet>
                     <negate>false</negate>
                 </filter>
