@@ -5,7 +5,7 @@
         <class>org.endeavourhealth.scheduler.models.database.ExtractEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.DataSetEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.FileTransactionsEntity</class>
-        <class>org.endeavourhealth.cohortmanager.models.CohortEntity</class>
+        <class>org.endeavourhealth.cohortmanager.models.CohortEntityDG</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.show_sql" value="false" />

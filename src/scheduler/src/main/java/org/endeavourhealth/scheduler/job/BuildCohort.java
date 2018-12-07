@@ -1,8 +1,7 @@
 package org.endeavourhealth.scheduler.job;
 
 import org.endeavourhealth.cohortmanager.CohortManager;
-import org.endeavourhealth.cohortmanager.json.JsonCohortRun;
-import org.endeavourhealth.cohortmanager.models.CohortEntity;
+import org.endeavourhealth.cohortmanager.models.CohortEntityDG;
 import org.endeavourhealth.cohortmanager.querydocument.models.LibraryItem;
 import org.endeavourhealth.scheduler.models.database.CohortResultsEntity;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
@@ -40,7 +39,7 @@ public class BuildCohort implements Job {
                     cohortResultsEntity.clearCohortResults(extractId);
 
                     // get cohort query document for this extract
-                    CohortEntity cohortEntity = new CohortEntity();
+                    CohortEntityDG cohortEntity = new CohortEntityDG();
                     LibraryItem libraryItem = cohortEntity.getCohort(cohortId);
 
                     // run cohort query for this extract

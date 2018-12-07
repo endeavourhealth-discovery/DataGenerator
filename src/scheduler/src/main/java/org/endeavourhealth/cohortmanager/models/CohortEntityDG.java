@@ -5,17 +5,13 @@ import org.endeavourhealth.cohortmanager.querydocument.models.LibraryItem;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.util.List;
 
 /**
  * Created by darren on 06/12/2018.
  */
 @Entity
 @Table(name = "cohort", schema = "data_generator", catalog = "")
-public class CohortEntity {
+public class CohortEntityDG {
     private int id;
     private String title;
     private String xmlContent;
@@ -55,7 +51,7 @@ public class CohortEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        CohortEntity that = (CohortEntity) o;
+        CohortEntityDG that = (CohortEntityDG) o;
 
         if (id != that.id) return false;
         if (title != null ? !title.equals(that.title) : that.title != null) return false;
@@ -78,7 +74,7 @@ public class CohortEntity {
         String where = "from CohortEntity"
                 + " WHERE id = :id";
 
-        CohortEntity cohortEntity = entityManager.createQuery(where, CohortEntity.class)
+        CohortEntityDG cohortEntity = entityManager.createQuery(where, CohortEntityDG.class)
                 .setParameter("id", id)
                 .getSingleResult();
 
