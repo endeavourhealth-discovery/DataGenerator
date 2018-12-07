@@ -64,25 +64,24 @@ public class GenerateData implements Job {
                 String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
                 this.createTodayDirectory(sourceLocation, extractIdAndTodayDate);
                 this.processExtracts(extractId);
+                try {
+                    // add the row to the file_transactions table of the
+                    // database for each extractId set of files that is run
+                    FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
+                    newFileTransEntityForCreation.setExtractId(extractId);
+                    newFileTransEntityForCreation.setExtractDate(new Timestamp(System.currentTimeMillis()));
+                    newFileTransEntityForCreation.setFilename(extractIdAndTodayDate);
+                    FileTransactionsEntity.create(newFileTransEntityForCreation);
+                    LOG.info("File (folder): " + extractIdAndTodayDate + " record created");
+                } catch (Exception e) {
+                    LOG.error("Exception occurred with using the database: " + e);
+                }
             } catch (Exception e) {
                 LOG.error("Exception occurred with generating data extracts: " + e);
                 // System.out.println("Error: " + e.getMessage());
             }
-            try {
-                // add the row to the file_transactions table of the
-                // database for each extractId set of files that is run
-                String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
-                FileTransactionsEntity newFileTransEntityForCreation = new FileTransactionsEntity();
-                newFileTransEntityForCreation.setExtractId(extractId);
-                newFileTransEntityForCreation.setExtractDate(new Timestamp(System.currentTimeMillis()));
-                newFileTransEntityForCreation.setFilename(extractIdAndTodayDate);
-                FileTransactionsEntity.create(newFileTransEntityForCreation);
-                LOG.info("File (folder): " + extractIdAndTodayDate + " record created");
-            } catch (Exception e) {
-                LOG.error("Exception occurred with using the database: " + e);
-            }
-            LOG.info("End of generating data extracts to CSV files");
         }
+        LOG.info("End of generating data extracts to CSV files");
     }
 
     private void processExtracts(int extractId) throws Exception {
