@@ -71,7 +71,7 @@ public class CohortEntityDG {
     public static LibraryItem getCohort(Integer id) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
-        String where = "from CohortEntity"
+        String where = "from CohortEntityDG"
                 + " WHERE id = :id";
 
         CohortEntityDG cohortEntity = entityManager.createQuery(where, CohortEntityDG.class)
