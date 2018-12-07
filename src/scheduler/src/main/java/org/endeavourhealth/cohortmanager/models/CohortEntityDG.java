@@ -71,12 +71,13 @@ public class CohortEntityDG {
     public static LibraryItem getCohort(Integer id) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
-        String where = "from CohortEntityDG"
-                + " WHERE id = :id";
+        //String where = "from CohortEntityDG"
+        //        + " WHERE id = :id";
 
-        CohortEntityDG cohortEntity = entityManager.createQuery(where, CohortEntityDG.class)
-                .setParameter("id", id)
-                .getSingleResult();
+        //CohortEntityDG cohortEntity = entityManager.createQuery(where, CohortEntityDG.class)
+        //        .setParameter("id", id)
+        //        .getSingleResult();
+        CohortEntityDG cohortEntity = entityManager.find(CohortEntityDG.class, id);
 
         entityManager.close();
 
