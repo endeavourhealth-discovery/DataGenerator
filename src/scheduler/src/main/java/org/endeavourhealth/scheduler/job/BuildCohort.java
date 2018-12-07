@@ -47,6 +47,7 @@ public class BuildCohort implements Job {
                     cohortManager.runCohort(libraryItem, extractId);
                 }
                 catch (Exception e){
+                    e.printStackTrace();
                     LOG.error("Unknown error encountered in cohort runner. " + e.getMessage());
                 }
                 LOG.info("Extract ID: " + extractId);
