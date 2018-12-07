@@ -88,7 +88,7 @@ select 2, '{
 {"header" : "home address id", "index" : "15"},
 {"header" : "address line 1", "index" : "17"},
 {"header" : "address line 2", "index" : "18"},
-{"header" : "address line 3", "index" : "29"},
+{"header" : "address line 3", "index" : "19"},
 {"header" : "address line 4", "index" : "20"},
 {"header" : "postcode", "index" : "21"},
 {"header" : "uprn", "index" : "22"}]
