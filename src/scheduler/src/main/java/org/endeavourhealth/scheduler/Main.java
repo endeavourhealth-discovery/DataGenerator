@@ -7,6 +7,7 @@ import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
+import org.endeavourhealth.scheduler.util.JobUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
 
@@ -26,6 +28,8 @@ public class Main {
     private static Scheduler housekeepFilesScheduler;
 
     public static final String FILE_JOB_GROUP = "fileJobGroup";
+    public static final String BUILD_COHORT_JOB = "buildCohort";
+    public static final String GENERATE_FILES_JOB = "generateFiles";
     public static final String ZIP_FILES_JOB = "zipFiles";
     public static final String ENCRYPT_FILES_JOB = "encryptFiles";
     public static final String SFTP_FILES_JOB = "sftpFiles";
@@ -159,7 +163,9 @@ public class Main {
     public static void buildCohort(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Building cohort information");
         if (isScheduled) {
-            JobDetail buildCohortJob = JobBuilder.newJob(BuildCohort.class).build();
+            JobDetail buildCohortJob =
+                    JobBuilder.newJob(BuildCohort.class).withIdentity
+                            (JobKey.jobKey(BUILD_COHORT_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire at 1am everyday
@@ -187,7 +193,17 @@ public class Main {
     private static void getData(boolean isScheduled, boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Generating CSV data files");
         if (isScheduled) {
-            JobDetail generateDataJob = JobBuilder.newJob(GenerateData.class).build();
+
+            while (true) {
+                List<JobExecutionContext> currentJobs = buildCohortScheduler.getCurrentlyExecutingJobs();
+                if (currentJobs.size() == 0) {
+                    break;
+                }
+            }
+
+            JobDetail generateDataJob =
+                    JobBuilder.newJob(GenerateData.class).withIdentity
+                            (JobKey.jobKey(GENERATE_FILES_JOB, FILE_JOB_GROUP)).build();
 
             //TODO determine timing
             //Fire at 2am everyday
