@@ -229,7 +229,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -257,7 +257,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -285,7 +285,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -313,13 +313,14 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingObservationCodesTempTable();
+            dropMatchingObservationCodesTempTable();
         }
     }
 
     public static void createMatchingObservationCodesTempTable(int extractId, int codeSetId) throws Exception {
-        // System.out.println("matching codes");
-        // LOG.info("Matching codes observation temp table");
+
+        // run a drop just in case it has been left due to an error
+        dropMatchingObservationCodesTempTable();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -339,6 +340,9 @@ public class ObservationExtracts {
             query.executeUpdate();
             entityManager.getTransaction().commit();
 
+            createIndexesOnMatchingObservationCodesTempTable();
+
+
         } finally {
             entityManager.close();
         }
@@ -348,9 +352,13 @@ public class ObservationExtracts {
         // System.out.println("delta matching codes");
         // LOG.info("Delta matching codes observation temp table");
 
+        // run a drop just in case it has been left due to an error
+        dropMatchingObservationCodesTempTable();
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
+
             String sql = "create table matching_codes as " +
                     " select o.* " +
                     " from data_generator.cohort_results cr " +
@@ -372,20 +380,45 @@ public class ObservationExtracts {
             query.executeUpdate();
             entityManager.getTransaction().commit();
 
+            createIndexesOnMatchingObservationCodesTempTable();
+
         } finally {
             entityManager.close();
         }
     }
 
-    public static void deleteMatchingObservationCodesTempTable() throws Exception {
+    public static void dropMatchingObservationCodesTempTable() throws Exception {
         // System.out.println("delete matching codes");
         // LOG.info("Delete matching codes observation temp table");
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "drop table matching_codes;";
+            String sql = "drop table if exists matching_codes;";
             Query query = entityManager.createNativeQuery(sql);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    public static void createIndexesOnMatchingObservationCodesTempTable() throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        try {
+            String patientIndex = "alter table matching_codes add index codes_patient_id (patient_id);";
+            String dateIndex = "alter table matching_codes add index codes_effective_date (effective_date);";
+            Query query = entityManager.createNativeQuery(patientIndex);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+            query = entityManager.createNativeQuery(dateIndex);
 
             entityManager.getTransaction().begin();
             query.executeUpdate();
