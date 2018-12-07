@@ -77,7 +77,6 @@
                 <xs:element name="valueFrom" type="valueFrom"/>
                 <xs:element name="valueTo" type="valueTo"/>
                 <xs:element name="codeSet" type="codeSet"/>
-                <xs:element name="codeSetLibraryItemUuid" type="xs:string" maxOccurs="unbounded"/>
                 <xs:element name="valueSet" type="valueSet"/>
             </xs:choice>
             <xs:element name="negate" type="xs:boolean"/>

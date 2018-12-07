@@ -78,8 +78,6 @@ public class CohortEntityDG {
         //        .setParameter("id", id)
         //        .getSingleResult();
         CohortEntityDG cohortEntity = entityManager.find(CohortEntityDG.class, id);
-        System.out.println(cohortEntity);
-        System.out.println(cohortEntity.getXmlContent());
 
         entityManager.close();
 
