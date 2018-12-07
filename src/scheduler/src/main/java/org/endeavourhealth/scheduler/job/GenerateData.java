@@ -78,7 +78,6 @@ public class GenerateData implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Exception occurred with generating data extracts: " + e);
-                // System.out.println("Error: " + e.getMessage());
             }
         }
         LOG.info("End of generating data extracts to CSV files");
@@ -402,7 +401,7 @@ public class GenerateData implements Job {
 
         FileWriter fw = new FileWriter(filename, true);
         try {
-            LOG.info(results.size() + " records returned" );
+            // LOG.info(results.size() + " records returned" );
             for (Object[] result : results) {
                 int counter = 0;
                 for (Integer idx : fieldIndexes) {

@@ -31,8 +31,8 @@ select 1, '{
 {"header" : "address line 2", "index" : "18"},
 {"header" : "address line 3", "index" : "19"},
 {"header" : "address line 4", "index" : "20"},
-{"header" : "postcode", "index" : "22"},
-{"header" : "uprn", "index" : "23"}]
+{"header" : "postcode", "index" : "21"},
+{"header" : "uprn", "index" : "22"}]
 },{
   		"type": "immunisation",
   		"fields": [
@@ -90,8 +90,8 @@ select 2, '{
 {"header" : "address line 2", "index" : "18"},
 {"header" : "address line 3", "index" : "29"},
 {"header" : "address line 4", "index" : "20"},
-{"header" : "postcode", "index" : "22"},
-{"header" : "uprn", "index" : "23"}]
+{"header" : "postcode", "index" : "21"},
+{"header" : "uprn", "index" : "22"}]
 },{
   		"type": "allergy",
   		"fields": [
