@@ -39,10 +39,10 @@ public class CohortManager {
 	private static String getDenominatorSQL(String cohortPopulation) {
 		if (cohortPopulation.equals("0")) // currently registered - TODO
 			return "select distinct id " +
-					"from pcr.patient";
+					"from pcr2.patient";
 		else if (cohortPopulation.equals("1")) // all patients
 			return "select distinct id " +
-					"from pcr.patient";
+					"from pcr2.patient";
 
 		return "";
 	}
@@ -332,26 +332,26 @@ public class CohortManager {
 			patientObservations2 = new ArrayList<>();
 
 		} else if (rule.getType()==1) { // Feature rule
-			if (ruleSQL.contains("JOIN pcr.observation")) {
+			if (ruleSQL.contains("JOIN pcr2.observation")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				setQueryParams(query, q.whereParams);
 				patientObservations = query.getResultList();
-			} else if (ruleSQL.contains("JOIN pcr.medication_statement")) {
+			} else if (ruleSQL.contains("JOIN pcr2.medication_statement")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				setQueryParams(query, q.whereParams);
 				patientMedicationStatements = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr.allergy")) {
+			} else if (ruleSQL.contains("JOIN pcr2.allergy")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				setQueryParams(query, q.whereParams);
 				patientAllergy = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr.referral")) {
+			} else if (ruleSQL.contains("JOIN pcr2.referral")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				setQueryParams(query, q.whereParams);
 				patientReferral = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr.patient")) {
+			} else if (ruleSQL.contains("JOIN pcr2.patient")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				setQueryParams(query, q.whereParams);
 				patients = query.getResultList();
@@ -366,7 +366,7 @@ public class CohortManager {
 		queryResult.setOnFail(rule.getOnFail());
 		List<Integer> queryPatients = new ArrayList<>();
 
-		if (ruleSQL.contains("JOIN pcr.patient")) {
+		if (ruleSQL.contains("JOIN pcr2.patient")) {
 			Integer patientId = 0;
 			for (Object patientEntity : patients) {
 				patientId = (Integer)patientEntity;
@@ -530,15 +530,15 @@ public class CohortManager {
 			buildConceptTypeFilter(q, c, code, term, parentType, baseType, valueFrom, valueTo);
 		}
 
-		if (q.dataTable.equals("pcr.allergy") ||
-				q.dataTable.equals("pcr.referral") ||
-				q.dataTable.equals("pcr.encounter")) {
+		if (q.dataTable.equals("pcr2.allergy") ||
+				q.dataTable.equals("pcr2.referral") ||
+				q.dataTable.equals("pcr2.encounter")) {
 			q.sqlWhere = q.sqlWhere.replaceFirst("or d.original_code", "and (d.original_code");
 			q.sqlWhere += ")";
-		} else if (q.dataTable.equals("pcr.observation")) {
+		} else if (q.dataTable.equals("pcr2.observation")) {
 			q.sqlWhere = "and (" + q.sqlWhere + ")";
-		} else if (q.dataTable.equals("pcr.medication_statement") ||
-				q.dataTable.equals("pcr.medication_order")) {
+		} else if (q.dataTable.equals("pcr2.medication_statement") ||
+				q.dataTable.equals("pcr2.medication_order")) {
 			q.sqlWhere = q.sqlWhere.replaceFirst("or d.original_code", "and (d.original_code");
 			q.sqlWhere += ")";
 		}
@@ -564,27 +564,27 @@ public class CohortManager {
 				break;
 			case "Medication Statement":
 				q.patientJoinField = "patient_id";
-				q.dataTable = "pcr.medication_statement";
+				q.dataTable = "pcr2.medication_statement";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Medication Order":
 				q.patientJoinField = "patient_id";
-				q.dataTable = "pcr.medication_order";
+				q.dataTable = "pcr2.medication_order";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Allergy":
 				q.patientJoinField = "patient_id";
-				q.dataTable = "pcr.allergy";
+				q.dataTable = "pcr2.allergy";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Referral":
 				q.patientJoinField = "patient_id";
-				q.dataTable = "pcr.referral";
+				q.dataTable = "pcr2.referral";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Encounter":
 				q.patientJoinField = "patient_id";
-				q.dataTable = "pcr.encounter";
+				q.dataTable = "pcr2.encounter";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 		}
@@ -592,7 +592,7 @@ public class CohortManager {
 
 	private static void buildConceptObservationFilter(QueryMeta q, Integer c, String code, String valueFrom, String valueTo) {
 		q.patientJoinField = "patient_id";
-		q.dataTable = "pcr.observation";
+		q.dataTable = "pcr2.observation";
 		String pref = " or";
 		if (c == 1)
 			pref = "";
@@ -620,7 +620,7 @@ public class CohortManager {
 
 	private static void buildConceptPatientFilter(QueryMeta q, String term, String parentType, String valueFrom, String valueTo) {
 		q.patientJoinField = "id";
-		q.dataTable = "pcr.patient";
+		q.dataTable = "pcr2.patient";
 		if (term.equals("Male")) {
 			q.sqlWhere += " and p.gender_concept_id = '0'";
 		} else if (term.equals("Female")) {
@@ -752,14 +752,14 @@ public class CohortManager {
 
 		if (cohortPopulation.equals("0")) { // currently registered TODO
 			String sql = "";
-			if (q.dataTable.equals("pcr.patient")) {
+			if (q.dataTable.equals("pcr2.patient")) {
 				sql = "select p.id " +
-						"from pcr.patient p " +
+						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where 1=1 "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
-						"from pcr.patient p " +
+						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
@@ -767,14 +767,14 @@ public class CohortManager {
 			return sql;
 		} else if (cohortPopulation.equals("1")) { // all patients
 			String sql = "";
-			if (q.dataTable.equals("pcr.patient")) {
+			if (q.dataTable.equals("pcr2.patient")) {
 				sql = "select p.id " +
-						"from pcr.patient p " +
+						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where 1=1 "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
-						"from pcr.patient p " +
+						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
