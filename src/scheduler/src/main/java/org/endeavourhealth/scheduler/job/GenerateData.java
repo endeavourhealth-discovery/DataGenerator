@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.DatasetCache;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.DatasetDefinition.DatasetCodeSet;
@@ -80,6 +81,7 @@ public class GenerateData implements Job {
                 LOG.error("Exception occurred with generating data extracts: " + e);
             }
         }
+        Main.generateFilesDone = true;
         LOG.info("End of generating data extracts to CSV files");
     }
 

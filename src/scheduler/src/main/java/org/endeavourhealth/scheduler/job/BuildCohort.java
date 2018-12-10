@@ -3,6 +3,7 @@ package org.endeavourhealth.scheduler.job;
 import org.endeavourhealth.cohortmanager.CohortManager;
 import org.endeavourhealth.cohortmanager.models.CohortEntityDG;
 import org.endeavourhealth.cohortmanager.querydocument.models.LibraryItem;
+import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.models.database.CohortResultsEntity;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.*;
@@ -19,6 +20,7 @@ public class BuildCohort implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(BuildCohort.class);
 
+    @Override
     public void execute(JobExecutionContext jobExecutionContext) {
 
         List<ExtractEntity> extractsToProcess = null;
@@ -52,10 +54,9 @@ public class BuildCohort implements Job {
                 }
                 LOG.info("Extract ID: " + extractId);
             }
+            Main.buildCohortDone = true;
         } catch (SchedulerException e) {
             LOG.error("Unknown error encountered in cohort handling. " + e.getMessage());
         }
-
-
     }
 }

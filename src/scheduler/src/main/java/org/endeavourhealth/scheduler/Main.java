@@ -7,7 +7,6 @@ import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
-import org.endeavourhealth.scheduler.util.JobUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -15,18 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    private static Scheduler buildCohortScheduler;
-    private static Scheduler generateDataScheduler;
-    private static Scheduler zipFilesScheduler;
-    private static Scheduler encryptFilesScheduler;
-    private static Scheduler moveFilesToSFTPScheduler;
-    private static Scheduler housekeepFilesScheduler;
 
+    private static Scheduler mainScheduler = null;
     public static final String FILE_JOB_GROUP = "fileJobGroup";
     public static final String BUILD_COHORT_JOB = "buildCohort";
     public static final String GENERATE_FILES_JOB = "generateFiles";
@@ -36,6 +29,8 @@ public class Main {
     public static final String HOUSEKEEP_FILES_JOB = "housekeepFiles";
 
     private static int totalExtracts = 0;
+    public static boolean buildCohortDone = false;
+    public static boolean generateFilesDone = false;
     public static int extractsProcessed = 0;
 
     public static void main(String[] args) throws Exception {
@@ -77,7 +72,7 @@ public class Main {
         String step = args[0];
 
         if (step.equals("buildCohort")) {
-            buildCohort(false, extractsToProcess);
+            buildCohort(extractsToProcess);
         }
 
         if (step.equals("getData")) {
@@ -87,23 +82,23 @@ public class Main {
                     limitCols = true;
                 }
             }
-            getData(false, limitCols, extractsToProcess);
+            getData(limitCols, extractsToProcess);
         }
 
         if (step.equals("zipFiles")){
-            zipFiles(false, extractsToProcess);
+            zipFiles(extractsToProcess);
         }
 
         if (step.equals("encryptFiles")) {
-            encryptFiles(false, extractsToProcess);
+            encryptFiles(extractsToProcess);
         }
 
         if (step.equals("moveFiles")) {
-            moveFilesToSFTP(false, extractsToProcess);
+            moveFilesToSFTP(extractsToProcess);
         }
 
         if (step.equals("housekeepFiles")) {
-            housekeepFiles(false, extractsToProcess);
+            housekeepFiles(extractsToProcess);
         }
     }
 
@@ -111,48 +106,92 @@ public class Main {
 
         LOG.info("Running full process");
 
-        buildCohort(true, extractsToProcess);
-        getData(true, false, extractsToProcess);
-        zipFiles(true, extractsToProcess);
-        encryptFiles(true, extractsToProcess);
-        moveFilesToSFTP(true, extractsToProcess);
-        housekeepFiles(true, extractsToProcess);
+        JobKey buildCohortJobKey = (JobKey.jobKey(BUILD_COHORT_JOB, FILE_JOB_GROUP));
+        JobDetail buildCohortJob =
+                JobBuilder.newJob(BuildCohort.class).withIdentity(buildCohortJobKey).storeDurably().build();
+
+        JobKey generateDataJobKey = JobKey.jobKey(GENERATE_FILES_JOB, FILE_JOB_GROUP);
+        JobDetail generateDataJob =
+                JobBuilder.newJob(GenerateData.class).withIdentity(generateDataJobKey).storeDurably().build();
+
+        JobDetail zipFilesJob =
+                JobBuilder.newJob(ZipCsvFiles.class).withIdentity
+                        (JobKey.jobKey(ZIP_FILES_JOB, FILE_JOB_GROUP)).build();
+        Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
+                .build();
+
+        JobDetail encryptFilesJob =
+                JobBuilder.newJob(EncryptFiles.class).withIdentity(
+                        JobKey.jobKey(ENCRYPT_FILES_JOB, FILE_JOB_GROUP)).build();
+        Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
+                .build();
+
+        JobDetail moveFilesToSFTPJob =
+                JobBuilder.newJob(TransferEncryptedFilesToSftp.class).withIdentity(
+                        JobKey.jobKey(SFTP_FILES_JOB, FILE_JOB_GROUP)).build();
+        Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
+                .build();
+
+        JobDetail housekeepFilesJob =
+                JobBuilder.newJob(HousekeepFiles.class).withIdentity(
+                        JobKey.jobKey(HOUSEKEEP_FILES_JOB, FILE_JOB_GROUP)).build();
+        Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
+                .build();
+
+        long counter = 0;
+
+        mainScheduler =  new StdSchedulerFactory().getScheduler();
+        mainScheduler.getContext().put("extractsToProcess", extractsToProcess);
+        mainScheduler.start();
+
+        mainScheduler.addJob(buildCohortJob, true);
+        mainScheduler.triggerJob(buildCohortJobKey);
+        while (!buildCohortDone) {
+            if (counter == 2147483647) {
+                counter = 0;
+                LOG.info("Waiting for Build Cohort to complete");
+            }
+            if (buildCohortDone) {
+                LOG.info("Build Cohort complete");
+                break;
+            }
+            counter++;
+        }
+
+        counter = 0;
+        mainScheduler.addJob(generateDataJob, true);
+        mainScheduler.triggerJob(generateDataJobKey);
+        while (!generateFilesDone) {
+            if (counter == 2147483647) {
+                counter = 0;
+                LOG.info("Waiting for Generate Data to complete");
+            }
+            if (generateFilesDone) {
+                LOG.info("Generate Data complete");
+                break;
+            }
+            counter++;
+        }
 
         Thread.sleep(1000);
-        zipFilesScheduler.start();
+        mainScheduler.scheduleJob(zipFilesJob, zipFilesTrigger);
         Thread.sleep(1000);
-        encryptFilesScheduler.start();
+        mainScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
         Thread.sleep(1000);
-        moveFilesToSFTPScheduler.start();
+        mainScheduler.scheduleJob(moveFilesToSFTPJob, moveFilesToSFTPTrigger);
         Thread.sleep(1000);
-        housekeepFilesScheduler.start();
+        mainScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
     }
 
     public static void endSchedulers(int processed) {
         try {
             if (processed == totalExtracts) {
-                if (buildCohortScheduler != null) {
-                    buildCohortScheduler.shutdown();
-                }
-
-                if (generateDataScheduler != null) {
-                    generateDataScheduler.shutdown();
-                }
-
-                if (zipFilesScheduler != null) {
-                    zipFilesScheduler.shutdown();
-                }
-
-                if (encryptFilesScheduler != null) {
-                    encryptFilesScheduler.shutdown();
-                }
-
-                if (moveFilesToSFTPScheduler != null) {
-                    moveFilesToSFTPScheduler.shutdown();
-                }
-
-                if (housekeepFilesScheduler != null) {
-                    housekeepFilesScheduler.shutdown();
+                if (mainScheduler != null) {
+                    mainScheduler.shutdown();
                 }
             }
         } catch (Exception e) {
@@ -160,188 +199,52 @@ public class Main {
         }
     }
 
-    public static void buildCohort(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void buildCohort(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Building cohort information");
-        if (isScheduled) {
-            JobDetail buildCohortJob =
-                    JobBuilder.newJob(BuildCohort.class).withIdentity
-                            (JobKey.jobKey(BUILD_COHORT_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire at 1am everyday
-            //Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
-            //        .build();
-            //TODO run job only once
-            Trigger buildCohortTrigger = TriggerBuilder.newTrigger()
-                    .startNow()
-                    .build();
-
-            buildCohortScheduler = new StdSchedulerFactory().getScheduler();
-            buildCohortScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            buildCohortScheduler.start();
-            buildCohortScheduler.scheduleJob(buildCohortJob, buildCohortTrigger);
-
-        } else {
-            BuildCohort buildCohort = new BuildCohort();
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            buildCohort.execute(context);
-        }
+        BuildCohort buildCohort = new BuildCohort();
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        buildCohort.execute(context);
     }
 
-    private static void getData(boolean isScheduled, boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void getData(boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Generating CSV data files");
-        if (isScheduled) {
-
-            while (true) {
-                List<JobExecutionContext> currentJobs = buildCohortScheduler.getCurrentlyExecutingJobs();
-                if (currentJobs.size() == 0) {
-                    break;
-                }
-            }
-
-            JobDetail generateDataJob =
-                    JobBuilder.newJob(GenerateData.class).withIdentity
-                            (JobKey.jobKey(GENERATE_FILES_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire at 2am everyday
-            //Trigger generateDataTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 * * ?"))
-            //        .build();
-            //TODO run job only once
-            Trigger generateDataTrigger = TriggerBuilder.newTrigger()
-                    .startNow()
-                    .build();
-
-            generateDataScheduler = new StdSchedulerFactory().getScheduler();
-            generateDataScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            generateDataScheduler.start();
-            generateDataScheduler.scheduleJob(generateDataJob, generateDataTrigger);
-
-        } else {
-            GenerateData generateData = new GenerateData();
-            generateData.setLimitCols(limitCols);
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            generateData.execute(context);
-        }
+        GenerateData generateData = new GenerateData();
+        generateData.setLimitCols(limitCols);
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        generateData.execute(context);
     }
 
-    private static void zipFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void zipFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Zipping CSV files");
-        if (isScheduled) {
-            JobDetail zipFilesJob =
-                    JobBuilder.newJob(ZipCsvFiles.class).withIdentity
-                            (JobKey.jobKey(ZIP_FILES_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire every 10 minutes every hour between 03am and 06am, of every day
-            //Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 0/10 3-6 ? * * *"))
-            //        .build();
-            //TODO temporarily run job every 10 seconds
-            Trigger zipFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
-                    .build();
-
-            zipFilesScheduler = new StdSchedulerFactory().getScheduler();
-            zipFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            zipFilesScheduler.scheduleJob(zipFilesJob, zipFilesTrigger);
-
-        } else {
-            ZipCsvFiles zipFiles = new ZipCsvFiles();
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            zipFiles.execute(context);
-        }
+        ZipCsvFiles zipFiles = new ZipCsvFiles();
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        zipFiles.execute(context);
     }
 
-    private static void encryptFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void encryptFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Encrypting zip files");
-        if (isScheduled) {
-            JobDetail encryptFilesJob =
-                    JobBuilder.newJob(EncryptFiles.class).withIdentity(
-                            JobKey.jobKey(ENCRYPT_FILES_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire every 10 minutes starting at minute :05, every hour between 03am and 06am, of every day
-            //Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 5/10 3-6 ? * * *"))
-            //        .build();
-            //TODO temporarily run job every 10 seconds
-            Trigger encryptFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
-                    .build();
-
-            encryptFilesScheduler = new StdSchedulerFactory().getScheduler();
-            encryptFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            encryptFilesScheduler.scheduleJob(encryptFilesJob, encryptFilesTrigger);
-
-        } else {
-            EncryptFiles encryptFiles = new EncryptFiles();
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            encryptFiles.execute(context);
-        }
+        EncryptFiles encryptFiles = new EncryptFiles();
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        encryptFiles.execute(context);
     }
 
-    private static void moveFilesToSFTP(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void moveFilesToSFTP(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Transferring encrypted files to SFTP");
-        if (isScheduled) {
-            JobDetail moveFilesToSFTPJob =
-                    JobBuilder.newJob(TransferEncryptedFilesToSftp.class).withIdentity(
-                            JobKey.jobKey(SFTP_FILES_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire every 10 minutes starting at minute :10, every hour between 03am and 06am, of every day
-            //Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 10/10 3-6 ? * * *"))
-            //        .build();
-            //TODO temporarily run job every 10 seconds
-            Trigger moveFilesToSFTPTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
-                    .build();
-
-            moveFilesToSFTPScheduler = new StdSchedulerFactory().getScheduler();
-            moveFilesToSFTPScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            moveFilesToSFTPScheduler.scheduleJob(moveFilesToSFTPJob, moveFilesToSFTPTrigger);
-
-        } else {
-            TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            sendFilesSFTP.execute(context);
-        }
+        TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        sendFilesSFTP.execute(context);
     }
 
-    private static void housekeepFiles(boolean isScheduled, List<ExtractEntity> extractsToProcess) throws Exception {
+    private static void housekeepFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Housekeeping encrypted files");
-        if (isScheduled) {
-            JobDetail housekeepFilesJob =
-                    JobBuilder.newJob(HousekeepFiles.class).withIdentity(
-                            JobKey.jobKey(HOUSEKEEP_FILES_JOB, FILE_JOB_GROUP)).build();
-
-            //TODO determine timing
-            //Fire every 10 minutes starting at minute :15, every hour between 03am and 06am, of every day
-            //Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
-            //        .withSchedule(CronScheduleBuilder.cronSchedule("0 15/10 3-6 ? * * *"))
-            //        .build();
-            //TODO temporarily run job every 10 seconds
-            Trigger housekeepFilesTrigger = TriggerBuilder.newTrigger()
-                    .withSchedule(CronScheduleBuilder.cronSchedule("0/10 * * * * ?"))
-                    .build();
-
-            housekeepFilesScheduler = new StdSchedulerFactory().getScheduler();
-            housekeepFilesScheduler.getContext().put("extractsToProcess", extractsToProcess);
-            housekeepFilesScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
-
-        } else {
-            HousekeepFiles housekeepFiles = new HousekeepFiles();
-            PlainJobExecutionContext context = new PlainJobExecutionContext();
-            context.put("extractsToProcess", extractsToProcess);
-            housekeepFiles.execute(context);
-        }
+        HousekeepFiles housekeepFiles = new HousekeepFiles();
+        PlainJobExecutionContext context = new PlainJobExecutionContext();
+        context.put("extractsToProcess", extractsToProcess);
+        housekeepFiles.execute(context);
     }
 }
