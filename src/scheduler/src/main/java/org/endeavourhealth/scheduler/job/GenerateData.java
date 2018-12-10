@@ -18,6 +18,7 @@ import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Timestamp;
@@ -401,27 +402,27 @@ public class GenerateData implements Job {
         String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
         String filename = this.createFilename(sourceLocation, extractIdAndTodayDate, tableName);
 
-        FileWriter fw = new FileWriter(filename, true);
-        try {
+        // FileWriter fw = new FileWriter(filename, true);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
             // LOG.info(results.size() + " records returned" );
             for (Object[] result : results) {
                 int counter = 0;
                 for (Integer idx : fieldIndexes) {
                     if (result[idx] != null) {
-                        fw.append("\"" + result[idx].toString() + "\"");
+                        bw.append("\"" + result[idx].toString() + "\"");
                     } else {
-                        fw.append("\"\"");
+                        bw.append("\"\"");
                     }
                     counter ++;
                     if (counter < fieldIndexes.size()){
-                        fw.append(',');
+                        bw.append(',');
                     }
                 }
-                fw.append(System.getProperty("line.separator"));
+                bw.append(System.getProperty("line.separator"));
             }
         } finally {
-            fw.flush();
-            fw.close();
+            /*fw.flush();
+            fw.close();*/
             // System.out.println("data added to " + tableName);
             // LOG.info("All rows of data added to " + filename);
         }
