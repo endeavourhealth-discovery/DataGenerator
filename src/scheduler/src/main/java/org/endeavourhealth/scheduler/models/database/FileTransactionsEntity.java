@@ -128,6 +128,7 @@ public class FileTransactionsEntity {
         entityManager.getTransaction().begin();
         entityManager.persist(entry);
         entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     public static void update(FileTransactionsEntity entry) throws Exception {
@@ -135,6 +136,7 @@ public class FileTransactionsEntity {
         entityManager.getTransaction().begin();
         entityManager.merge(entry);
         entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     public static void delete(FileTransactionsEntity entry) throws Exception {
@@ -143,6 +145,7 @@ public class FileTransactionsEntity {
         entry = entityManager.merge(entry);
         entityManager.remove(entry);
         entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     public static List<FileTransactionsEntity> getFilesForResending(int extractId) throws Exception {

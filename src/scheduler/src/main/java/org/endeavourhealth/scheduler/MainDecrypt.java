@@ -1,14 +1,17 @@
 package org.endeavourhealth.scheduler;
 
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileFilter;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.security.*;
-import java.security.cert.CertificateException;
 
 public class MainDecrypt {
 
@@ -18,16 +21,18 @@ public class MainDecrypt {
     public static void main(String[] args) {
 
         if (args.length != 5) {
-            LOG.error("Application requires 5 parameters.");
-            LOG.error("Parameter 1: P12 file.");
-            LOG.error("Parameter 2: Password of the P12 file.");
-            LOG.error("Parameter 3: Alias of the private key.");
-            LOG.error("Parameter 4: Password of the private key");
-            LOG.error("Parameter 5: File that needs to be decrypted.");
+            LOG.info("Application requires 5 parameters.");
+            LOG.info("Parameter 1: P12 file.");
+            LOG.info("Parameter 2: Password of the P12 file.");
+            LOG.info("Parameter 3: Alias of the private key.");
+            LOG.info("Parameter 4: Password of the private key");
+            LOG.info("Parameter 5: Main file (.zip) that needs to be decrypted.");
             return;
         }
 
         try {
+            Security.addProvider(new BouncyCastleProvider());
+
             char[] keystorePassword = args[1].toCharArray();
             KeyStore keystore = KeyStore.getInstance("PKCS12");
             keystore.load(EncryptFiles.class.getClassLoader().getResourceAsStream(args[0]), keystorePassword);
@@ -36,18 +41,42 @@ public class MainDecrypt {
             PrivateKey key = (PrivateKey) keystore.getKey(args[2], keyPassword);
 
             File file = new File(args[4]);
-            boolean value = PgpEncryptDecrypt.decryptFile(file, key);
+            if (!file.getName().contains(".zip")) {
+                LOG.info("Parameter 5 needs to be a zip file.");
+                return;
+            }
 
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (UnrecoverableKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Path path = FileSystems.getDefault().getPath(".").toAbsolutePath();
+            String sPath = path.toFile().getAbsolutePath();
+            sPath = sPath.substring(0, sPath.length() - 1);
+            File destination = new File(sPath);
+
+            File[] files = getFilesFromDirectory(file.getParent(), file.getName().substring(0, file.getName().length() - 2));
+            if (files != null && files.length != 0) {
+                for (File zipPart : files) {
+                    FileUtils.copyFileToDirectory(zipPart, destination, false);
+                    LOG.info("Encrypted file: " + file.getAbsolutePath() + " copied to: " + destination.getAbsolutePath());
+                }
+            }
+
+            File unencrypted = new File(destination.getAbsolutePath() + File.separator + file.getName());
+            if (PgpEncryptDecrypt.decryptFile(unencrypted, key)) {
+                LOG.info(unencrypted.getAbsolutePath() + " was decrypted.");
+            } else {
+                LOG.info("File decryption failed.");
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
         }
+    }
+
+    private static File[] getFilesFromDirectory(String directory, String prefix) {
+        final String str = prefix;
+        FileFilter fileFilter = new FileFilter() {
+            public boolean accept(File file) {
+                return file.getName().startsWith(str);
+            }
+        };
+        return new File(directory).listFiles(fileFilter);
     }
 }
