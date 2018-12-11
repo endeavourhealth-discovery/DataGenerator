@@ -2,6 +2,7 @@ package org.endeavourhealth.scheduler;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.slf4j.Logger;
@@ -18,7 +19,9 @@ public class MainDecrypt {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainDecrypt.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
+        ConfigManager.Initialize("data-generator");
 
         if (args.length != 5) {
             LOG.info("Application requires 5 parameters.");
