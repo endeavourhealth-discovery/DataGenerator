@@ -3,10 +3,7 @@ package org.endeavourhealth.scheduler.models.database;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,32 +145,32 @@ public class FileTransactionsEntity {
         entityManager.close();
     }
 
-    public static List<FileTransactionsEntity> getFilesForResending(int extractId) throws Exception {
-        return getFileTransactionsValues(extractId, false, false,
+    public static List<FileTransactionsEntity> getFilesForResending(int extractId, String filename) throws Exception {
+        return getFileTransactionsValues(extractId, filename, false, false,
                 false, false, false);
     }
 
     public static List<FileTransactionsEntity> getFilesForZip(int extractId) throws Exception {
-        return getFileTransactionsValues(extractId, false, true,
+        return getFileTransactionsValues(extractId, null, false, true,
                 true, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForEncryption(int extractId) throws Exception {
-        return getFileTransactionsValues(extractId,false, false,
+        return getFileTransactionsValues(extractId, null,false, false,
                 true, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForSftp(int extractId) throws Exception {
-        return getFileTransactionsValues(extractId, false,false,
+        return getFileTransactionsValues(extractId, null, false,false,
                 false, true, true);
     }
 
     public static List<FileTransactionsEntity> getFilesForHousekeeping(int extractId) throws Exception {
-        return getFileTransactionsValues(extractId, false,false,
+        return getFileTransactionsValues(extractId, null, false,false,
                 false,false, true);
     }
 
-    private static List<FileTransactionsEntity> getFileTransactionsValues(Integer extractId,
+    private static List<FileTransactionsEntity> getFileTransactionsValues(Integer extractId, String filename,
         boolean extractIsNull, boolean zipIsNull, boolean encryptIsNull,
         boolean sftpIsNull, boolean isHousekeepingIsNull) throws Exception {
 
@@ -186,6 +183,11 @@ public class FileTransactionsEntity {
 
         if (extractId != null) {
             predicates.add(builder.equal(root.get("extractId"), extractId));
+        }
+
+        if (filename != null) {
+            filename = filename + "%";
+            predicates.add(builder.like(root.get("filename"), filename));
         }
 
         if (extractIsNull) {

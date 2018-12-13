@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +22,10 @@ public class MainResend {
 
     public static void main(String[] args) {
 
-        if (args.length == 0) {
-            LOG.error("Extract ID is required.");
+        if (args.length != 2) {
+            LOG.info("Application requires 2 parameters.");
+            LOG.info("Parameter 1: Extract ID");
+            LOG.info("Parameter 2: Date in yyyyMMdd format");
             return;
         }
 
@@ -29,6 +33,10 @@ public class MainResend {
         try {
             extractId = Integer.parseInt(args[0]);
             LOG.debug("extractId:" + extractId);
+
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            format.parse(args[1]);
+            String filename = extractId + "_" + args[1];
 
             ExtractConfig config = ExtractCache.getExtractConfig(extractId);
 
@@ -40,13 +48,13 @@ public class MainResend {
             LOG.debug("housekeep:" + housekeep);
 
             //retrieve files for resending
-            List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForResending(extractId);
+            List<FileTransactionsEntity> toProcess = FileTransactionsEntity.getFilesForResending(extractId, filename);
             if (toProcess.size() == 0) {
-                LOG.error("There are no transactions associated with Extract ID = " + extractId);
+                LOG.error("There are no transactions associated with the Extract ID = " + extractId + " and Date: " + args[1]);
                 return;
             }
 
-            String filename = toProcess.get(0).getFilename();
+            filename = toProcess.get(0).getFilename();
             File[] files = MainResend.getFilesFromDirectory(housekeep, filename.substring(0, filename.indexOf(".")));
             if (toProcess.size() != files.length) {
                 LOG.error("Files needed for this Extract ID do not match the available files stored in housekeeping.");
@@ -60,7 +68,7 @@ public class MainResend {
 
             boolean match = true;
             for (FileTransactionsEntity entry : toProcess) {
-                if (filesList.contains(entry.getFilename())) {
+                if (!filesList.contains(entry.getFilename())) {
                     match = false;
                     break;
                 }
@@ -94,6 +102,8 @@ public class MainResend {
             }
         } catch (NumberFormatException e) {
             LOG.error("Extract ID should be numeric. " + e.getMessage());
+        } catch (ParseException e) {
+            LOG.error("Date parameter does not match yyyyMMdd format. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Error encountered in resending files for Extract ID = " + extractId + " " + e.getMessage());
         }
