@@ -36,7 +36,7 @@ public class PatientExtracts {
                     " p.previous_last_name," +
                     " p.home_address_id," +
                     " p.is_spine_sensitive," +
-                    // " p.ethnic_code," +
+                    " p.ethnic_code," +
                     " a.address_line_1," +
                     " a.address_line_2," +
                     " a.address_line_3," +
@@ -46,11 +46,15 @@ public class PatientExtracts {
                     " a.approximation_concept_id, " +
                     " a.property_type_concept_id, " +
                     " org.ods_code, " +
-                    " org.name as organisation_name " +
+                    " org.name as organisation_name, " +
+                    " grs.effective_date as registered_date, " +
+                    " pid.value as usual_practitioner_number " +
                     " FROM pcr2.patient p " +
                     " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +
+                    " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id " +
+                    " left outer join pcr2.practitioner_identifier pid on pid.practitioner_id = p.usual_practitioner_id " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -89,7 +93,7 @@ public class PatientExtracts {
                     " p.previous_last_name," +
                     " p.home_address_id," +
                     " p.is_spine_sensitive," +
-                    // " p.ethnic_code," +
+                    " p.ethnic_code," +
                     " a.address_line_1," +
                     " a.address_line_2," +
                     " a.address_line_3," +
@@ -99,17 +103,21 @@ public class PatientExtracts {
                     " a.approximation_concept_id, " +
                     " a.property_type_concept_id, " +
                     " org.ods_code, " +
-                    " org.name as organisation_name " +
+                    " org.name as organisation_name, " +
+                    " grs.effective_date as registered_date, " +
+                    " pid.value as usual_practitioner_number" +
                     " FROM pcr2.patient p " +
                     " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +
+                    " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id" +
+                    " left outer join pcr2.practitioner_identifier pid on pid.practitioner_id = p.usual_practitioner_id" +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 8 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
                     "        group by item_id) log on log.item_id = p.id " +
-                    " where cr.bulked = 1 ";
+                    " where cr.bulked = 1;";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
                     .setParameter("currentTransactionId", currentTransactionId)
