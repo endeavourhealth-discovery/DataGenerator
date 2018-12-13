@@ -19,9 +19,30 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
-                    " join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+            String sql = "SELECT " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
+                    " FROM data_generator.cohort_results cr" +
+                    " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -44,15 +65,35 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 41 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "       group by item_id) log on log.item_id = o.id " +
+                    "       group by item_id) log on log.item_id = a.id " +
                     " where cr.bulked = 1;";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
@@ -76,15 +117,35 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct o.* " +
+            String sql = "select distinct " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.allergy oo on oo.patient_id = o.patient_id " +
-                    "   and oo.original_code = o.original_code " +
-                    "   and (o.effective_date < oo.effective_date " +
-                    "     or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
+                    " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
+                    "   and oo.original_code = a.original_code " +
+                    "   and (a.effective_date < oo.effective_date " +
+                    "     or (a.effective_date = oo.effective_date and a.id < oo.id)) " +
                     " where oo.patient_id is null " +
                     "   and cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -107,19 +168,39 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.allergy oo on oo.patient_id = o.patient_id " +
-                    "    and oo.original_code = o.original_code " +
-                    "    and (o.effective_date < oo.effective_date " +
-                    "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
+                    " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
+                    "    and oo.original_code = a.original_code " +
+                    "    and (a.effective_date < oo.effective_date " +
+                    "       or (a.effective_date = oo.effective_date and a.id < oo.id)) " +
                     " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 41 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "  group by item_id) log on log.item_id = o.id " +
+                    "  group by item_id) log on log.item_id = a.id " +
                     " where cr.bulked = 1 " +
                     "   and oo.patient_id is null;";
             Query query = entityManager.createNativeQuery(sql)
@@ -144,15 +225,35 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct o.* " +
+            String sql = "select distinct " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.allergy oo on oo.patient_id = o.patient_id " +
-                    "   and oo.original_code = o.original_code " +
-                    "   and (o.effective_date > oo.effective_date " +
-                    "     or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
+                    " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
+                    "   and oo.original_code = a.original_code " +
+                    "   and (a.effective_date > oo.effective_date " +
+                    "     or (a.effective_date = oo.effective_date and a.id > oo.id)) " +
                     " where oo.patient_id is null " +
                     "   and cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -175,19 +276,39 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.allergy oo on oo.patient_id = o.patient_id " +
-                    "    and oo.original_code = o.original_code " +
-                    "    and (o.effective_date > oo.effective_date " +
-                    "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
+                    " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
+                    "    and oo.original_code = a.original_code " +
+                    "    and (a.effective_date > oo.effective_date " +
+                    "       or (a.effective_date = oo.effective_date and a.id > oo.id)) " +
                     " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 41 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "  group by item_id) log on log.item_id = o.id " +
+                    "  group by item_id) log on log.item_id = a.id " +
                     " where cr.bulked = 1 " +
                     "   and oo.patient_id is null;";
             Query query = entityManager.createNativeQuery(sql)
@@ -215,7 +336,27 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.substance_concept_id, " +
+                    "  mc.manifestation_concept_id, " +
+                    "  mc.manifestation_free_text_id, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -243,7 +384,27 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.substance_concept_id, " +
+                    "  mc.manifestation_concept_id, " +
+                    "  mc.manifestation_free_text_id, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -271,7 +432,27 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.substance_concept_id, " +
+                    "  mc.manifestation_concept_id, " +
+                    "  mc.manifestation_free_text_id, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -299,7 +480,27 @@ public class AllergyExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.substance_concept_id, " +
+                    "  mc.manifestation_concept_id, " +
+                    "  mc.manifestation_free_text_id, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -327,10 +528,30 @@ public class AllergyExtracts {
 
         try {
             String sql = "create table matching_codes as " +
-                    " select o.* " +
+                    " select " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -356,15 +577,35 @@ public class AllergyExtracts {
 
         try {
             String sql = "create table matching_codes as " +
-                    " select o.* " +
+                    " select " +
+                    "  a.id, " +
+                    "  a.patient_id, " +
+                    "  a.concept_id, " +
+                    "  a.effective_date, " +
+                    "  a.effective_date_precision, " +
+                    "  a.effective_practitioner_id, " +
+                    "  a.entered_by_practitioner_id, " +
+                    "  a.care_activity_id, " +
+                    "  a.care_activity_heading_concept_id, " +
+                    "  a.owning_organisation_id, " +
+                    "  a.status_concept_id, " +
+                    "  a.is_confidential, " +
+                    "  a.original_code, " +
+                    "  a.original_term, " +
+                    "  a.original_code_scheme, " +
+                    "  a.original_system, " +
+                    "  a.substance_concept_id, " +
+                    "  a.manifestation_concept_id, " +
+                    "  a.manifestation_free_text_id, " +
+                    "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.allergy o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 41 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "       group by item_id) log on log.item_id = o.id " +
+                    "       group by item_id) log on log.item_id = a.id " +
                     " where cr.bulked = 1;";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
