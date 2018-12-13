@@ -19,9 +19,35 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT o.* FROM data_generator.cohort_results cr" +
-                    " join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+            String sql = "SELECT " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
+                    " FROM data_generator.cohort_results cr" +
+                    " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -44,15 +70,40 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 40 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "       group by item_id) log on log.item_id = o.id " +
+                    "       group by item_id) log on log.item_id = i.id " +
                     " where cr.bulked = 1;";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
@@ -76,15 +127,40 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct o.* " +
+            String sql = "select distinct " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.immunisation oo on oo.patient_id = o.patient_id " +
-                    "   and oo.original_code = o.original_code " +
-                    "   and (o.effective_date < oo.effective_date " +
-                    "     or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
+                    " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
+                    "   and oo.original_code = i.original_code " +
+                    "   and (i.effective_date < oo.effective_date " +
+                    "     or (i.effective_date = oo.effective_date and i.id < oo.id)) " +
                     " where oo.patient_id is null " +
                     "   and cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -107,19 +183,44 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.immunisation oo on oo.patient_id = o.patient_id " +
-                    "    and oo.original_code = o.original_code " +
-                    "    and (o.effective_date < oo.effective_date " +
-                    "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
+                    " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
+                    "    and oo.original_code = i.original_code " +
+                    "    and (i.effective_date < oo.effective_date " +
+                    "       or (i.effective_date = oo.effective_date and i.id < oo.id)) " +
                     " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 40 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "  group by item_id) log on log.item_id = o.id " +
+                    "  group by item_id) log on log.item_id = i.id " +
                     " where cr.bulked = 1 " +
                     "   and oo.patient_id is null;";
             Query query = entityManager.createNativeQuery(sql)
@@ -144,15 +245,40 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct o.* " +
+            String sql = "select distinct " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.immunisation oo on oo.patient_id = o.patient_id " +
-                    "   and oo.original_code = o.original_code " +
-                    "   and (o.effective_date > oo.effective_date " +
-                    "     or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
+                    " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
+                    "   and oo.original_code = i.original_code " +
+                    "   and (i.effective_date > oo.effective_date " +
+                    "     or (i.effective_date = oo.effective_date and i.id > oo.id)) " +
                     " where oo.patient_id is null " +
                     "   and cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -175,19 +301,44 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT distinct o.* " +
+            String sql = "SELECT distinct " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.immunisation oo on oo.patient_id = o.patient_id " +
-                    "    and oo.original_code = o.original_code " +
-                    "    and (o.effective_date > oo.effective_date " +
-                    "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
+                    " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
+                    "    and oo.original_code = i.original_code " +
+                    "    and (i.effective_date > oo.effective_date " +
+                    "       or (i.effective_date = oo.effective_date and i.id > oo.id)) " +
                     " join (select item_id from pcr2.event_log e " +
                     " where e.table_id = 40 " +
                     "   and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "  group by item_id) log on log.item_id = o.id " +
+                    "  group by item_id) log on log.item_id = i.id " +
                     " where cr.bulked = 1 " +
                     "   and oo.patient_id is null;";
             Query query = entityManager.createNativeQuery(sql)
@@ -215,7 +366,32 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.dose, " +
+                    "  mc.body_location_concept_id, " +
+                    "  mc.method_concept_id, " +
+                    "  mc.batch_number, " +
+                    "  mc.expiry_date, " +
+                    "  mc.manufacturer, " +
+                    "  mc.dose_ordinal, " +
+                    "  mc.doses_required, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -243,7 +419,32 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.dose, " +
+                    "  mc.body_location_concept_id, " +
+                    "  mc.method_concept_id, " +
+                    "  mc.batch_number, " +
+                    "  mc.expiry_date, " +
+                    "  mc.manufacturer, " +
+                    "  mc.dose_ordinal, " +
+                    "  mc.doses_required, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -271,7 +472,32 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.dose, " +
+                    "  mc.body_location_concept_id, " +
+                    "  mc.method_concept_id, " +
+                    "  mc.batch_number, " +
+                    "  mc.expiry_date, " +
+                    "  mc.manufacturer, " +
+                    "  mc.dose_ordinal, " +
+                    "  mc.doses_required, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -299,7 +525,32 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct mc.* " +
+            String sql = "select distinct " +
+                    "  mc.id, " +
+                    "  mc.patient_id, " +
+                    "  mc.concept_id, " +
+                    "  mc.effective_date, " +
+                    "  mc.effective_date_precision, " +
+                    "  mc.effective_practitioner_id, " +
+                    "  mc.entered_by_practitioner_id, " +
+                    "  mc.care_activity_id, " +
+                    "  mc.care_activity_heading_concept_id, " +
+                    "  mc.owning_organisation_id, " +
+                    "  mc.status_concept_id, " +
+                    "  mc.is_confidential, " +
+                    "  mc.original_code, " +
+                    "  mc.original_term, " +
+                    "  mc.original_code_scheme, " +
+                    "  mc.original_system, " +
+                    "  mc.dose, " +
+                    "  mc.body_location_concept_id, " +
+                    "  mc.method_concept_id, " +
+                    "  mc.batch_number, " +
+                    "  mc.expiry_date, " +
+                    "  mc.manufacturer, " +
+                    "  mc.dose_ordinal, " +
+                    "  mc.doses_required, " +
+                    "  mc.is_consent" +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -325,10 +576,35 @@ public class ImmunisationExtracts {
 
         try {
             String sql = "create table matching_codes as " +
-                    " select o.* " +
+                    " select " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -352,15 +628,40 @@ public class ImmunisationExtracts {
 
         try {
             String sql = "create table matching_codes as " +
-                    " select o.* " +
+                    " select " +
+                    "  i.id, " +
+                    "  i.patient_id, " +
+                    "  i.concept_id, " +
+                    "  i.effective_date, " +
+                    "  i.effective_date_precision, " +
+                    "  i.effective_practitioner_id, " +
+                    "  i.entered_by_practitioner_id, " +
+                    "  i.care_activity_id, " +
+                    "  i.care_activity_heading_concept_id, " +
+                    "  i.owning_organisation_id, " +
+                    "  i.status_concept_id, " +
+                    "  i.is_confidential, " +
+                    "  i.original_code, " +
+                    "  i.original_term, " +
+                    "  i.original_code_scheme, " +
+                    "  i.original_system, " +
+                    "  i.dose, " +
+                    "  i.body_location_concept_id, " +
+                    "  i.method_concept_id, " +
+                    "  i.batch_number, " +
+                    "  i.expiry_date, " +
+                    "  i.manufacturer, " +
+                    "  i.dose_ordinal, " +
+                    "  i.doses_required, " +
+                    "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.immunisation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 40 " +
                     "         and e.id > :currentTransactionId and e.id <= :maxTransactionId " +
-                    "       group by item_id) log on log.item_id = o.id " +
+                    "       group by item_id) log on log.item_id = i.id " +
                     " where cr.bulked = 1;";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
