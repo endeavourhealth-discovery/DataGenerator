@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler;
 
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.job.TransferEncryptedFilesToSftp;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
@@ -20,7 +21,9 @@ public class MainResend {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainResend.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
+        ConfigManager.Initialize("data-generator");
 
         if (args.length != 2) {
             LOG.info("Application requires 2 parameters.");
