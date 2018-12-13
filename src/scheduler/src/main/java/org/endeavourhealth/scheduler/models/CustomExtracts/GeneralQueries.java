@@ -64,4 +64,23 @@ public class GeneralQueries {
             entityManager.close();
         }
     }
+
+    public static void dropMatchingObservationCodesTempTable() throws Exception {
+        // System.out.println("delete matching codes");
+        // LOG.info("Delete matching codes observation temp table");
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        try {
+            String sql = "drop table if exists matching_codes;";
+            Query query = entityManager.createNativeQuery(sql);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } finally {
+            entityManager.close();
+        }
+    }
 }

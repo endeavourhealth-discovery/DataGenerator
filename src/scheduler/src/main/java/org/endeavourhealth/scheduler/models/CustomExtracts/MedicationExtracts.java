@@ -229,7 +229,7 @@ public class MedicationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingMedicationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -257,7 +257,7 @@ public class MedicationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingMedicationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -285,7 +285,7 @@ public class MedicationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingMedicationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -313,13 +313,15 @@ public class MedicationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingMedicationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
     public static void createMatchingMedicationCodesTempTable(int extractId, int codeSetId) throws Exception {
         // System.out.println("matching codes");
         // LOG.info("Matching codes medication temp table");
+
+        GeneralQueries.dropMatchingObservationCodesTempTable();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -348,6 +350,8 @@ public class MedicationExtracts {
         // System.out.println("delta matching codes");
         // LOG.info("Delta matching codes medication temp table");
 
+        GeneralQueries.dropMatchingObservationCodesTempTable();
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
@@ -367,25 +371,6 @@ public class MedicationExtracts {
                     .setParameter("codeSetId", codeSetId)
                     .setParameter("currentTransactionId", currentTransactionId)
                     .setParameter("maxTransactionId", maxTransactionId);
-
-            entityManager.getTransaction().begin();
-            query.executeUpdate();
-            entityManager.getTransaction().commit();
-
-        } finally {
-            entityManager.close();
-        }
-    }
-
-    public static void deleteMatchingMedicationCodesTempTable() throws Exception {
-        // System.out.println("delete matching codes");
-        // LOG.info("Delete matching codes medication temp table");
-
-        EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        try {
-            String sql = "drop table matching_codes;";
-            Query query = entityManager.createNativeQuery(sql);
 
             entityManager.getTransaction().begin();
             query.executeUpdate();

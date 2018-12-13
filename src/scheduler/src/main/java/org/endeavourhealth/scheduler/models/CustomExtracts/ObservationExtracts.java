@@ -229,7 +229,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            dropMatchingObservationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -257,7 +257,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            dropMatchingObservationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -285,7 +285,7 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            dropMatchingObservationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -313,14 +313,14 @@ public class ObservationExtracts {
 
         } finally {
             entityManager.close();
-            dropMatchingObservationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
     public static void createMatchingObservationCodesTempTable(int extractId, int codeSetId) throws Exception {
 
         // run a drop just in case it has been left due to an error
-        dropMatchingObservationCodesTempTable();
+        GeneralQueries.dropMatchingObservationCodesTempTable();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -353,7 +353,7 @@ public class ObservationExtracts {
         // LOG.info("Delta matching codes observation temp table");
 
         // run a drop just in case it has been left due to an error
-        dropMatchingObservationCodesTempTable();
+        GeneralQueries.dropMatchingObservationCodesTempTable();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -381,25 +381,6 @@ public class ObservationExtracts {
             entityManager.getTransaction().commit();
 
             createIndexesOnMatchingObservationCodesTempTable();
-
-        } finally {
-            entityManager.close();
-        }
-    }
-
-    public static void dropMatchingObservationCodesTempTable() throws Exception {
-        // System.out.println("delete matching codes");
-        // LOG.info("Delete matching codes observation temp table");
-
-        EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        try {
-            String sql = "drop table if exists matching_codes;";
-            Query query = entityManager.createNativeQuery(sql);
-
-            entityManager.getTransaction().begin();
-            query.executeUpdate();
-            entityManager.getTransaction().commit();
 
         } finally {
             entityManager.close();

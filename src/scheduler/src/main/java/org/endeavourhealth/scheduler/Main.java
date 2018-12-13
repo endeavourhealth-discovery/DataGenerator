@@ -1,7 +1,7 @@
 package org.endeavourhealth.scheduler;
 
 import org.endeavourhealth.common.config.ConfigManager;
-import org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity;
+import org.endeavourhealth.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
@@ -42,19 +42,19 @@ public class Main {
         List<ExtractEntity> extractsToProcess = new ArrayList<>();
         List<ExtractEntity> allExtracts = ExtractEntity.getAllExtracts();
 
-        //TODO: uncomment after testing
-//        for (ExtractEntity extract : allExtracts) {
-//            ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
-//            LOG.info("Checking project status for extract : " + extract.getExtractId()
-//                    + ", projectId : " + config.getProjectId());
-//            if (ProjectEntity.checkProjectIsActive(config.getProjectId())) {
-//                LOG.info("Project exists and is active, adding...");
-//                extractsToProcess.add(extract);
-//            } else {
-//                LOG.info("No active project exists, rejecting...");
-//            }
-//        }
-        extractsToProcess.addAll(allExtracts);
+        for (ExtractEntity extract : allExtracts) {
+            ExtractConfig config = ExtractCache.getExtractConfig(extract.getExtractId());
+            LOG.info("Checking project status for extract : " + extract.getExtractId()
+                    + ", projectId : " + config.getProjectId());
+
+            List<DataProcessingAgreementEntity> results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+            if (results != null && results.size() > 0) {
+                LOG.info("Project exists and is active, adding...");
+                extractsToProcess.add(extract);
+            } else {
+                LOG.info("No active project exists, rejecting...");
+            }
+        }
 
         if (extractsToProcess.size() == 0) {
             LOG.info("No extracts to process. Exiting.");

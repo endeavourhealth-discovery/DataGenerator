@@ -280,7 +280,7 @@ insert into data_generator.extract
 select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
  "name": "Data Generator Extract Definition 1",
  "id": "1",
- "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
+ "projectId": "R1D68",
  "fileLocationDetails": {
           "source": "C:/DataGenerator/SubscriberA/ChildImms/Source/",
           "destination": "/endeavour/ftp/SubscriberA/ChildImms/",
@@ -301,7 +301,7 @@ insert into data_generator.extract
 select 2, 'Subscriber B Health Check', 1, 1, 2, '{
  "name": "Data Generator Extract Definition 2",
  "id": "2",
- "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
+ "projectId": "8JM56",
  "fileLocationDetails": {
           "source": "C:/DataGenerator/SubscriberA/HealthCheck/Source/",
           "destination": "/endeavour/ftp/SubscriberA/HealthCheck/",
@@ -322,7 +322,7 @@ insert into data_generator.extract
 select 3, 'Subscriber B Child Imms', 1, 1, 1, '{
  "name": "Data Generator Extract Definition 3",
  "id": "3",
- "projectId": "19b3bce7-60f6-4e2d-878b-fd9a5e9de08b",
+ "projectId": "RJD69",
  "fileLocationDetails": {
           "source": "C:/DataGenerator/SubscriberB/ChildImms/Source/",
           "destination": "/endeavour/ftp/SubscriberB/ChildImms/",
@@ -343,7 +343,7 @@ insert into data_generator.extract
 select 4, 'Subscriber B Health Check', 1, 1, 2, '{
  "name": "Data Generator Extract Definition 4",
  "id": "4",
- "projectId": "f0bc6f4a-8f18-11e8-839e-80fa5b320513",
+ "projectId": "RJD69",
  "fileLocationDetails": {
           "source": "C:/DataGenerator/SubscriberB/HealthCheck/Source/",
           "destination": "/endeavour/ftp/SubscriberB/HealthCheck/",
@@ -388,6 +388,8 @@ select * from data_generator.file_transactions;
 -- set encrypt_date = now() where extract_id = 1 and filename = '1_20181126.z01';
 -- update data_generator.file_transactions
 -- set encrypt_date = now() where extract_id = 1 and filename = '2_20181126.zip';
+
+delete from data_generator.cohort;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

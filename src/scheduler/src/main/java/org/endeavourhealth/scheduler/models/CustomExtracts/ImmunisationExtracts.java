@@ -229,7 +229,7 @@ public class ImmunisationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingImmunisationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -257,7 +257,7 @@ public class ImmunisationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingImmunisationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -285,7 +285,7 @@ public class ImmunisationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingImmunisationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -313,7 +313,7 @@ public class ImmunisationExtracts {
 
         } finally {
             entityManager.close();
-            deleteMatchingImmunisationCodesTempTable();
+            GeneralQueries.dropMatchingObservationCodesTempTable();
         }
     }
 
@@ -367,25 +367,6 @@ public class ImmunisationExtracts {
                     .setParameter("codeSetId", codeSetId)
                     .setParameter("currentTransactionId", currentTransactionId)
                     .setParameter("maxTransactionId", maxTransactionId);
-
-            entityManager.getTransaction().begin();
-            query.executeUpdate();
-            entityManager.getTransaction().commit();
-
-        } finally {
-            entityManager.close();
-        }
-    }
-
-    public static void deleteMatchingImmunisationCodesTempTable() throws Exception {
-        // System.out.println("delete matching codes");
-        // LOG.info("Delete matching codes immunisation temp table");
-
-        EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        try {
-            String sql = "drop table matching_codes;";
-            Query query = entityManager.createNativeQuery(sql);
 
             entityManager.getTransaction().begin();
             query.executeUpdate();
