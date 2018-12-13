@@ -80,6 +80,7 @@ public class GenerateData implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Exception occurred with generating data extracts: " + e);
+                // e.printStackTrace();
             }
         }
         Main.generateFilesDone = true;
