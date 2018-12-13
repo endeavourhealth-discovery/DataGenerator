@@ -116,11 +116,13 @@ public class TransferEncryptedFilesToSftp implements Job {
                                 entry.setSftpDate(new Timestamp(System.currentTimeMillis()));
                                 FileTransactionsEntity.update(entry);
                                 LOG.info("File: " + entry.getFilename() + " record updated");
+                                Main.endJob(Main.SFTP_FILES_JOB, ++Main.sftpProcessed);
                             } catch (Exception e) {
                                 LOG.error("Exception occurred with using the database: " + e);
                             }
                         }
                     } catch (Exception e) {
+                        Main.errorEncountered(++Main.errorCount);
                         LOG.error("Exception occurred with using the SFTP: " + e);
                     } finally {
                         // Close the connection to the SFTP

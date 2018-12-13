@@ -18,6 +18,7 @@ import java.util.List;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final int ERROR_LIMIT = 20;
 
     private static Scheduler mainScheduler = null;
     public static final String FILE_JOB_GROUP = "fileJobGroup";
@@ -31,7 +32,12 @@ public class Main {
     private static int totalExtracts = 0;
     public static boolean buildCohortDone = false;
     public static boolean generateFilesDone = false;
+
+    public static int zipProcessed = 0;
+    public static int encryptProcessed = 0;
+    public static int sftpProcessed = 0;
     public static int extractsProcessed = 0;
+    public static int errorCount = 0;
 
     public static void main(String[] args) throws Exception {
 
@@ -187,12 +193,37 @@ public class Main {
         mainScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
     }
 
-    public static void endSchedulers(int processed) {
-        try {
-            if (processed == totalExtracts) {
-                if (mainScheduler != null) {
-                    mainScheduler.shutdown();
+    public static void endJob(String job, int processed) {
+        if (processed == totalExtracts) {
+            if (mainScheduler != null) {
+                try {
+                    LOG.info("Job: " + job + " is done.");
+                    mainScheduler.pauseJob(JobKey.jobKey(job, FILE_JOB_GROUP));
+                } catch (SchedulerException e) {
+                    LOG.error(e.getMessage());
                 }
+            }
+        }
+    }
+
+    public static void endScheduler(int processed) {
+        if (processed == totalExtracts) {
+            terminateScheduler();
+        }
+    }
+
+    public static void errorEncountered(int errors) {
+        LOG.info("count:" + errors);
+        if (errors == ERROR_LIMIT) {
+            LOG.error("Application has reached its allowable error count.");
+            terminateScheduler();
+        }
+    }
+
+    private static void terminateScheduler() {
+        try {
+            if (mainScheduler != null) {
+                mainScheduler.shutdown();
             }
         } catch (Exception e) {
             LOG.error(e.getMessage());

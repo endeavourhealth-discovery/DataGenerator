@@ -106,6 +106,7 @@ public class EncryptFiles implements Job {
                                 entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
                                 FileTransactionsEntity.update(entry);
                                 LOG.info("File: " + entry.getFilename() + " record updated.");
+                                Main.endJob(Main.ENCRYPT_FILES_JOB, ++Main.encryptProcessed);
                             } catch (Exception e) {
                                 LOG.error("Exception occurred with using the database: " + e);
                             }
@@ -117,6 +118,7 @@ public class EncryptFiles implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Unknown error encountered in encryption handling: " + e.getMessage());
+                Main.errorEncountered(++Main.errorCount);
             }
         }
         LOG.info("End of encrypting zip files");

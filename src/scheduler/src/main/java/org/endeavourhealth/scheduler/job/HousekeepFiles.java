@@ -96,12 +96,14 @@ public class HousekeepFiles implements Job {
                                 LOG.error("Exception occurred with using the database: " + e);
                             }
                         } catch (IOException e) {
+                            Main.errorEncountered(++Main.errorCount);
                             LOG.error("Error encountered in moving the file to housekeep. " + e.getMessage());
                         }
                     }
-                    Main.endSchedulers(++Main.extractsProcessed);
+                    Main.endScheduler(++Main.extractsProcessed);
                 }
             } catch (Exception e) {
+                Main.errorEncountered(++Main.errorCount);
                 LOG.error("Exception occurred with using the database. " + e);
             }
         }
