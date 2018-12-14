@@ -642,6 +642,13 @@ public class CohortManager {
 				q.sqlWhere += " and p.date_of_birth >= " + parameterize(q.whereParams, convertToDate(valueFrom));
 			else if (valueFrom.equals("") && !valueTo.equals(""))
 				q.sqlWhere += " and p.date_of_birth <= " + parameterize(q.whereParams, convertToDate(valueTo));
+		} else if (term.equals("Age")) {
+			if (!valueFrom.equals("") && !valueTo.equals(""))
+				q.sqlWhere += " and DATEDIFF(NOW(), p.date_of_birth) / 365.25 between " + parameterize(q.whereParams, valueFrom)+" and "+ parameterize(q.whereParams, valueTo);
+			else if (!valueFrom.equals("") && valueTo.equals(""))
+				q.sqlWhere += " and DATEDIFF(NOW(), p.date_of_birth) / 365.25 >= " + parameterize(q.whereParams, valueFrom);
+			else if (valueFrom.equals("") && !valueTo.equals(""))
+				q.sqlWhere += " and DATEDIFF(NOW(), p.date_of_birth) / 365.25 <= " + parameterize(q.whereParams, valueTo);
 		}
 	}
 

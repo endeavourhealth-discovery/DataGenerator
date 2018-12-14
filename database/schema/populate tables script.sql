@@ -627,3 +627,53 @@ values (3, 'Example Cohort with Multiple Rules', '<?xml version="1.0" encoding="
         </rule>
     </query>
 </libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (4, 'Under 20s', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>Under 20s</name>
+    <description>Under 20s</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Age</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>0</code>
+                            <term>Age</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo>20</valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>547</x>
+                <y>202</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
