@@ -37,13 +37,16 @@ public class CohortManager {
 	}
 
 	private static String getDenominatorSQL(String cohortPopulation) {
-		if (cohortPopulation.equals("0")) // currently registered - TODO
-			return "select distinct id " +
-					"from pcr2.patient";
+		if (cohortPopulation.equals("0")) // currently registered
+			return "select distinct p.id " +
+					"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
+					"where p.date_of_death IS NULL " +
+					"and e.gp_registration_type_concept_id = 2 " +
+					"and e.effective_date <= NOW() " +
+					"and (e.end_date > NOW() or e.end_date IS NULL)";
 		else if (cohortPopulation.equals("1")) // all patients
-			return "select distinct id " +
-					"from pcr2.patient";
-
+			return "select distinct p.id " +
+					"from pcr2.patient p";
 		return "";
 	}
 
@@ -59,7 +62,7 @@ public class CohortManager {
 
 		Integer i = 0;
 
-		String denominatorSQL = getDenominatorSQL("1");
+		String denominatorSQL = getDenominatorSQL("0");
 
 		EntityManager entityManager = PersistenceManager.getEntityManager();
 
@@ -178,7 +181,7 @@ public class CohortManager {
 	}
 
 	private static void runRule(LibraryItem libraryItem, List<QueryResult> queryResults, Rule rule, QueryMeta q, List<Filter> filters) throws Exception {
-		String cohortPopulation = "1";
+		String cohortPopulation = "0";
 
 		String restriction = "LATEST";
 
@@ -750,18 +753,24 @@ public class CohortManager {
 		else if (restriction.equals("EARLIEST"))
 			order = "ASC";
 
-		if (cohortPopulation.equals("0")) { // currently registered TODO
+		if (cohortPopulation.equals("0")) { // currently registered
 			String sql = "";
 			if (q.dataTable.equals("pcr2.patient")) {
 				sql = "select p.id " +
-						"from pcr2.patient p " +
+						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where 1=1 "+q.sqlWhere;
+						"where p.date_of_death IS NULL " +
+						"and e.gp_registration_type_concept_id = 2 " +
+						"and e.effective_date <= NOW() " +
+						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
-						"from pcr2.patient p " +
+						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where 1=1 "+q.sqlWhere+
+						"where p.date_of_death IS NULL " +
+						"and e.gp_registration_type_concept_id = 2 " +
+						"and e.effective_date <= NOW() " +
+						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
 			return sql;
