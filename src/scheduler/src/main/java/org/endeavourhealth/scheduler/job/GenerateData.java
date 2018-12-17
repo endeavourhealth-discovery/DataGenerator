@@ -542,7 +542,6 @@ public class GenerateData implements Job {
         if (saveIds) {
             ExportedIdsEntity.saveExportedIds(extractId, getTableId(tableName), itemIds);
         }
-
     }
 
     private void createSourceAndHousekeepDirectories(int extractId) throws Exception {

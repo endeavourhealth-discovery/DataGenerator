@@ -18,7 +18,7 @@ public class PatientExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT " +
+            String sql = "SELECT DISTINCT " +
                     " p.id," +
                     " p.organisation_id," +
                     " p.nhs_number," +
@@ -50,7 +50,7 @@ public class PatientExtracts {
                     " grs.effective_date as registered_date, " +
                     " pid.value as usual_practitioner_number " +
                     " FROM pcr2.patient p " +
-                    " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id " +
+                    " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id and pa.patient_id = p.id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +
                     " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id " +
@@ -75,7 +75,7 @@ public class PatientExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT " +
+            String sql = "SELECT DISTINCT" +
                     " p.id," +
                     " p.organisation_id," +
                     " p.nhs_number," +
@@ -107,7 +107,7 @@ public class PatientExtracts {
                     " grs.effective_date as registered_date, " +
                     " pid.value as usual_practitioner_number" +
                     " FROM pcr2.patient p " +
-                    " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id " +
+                    " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id and pa.patient_id = p.id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +
                     " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id" +

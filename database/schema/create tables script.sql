@@ -67,4 +67,3 @@ CREATE TABLE data_generator.exported_ids
   CONSTRAINT pk_exported_ids PRIMARY KEY (extract_id, item_id, table_id),
   FOREIGN KEY fk_exported_ids_extract_id (extract_id) REFERENCES data_generator.extract (extract_id)
 );
-
