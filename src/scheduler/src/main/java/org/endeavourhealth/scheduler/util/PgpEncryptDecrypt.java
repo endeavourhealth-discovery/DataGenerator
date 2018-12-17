@@ -92,7 +92,7 @@ public class PgpEncryptDecrypt {
             LOG.error("Unknown error encountered in decryption handling. " + e.getMessage());
         }
 
-        LOG.info("File decryption was successful.");
+        LOG.info("File decryption failed.");
         return false;
     }
 }
