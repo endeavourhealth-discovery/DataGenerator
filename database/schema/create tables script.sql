@@ -6,6 +6,8 @@ drop table if exists data_generator.dataset;
 drop table if exists data_generator.extract;
 drop table if exists data_generator.cohort_results;
 drop table if exists data_generator.file_transactions;
+drop table if exists data_generator.cohort;
+drop table if exists data_generator.exported_ids;
 
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
@@ -56,3 +58,13 @@ CREATE TABLE data_generator.cohort (
   xml_content longtext NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE data_generator.exported_ids
+(
+  extract_id int NOT NULL,
+  item_id bigint NOT NULL,
+  table_id int NOT NULL,
+  CONSTRAINT pk_exported_ids PRIMARY KEY (extract_id, item_id, table_id),
+  FOREIGN KEY fk_exported_ids_extract_id (extract_id) REFERENCES data_generator.extract (extract_id)
+);
+

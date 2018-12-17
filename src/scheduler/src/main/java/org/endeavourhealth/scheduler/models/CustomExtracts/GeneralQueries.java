@@ -5,6 +5,7 @@ import org.endeavourhealth.scheduler.models.PersistenceManager;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.util.List;
 
 public class GeneralQueries {
 
@@ -78,6 +79,33 @@ public class GeneralQueries {
             entityManager.getTransaction().begin();
             query.executeUpdate();
             entityManager.getTransaction().commit();
+
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    public static List getDeletionsForTable(int tableId, int extractId, Long currentTransactionId, Long maxTransactionId) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        try {
+            String sql = "select e.item_id, e.table_id from pcr2.event_log e " +
+                    " join data_generator.exported_ids id on id.item_id = e.item_id and id.table_id = e.table_id " +
+                    " where e.entry_mode = 1" +
+                    "   and e.table_id = :tableId" +
+                    "   and id.extract_id = :extractId" +
+                    "   and e.id > :currentTransactionId and e.id <= :maxTransactionId ;";
+
+            Query query = entityManager.createNativeQuery(sql)
+                    .setParameter("tableId", tableId)
+                    .setParameter("extractId", extractId)
+                    .setParameter("currentTransactionId", currentTransactionId)
+                    .setParameter("maxTransactionId", maxTransactionId);
+
+            List result = query.getResultList();
+
+            return result;
 
         } finally {
             entityManager.close();

@@ -38,6 +38,7 @@
         <class>org.endeavourhealth.datasharingmanagermodel.models.database.DataExchangeEntity</class>
         <class>org.endeavourhealth.datasharingmanagermodel.models.database.ProjectEntity</class>
         <class>org.endeavourhealth.datasharingmanagermodel.models.database.ProjectApplicationPolicyEntity</class>
+        <class>org.endeavourhealth.scheduler.models.database.ExportedIdsEntity</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.show_sql" value="false" />
