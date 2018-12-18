@@ -48,7 +48,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " FROM data_generator.cohort_results cr" +
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId" +
@@ -102,7 +102,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -162,7 +162,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -221,7 +221,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -286,7 +286,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -345,7 +345,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -627,7 +627,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
@@ -684,7 +684,7 @@ public class ImmunisationExtracts {
                     "  i.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunisation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
