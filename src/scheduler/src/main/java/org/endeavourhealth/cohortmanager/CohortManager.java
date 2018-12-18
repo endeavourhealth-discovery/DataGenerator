@@ -41,7 +41,7 @@ public class CohortManager {
 			return "select distinct p.id " +
 					"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 					"where p.date_of_death IS NULL " +
-					"and e.gp_registration_type_concept_id = 2 " +
+					"and e.gp_registration_status_concept_id = 2 " +
 					"and e.effective_date <= NOW() " +
 					"and (e.end_date > NOW() or e.end_date IS NULL)";
 		else if (cohortPopulation.equals("1")) // all patients
@@ -767,7 +767,7 @@ public class CohortManager {
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where p.date_of_death IS NULL " +
-						"and e.gp_registration_type_concept_id = 2 " +
+						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere;
 			} else {
@@ -775,7 +775,7 @@ public class CohortManager {
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
 						"where p.date_of_death IS NULL " +
-						"and e.gp_registration_type_concept_id = 2 " +
+						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
@@ -848,5 +848,4 @@ public class CohortManager {
 		list.add(value);
 		return " ?" + (list.size()) + " ";
 	}
-
 }

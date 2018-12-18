@@ -27,10 +27,6 @@ where c.code_set_id in (1);
 select * from pcr.patient;
 -- To test health check allergy.csv file
 select * from pcr.allergy;
--- To test health check immunisation.csv file
-select * from pcr.immunisation i
-join subscriber_transform.code_set_codes c on c.read2_concept_id = i.original_code
-where c.code_set_id in (1);
 -- To test health check medication.csv file
 select * from pcr.medication_statement m 
 join subscriber_transform.code_set_codes c on c.read2_concept_id = m.original_code
@@ -52,12 +48,6 @@ where c.code_set_id in (6,7,8,9,10,
 
 -- To test diabetes patient.csv file
 select * from pcr.patient;
--- To test diabetes allergy.csv file
-select * from pcr.allergy;
--- To test diabetes immunisation.csv file
-select * from pcr.immunisation i
-join subscriber_transform.code_set_codes c on c.read2_concept_id = i.original_code
-where c.code_set_id in (1);
 -- To test diabetes medication.csv file
 select * from pcr.medication_statement m 
 join subscriber_transform.code_set_codes c on c.read2_concept_id = m.original_code
