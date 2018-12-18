@@ -23,27 +23,26 @@ public class MainDecrypt {
 
         ConfigManager.Initialize("data-generator");
 
-        if (args.length != 5) {
+        if (args.length != 4) {
             LOG.info("Application requires 5 parameters.");
-            LOG.info("Parameter 1: P12 file.");
-            LOG.info("Parameter 2: Password of the P12 file.");
-            LOG.info("Parameter 3: Alias of the private key.");
-            LOG.info("Parameter 4: Password of the private key");
-            LOG.info("Parameter 5: Main file (.zip) that needs to be decrypted.");
+            LOG.info("Parameter 1: P12 file");
+            LOG.info("Parameter 2: Alias");
+            LOG.info("Parameter 3: Password");
+            LOG.info("Parameter 4: Main file (.zip) that needs to be decrypted.");
             return;
         }
 
         try {
             Security.addProvider(new BouncyCastleProvider());
 
-            char[] keystorePassword = args[1].toCharArray();
+            char[] keystorePassword = args[2].toCharArray();
             KeyStore keystore = KeyStore.getInstance("PKCS12");
             keystore.load(EncryptFiles.class.getClassLoader().getResourceAsStream(args[0]), keystorePassword);
 
-            char[] keyPassword = args[3].toCharArray();
-            PrivateKey key = (PrivateKey) keystore.getKey(args[2], keyPassword);
+            char[] keyPassword = args[2].toCharArray();
+            PrivateKey key = (PrivateKey) keystore.getKey(args[1], keyPassword);
 
-            File file = new File(args[4]);
+            File file = new File(args[3]);
             if (!file.getName().contains(".zip")) {
                 LOG.info("Parameter 5 needs to be a zip file.");
                 return;
