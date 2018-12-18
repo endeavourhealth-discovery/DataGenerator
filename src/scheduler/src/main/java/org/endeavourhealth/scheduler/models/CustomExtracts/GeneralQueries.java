@@ -111,4 +111,27 @@ public class GeneralQueries {
             entityManager.close();
         }
     }
+
+    public static void createIndexesOnMatchingObservationCodesTempTable() throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        try {
+            String patientIndex = "alter table matching_codes add index codes_patient_id (patient_id);";
+            String dateIndex = "alter table matching_codes add index codes_effective_date (effective_date);";
+            Query query = entityManager.createNativeQuery(patientIndex);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+            query = entityManager.createNativeQuery(dateIndex);
+
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } finally {
+            entityManager.close();
+        }
+    }
 }

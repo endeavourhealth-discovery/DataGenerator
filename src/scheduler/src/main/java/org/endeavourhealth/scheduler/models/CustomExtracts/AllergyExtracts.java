@@ -21,7 +21,8 @@ public class AllergyExtracts {
         try {
             String sql = "SELECT " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -42,6 +43,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " FROM data_generator.cohort_results cr" +
                     " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
@@ -67,7 +70,8 @@ public class AllergyExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -88,6 +92,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
@@ -119,7 +125,8 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -140,6 +147,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
@@ -170,7 +179,8 @@ public class AllergyExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -191,6 +201,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
@@ -227,7 +239,8 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -248,6 +261,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
@@ -278,7 +293,8 @@ public class AllergyExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -299,6 +315,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.allergy oo on oo.patient_id = a.patient_id " +
@@ -338,6 +356,7 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -386,6 +405,7 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -434,6 +454,7 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -482,6 +503,7 @@ public class AllergyExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -530,7 +552,8 @@ public class AllergyExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -551,6 +574,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
@@ -561,6 +586,8 @@ public class AllergyExtracts {
             entityManager.getTransaction().begin();
             query.executeUpdate();
             entityManager.getTransaction().commit();
+
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
 
         } finally {
             entityManager.close();
@@ -579,7 +606,8 @@ public class AllergyExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  a.id, " +
-                    "  a.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  a.concept_id, " +
                     "  a.effective_date, " +
                     "  a.effective_date_precision, " +
@@ -600,6 +628,8 @@ public class AllergyExtracts {
                     "  a.is_consent" +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.allergy a on a.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = a.id and pcrm.resource_type = 'Allergy' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
@@ -616,6 +646,8 @@ public class AllergyExtracts {
             entityManager.getTransaction().begin();
             query.executeUpdate();
             entityManager.getTransaction().commit();
+
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
 
         } finally {
             entityManager.close();

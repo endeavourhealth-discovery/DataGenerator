@@ -21,7 +21,8 @@ public class MedicationExtracts {
         try {
             String sql = "SELECT " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -54,6 +55,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units" +
                     " FROM data_generator.cohort_results cr" +
                     " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = 1 " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
@@ -81,7 +84,8 @@ public class MedicationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -114,6 +118,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id" +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -146,7 +152,8 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -179,6 +186,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -210,7 +219,8 @@ public class MedicationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -243,6 +253,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -280,7 +292,8 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -313,6 +326,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -344,7 +359,8 @@ public class MedicationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -377,6 +393,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -417,6 +435,7 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
                     "  mc.effective_date, " +
@@ -477,6 +496,7 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
                     "  mc.effective_date, " +
@@ -537,6 +557,7 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
                     "  mc.effective_date, " +
@@ -597,6 +618,7 @@ public class MedicationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
                     "  mc.effective_date, " +
@@ -657,7 +679,8 @@ public class MedicationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -702,6 +725,8 @@ public class MedicationExtracts {
             query.executeUpdate();
             entityManager.getTransaction().commit();
 
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
+
         } finally {
             entityManager.close();
         }
@@ -719,7 +744,8 @@ public class MedicationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  m.id, " +
-                    "  m.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
                     "  m.effective_date, " +
                     "  m.effective_date_precision, " +
@@ -752,6 +778,8 @@ public class MedicationExtracts {
                     "  ma.quantity_units " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.medication_statement o on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'Medication' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -769,6 +797,8 @@ public class MedicationExtracts {
             entityManager.getTransaction().begin();
             query.executeUpdate();
             entityManager.getTransaction().commit();
+
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
 
         } finally {
             entityManager.close();

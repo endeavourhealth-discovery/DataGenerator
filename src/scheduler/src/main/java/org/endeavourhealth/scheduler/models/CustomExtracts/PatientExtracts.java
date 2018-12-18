@@ -19,7 +19,8 @@ public class PatientExtracts {
 
         try {
             String sql = "SELECT DISTINCT " +
-                    " p.id," +
+                    " p.id, " +
+                    " pcrm.resource_id, " +
                     " p.organisation_id," +
                     " p.nhs_number," +
                     " p.nhs_number_verification_concept_id," +
@@ -50,6 +51,7 @@ public class PatientExtracts {
                     " grs.effective_date as registered_date, " +
                     " pid.value as usual_practitioner_number " +
                     " FROM pcr2.patient p " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = p.id and pcrm.resource_type = 'Patient' " +
                     " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id and pa.patient_id = p.id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +
@@ -77,6 +79,7 @@ public class PatientExtracts {
         try {
             String sql = "SELECT DISTINCT" +
                     " p.id," +
+                    " pcrm.resource_id, " +
                     " p.organisation_id," +
                     " p.nhs_number," +
                     " p.nhs_number_verification_concept_id," +
@@ -107,6 +110,7 @@ public class PatientExtracts {
                     " grs.effective_date as registered_date, " +
                     " pid.value as usual_practitioner_number" +
                     " FROM pcr2.patient p " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = p.id and pcrm.resource_type = 'Patient' " +
                     " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id and pa.patient_id = p.id " +
                     " left outer join pcr2.address a on a.id = pa.address_id " +
                     " left outer join pcr2.organisation org on org.id = p.organisation_id " +

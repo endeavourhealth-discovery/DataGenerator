@@ -21,7 +21,8 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -49,6 +50,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     "FROM data_generator.cohort_results cr" +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId" +
@@ -75,7 +78,8 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -103,6 +107,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -135,7 +141,8 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -163,6 +170,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -194,7 +203,8 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -222,6 +232,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -257,9 +269,39 @@ public class ObservationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "select distinct o.* " +
+            String sql = "select distinct " +
+                    "  o.id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
+                    "  o.concept_id, " +
+                    "  o.effective_date, " +
+                    "  o.effective_date_precision, " +
+                    "  o.effective_practitioner_id, " +
+                    "  o.entered_by_practitioner_id, " +
+                    "  o.care_activity_id, " +
+                    "  o.care_activity_heading_concept_id, " +
+                    "  o.owning_organisation_id, " +
+                    "  o.is_confidential, " +
+                    "  o.original_code, " +
+                    "  o.original_term, " +
+                    "  o.original_code_scheme, " +
+                    "  o.original_system, " +
+                    "  o.episodicity_concept_id, " +
+                    "  o.free_text_id, " +
+                    "  o.data_entry_prompt_id, " +
+                    "  o.significance_concept_id, " +
+                    "  o.is_consent, " +
+                    "  ov.result_value, " +
+                    "  ov.result_value_units, " +
+                    "  ov.result_date, " +
+                    "  ov.result_text, " +
+                    "  ov.result_concept_id, " +
+                    "  ov.reference_range_id, " +
+                    "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
@@ -291,7 +333,8 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -319,6 +362,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -359,6 +404,7 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -414,6 +460,7 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -469,6 +516,7 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -524,6 +572,7 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
+                    "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
                     "  mc.effective_date, " +
@@ -578,7 +627,8 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -606,6 +656,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
@@ -618,7 +670,7 @@ public class ObservationExtracts {
             query.executeUpdate();
             entityManager.getTransaction().commit();
 
-            createIndexesOnMatchingObservationCodesTempTable();
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
 
 
         } finally {
@@ -640,7 +692,8 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  o.id, " +
-                    "  o.patient_id, " +
+                    "  pcrm.resource_id, " +
+                    "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
                     "  o.effective_date, " +
                     "  o.effective_date_precision, " +
@@ -668,6 +721,8 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
@@ -686,30 +741,7 @@ public class ObservationExtracts {
             query.executeUpdate();
             entityManager.getTransaction().commit();
 
-            createIndexesOnMatchingObservationCodesTempTable();
-
-        } finally {
-            entityManager.close();
-        }
-    }
-
-    public static void createIndexesOnMatchingObservationCodesTempTable() throws Exception {
-        EntityManager entityManager = PersistenceManager.getEntityManager();
-
-        try {
-            String patientIndex = "alter table matching_codes add index codes_patient_id (patient_id);";
-            String dateIndex = "alter table matching_codes add index codes_effective_date (effective_date);";
-            Query query = entityManager.createNativeQuery(patientIndex);
-
-            entityManager.getTransaction().begin();
-            query.executeUpdate();
-            entityManager.getTransaction().commit();
-
-            query = entityManager.createNativeQuery(dateIndex);
-
-            entityManager.getTransaction().begin();
-            query.executeUpdate();
-            entityManager.getTransaction().commit();
+            GeneralQueries.createIndexesOnMatchingObservationCodesTempTable();
 
         } finally {
             entityManager.close();
