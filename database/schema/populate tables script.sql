@@ -12,28 +12,30 @@ select 1, '{
  "extract": [{
   		"type": "patient",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "nhs number", "index" : "2"},
-{"header" : "date of birth", "index" : "4"},
-{"header" : "gender concept id", "index": "6"},
-{"header" : "ethnic code", "index" : "17"},
-{"header" : "home address id", "index" : "15"},
-{"header" : "address line 1", "index" : "18"},
-{"header" : "address line 2", "index" : "19"},
-{"header" : "address line 3", "index" : "20"},
-{"header" : "address line 4", "index" : "21"},
-{"header" : "postcode", "index" : "22"},
-{"header" : "organisation id", "index" : "1"},
-{"header" : "ods code", "index" : "26"},
-{"header" : "organisation name", "index" : "27"}]
+{"header" : "patient id", "index" : "0"},
+{"header" : "patient resource id", "index" : "1"},
+{"header" : "nhs number", "index" : "3"},
+{"header" : "date of birth", "index" : "5"},
+{"header" : "gender concept id", "index": "7"},
+{"header" : "ethnic code", "index" : "18"},
+{"header" : "home address id", "index" : "16"},
+{"header" : "address line 1", "index" : "19"},
+{"header" : "address line 2", "index" : "20"},
+{"header" : "address line 3", "index" : "21"},
+{"header" : "address line 4", "index" : "22"},
+{"header" : "postcode", "index" : "23"},
+{"header" : "organisation id", "index" : "2"},
+{"header" : "ods code", "index" : "27"},
+{"header" : "organisation name", "index" : "28"}]
 },{
   		"type": "immunisation",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "12"},
-{"header" : "original term", "index" : "13"}],
+{"header" : "immunisation id", "index" : "0"},
+{"header" : "immunisation resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "13"},
+{"header" : "original term", "index" : "14"}],
  		"codeSets": [
 {"codeSetId" : 1, "extractType" : "latest_each"}]
 }]
@@ -47,64 +49,68 @@ select 2, '{
  "extract": [{
   		"type": "patient",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "nhs number", "index" : "2"},
-{"header" : "date of birth", "index" : "4"},
-{"header" : "date of death", "index" : "5"},
-{"header" : "gender concept id", "index": "6"},
-{"header" : "ethnic code", "index" : "17"},
-{"header" : "organisation id", "index" : "1"},
-{"header" : "ods code", "index" : "26"},
-{"header" : "organisation name", "index" : "27"}]
+{"header" : "patient id", "index" : "0"},
+{"header" : "patient resource id", "index" : "1"},
+{"header" : "nhs number", "index" : "3"},
+{"header" : "date of birth", "index" : "5"},
+{"header" : "date of death", "index" : "6"},
+{"header" : "gender concept id", "index": "7"},
+{"header" : "ethnic code", "index" : "18"},
+{"header" : "organisation id", "index" : "2"},
+{"header" : "ods code", "index" : "27"},
+{"header" : "organisation name", "index" : "28"}]
 },{
   		"type": "allergy",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "concept id", "index" : "2"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "effective practitioner id", "index" : "5"},
-{"header" : "entered by practitioner id", "index" : "6"},
-{"header" : "care activity id", "index" : "7"},
-{"header" : "care activity heading concept id", "index" : "8"},
-{"header" : "owning organisation id", "index" : "9"},
-{"header" : "status concept id", "index" : "10"},
-{"header" : "is confidential", "index" : "11"},
-{"header" : "original code", "index" : "12"},
-{"header" : "original term", "index" : "13"},
-{"header" : "original code scheme", "index" : "14"},
-{"header" : "original system", "index" : "15"},
-{"header" : "substance concept id", "index" : "16"},
-{"header" : "manifestation concept id", "index" : "17"},
-{"header" : "manifestation free text id", "index" : "18"},
-{"header" : "is consent", "index" : "19"}]
+{"header" : "allergy id", "index" : "0"},
+{"header" : "allergy resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "concept id", "index" : "3"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "effective practitioner id", "index" : "6"},
+{"header" : "entered by practitioner id", "index" : "7"},
+{"header" : "care activity id", "index" : "8"},
+{"header" : "care activity heading concept id", "index" : "9"},
+{"header" : "owning organisation id", "index" : "10"},
+{"header" : "status concept id", "index" : "11"},
+{"header" : "is confidential", "index" : "12"},
+{"header" : "original code", "index" : "13"},
+{"header" : "original term", "index" : "14"},
+{"header" : "original code scheme", "index" : "15"},
+{"header" : "original system", "index" : "16"},
+{"header" : "substance concept id", "index" : "17"},
+{"header" : "manifestation concept id", "index" : "18"},
+{"header" : "manifestation free text id", "index" : "19"},
+{"header" : "is consent", "index" : "20"}]
 },{
   		"type": "medication",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "12"},
-{"header" : "original term", "index" : "13"},
-{"header" : "issues authorised", "index" : "18"},
-{"header" : "is active", "index" : "23"},
-{"header" : "end date", "index" : "24"},
-{"header" : "issues", "index" : "27"},
-{"header" : "medication amount id", "index" : "17"},
-{"header" : "dose", "index" : "29"},
-{"header" : "quantity value", "index" : "30"},
-{"header" : "quantity units", "index" : "31"}],
+{"header" : "medication id", "index" : "0"},
+{"header" : "medication resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "13"},
+{"header" : "original term", "index" : "14"},
+{"header" : "issues authorised", "index" : "19"},
+{"header" : "is active", "index" : "24"},
+{"header" : "end date", "index" : "25"},
+{"header" : "issues", "index" : "28"},
+{"header" : "medication amount id", "index" : "18"},
+{"header" : "dose", "index" : "30"},
+{"header" : "quantity value", "index" : "31"},
+{"header" : "quantity units", "index" : "32"}],
  		"codeSets": [
 {"codeSetId": 19, "extractType": "latest_each"},
 {"codeSetId": 25, "extractType": "latest_each"}]
 },{
   		"type": "observation",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"}],
+{"header" : "observation id", "index" : "0"},
+{"header" : "observation resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"}],
  		"codeSets": [
 {"codeSetId": 6, "extractType": "latest"},
 {"codeSetId": 7, "extractType": "latest"},
@@ -177,58 +183,61 @@ select 3, '{
  "extract": [{
   		"type": "patient",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "nhs number", "index" : "2"},
-{"header" : "date of birth", "index" : "4"},
-{"header" : "date of death", "index" : "5"},
-{"header" : "gender concept id", "index": "6"},
-{"header" : "ethnic code", "index" : "17"},
-{"header" : "title", "index" : "10"},
-{"header" : "first name", "index" : "11"},
-{"header" : "middle names", "index" : "12"},
-{"header" : "last name", "index" : "13"},
-{"header" : "previous last name", "index" : "14"},
-{"header" : "home address id", "index" : "15"},
-{"header" : "address line 1", "index" : "18"},
-{"header" : "address line 2", "index" : "19"},
-{"header" : "address line 3", "index" : "20"},
-{"header" : "address line 4", "index" : "21"},
-{"header" : "postcode", "index" : "22"},
-{"header" : "organisation id", "index" : "1"},
-{"header" : "ods code", "index" : "26"},
-{"header" : "organisation name", "index" : "27"},
-{"header" : "registered date", "index" : "28"},
-{"header" : "usual practitioner number", "index" : "29"}]
+{"header" : "patient id", "index" : "0"},
+{"header" : "patient resource id", "index" : "1"},
+{"header" : "nhs number", "index" : "3"},
+{"header" : "date of birth", "index" : "5"},
+{"header" : "date of death", "index" : "6"},
+{"header" : "gender concept id", "index": "7"},
+{"header" : "ethnic code", "index" : "18"},
+{"header" : "title", "index" : "11"},
+{"header" : "first name", "index" : "12"},
+{"header" : "middle names", "index" : "13"},
+{"header" : "last name", "index" : "14"},
+{"header" : "previous last name", "index" : "15"},
+{"header" : "home address id", "index" : "16"},
+{"header" : "address line 1", "index" : "19"},
+{"header" : "address line 2", "index" : "20"},
+{"header" : "address line 3", "index" : "21"},
+{"header" : "address line 4", "index" : "22"},
+{"header" : "postcode", "index" : "23"},
+{"header" : "organisation id", "index" : "2"},
+{"header" : "ods code", "index" : "27"},
+{"header" : "organisation name", "index" : "28"},
+{"header" : "registered date", "index" : "29"},
+{"header" : "usual practitioner number", "index" : "30"}]
 },{
   		"type": "medication",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "12"},
-{"header" : "original term", "index" : "13"},
-{"header" : "issues authorised", "index" : "18"},
-{"header" : "is active", "index" : "23"},
-{"header" : "end date", "index" : "24"},
-{"header" : "issues", "index" : "27"},
-{"header" : "medication amount id", "index" : "17"},
-{"header" : "dose", "index" : "29"},
-{"header" : "quantity value", "index" : "30"},
-{"header" : "quantity units", "index" : "31"}],
+{"header" : "medication id", "index" : "0"},
+{"header" : "medication resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "13"},
+{"header" : "original term", "index" : "14"},
+{"header" : "issues authorised", "index" : "19"},
+{"header" : "is active", "index" : "24"},
+{"header" : "end date", "index" : "25"},
+{"header" : "issues", "index" : "28"},
+{"header" : "medication amount id", "index" : "18"},
+{"header" : "dose", "index" : "30"},
+{"header" : "quantity value", "index" : "31"},
+{"header" : "quantity units", "index" : "32"}],
  		"codeSets": [
 {"codeSetId": 19, "extractType": "latest_each"}]
 },{
-  		"type": "observation",
+   		"type": "observation",
   		"fields": [
-{"header" : "id", "index" : "0"},
-{"header" : "patient id", "index" : "1"},
-{"header" : "effective date", "index" : "3"},
-{"header" : "original code", "index" : "11"},
-{"header" : "original term", "index" : "12"},
-{"header" : "result value", "index" : "20"},
-{"header" : "result value units", "index" : "21"},
-{"header" : "result date", "index" : "22"},
-{"header" : "result text", "index" : "23"}],
+{"header" : "observation id", "index" : "0"},
+{"header" : "observation resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"},
+{"header" : "result value", "index" : "21"},
+{"header" : "result value units", "index" : "22"},
+{"header" : "result date", "index" : "23"},
+{"header" : "result text", "index" : "24"}],
  		"codeSets": [
 {"codeSetId": 2, "extractType": "latest"},
 {"codeSetId": 3, "extractType": "latest"},
@@ -244,7 +253,7 @@ delete from data_generator.extract where extract_id <= 6;
 
 -- create some extract data for extract 1
 insert into data_generator.extract
-select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
+select 1, 'Subscriber A Child Imms', 4, 1, 1, '{
  "name": "Data Generator Extract Definition 1",
  "id": "1",
  "projectId": "R1D68",
@@ -307,7 +316,7 @@ select 3, 'Subscriber A Diabetes', 1, 1, 3, '{
 
 -- create some extract data for extract 4
 insert into data_generator.extract
-select 4, 'Subscriber B Child Imms', 2, 1, 1, '{
+select 4, 'Subscriber B Child Imms', 4, 1, 1, '{
  "name": "Data Generator Extract Definition 4",
  "id": "4",
  "projectId": "8JM56",
@@ -390,7 +399,7 @@ select * from data_generator.file_transactions;
 -- set encrypt_date = now() where extract_id = 1 and filename = '2_20181126.zip';
 
 -- delete some cohort data
-delete from data_generator.cohort where id <= 3;
+delete from data_generator.cohort where id <= 4;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
