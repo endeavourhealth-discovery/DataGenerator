@@ -58,7 +58,6 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = 1 " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
