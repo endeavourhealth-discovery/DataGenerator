@@ -58,7 +58,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     "  where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -120,7 +120,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id" +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 44 " +
@@ -188,7 +188,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.medication_statement oo on oo.patient_id = m.patient_id " +
                     "   and oo.original_code = m.original_code " +
@@ -255,7 +255,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.medication_statement oo on oo.patient_id = m.patient_id " +
                     "    and oo.original_code = m.original_code " +
@@ -328,7 +328,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.medication_statement oo on oo.patient_id = m.patient_id " +
                     "   and oo.original_code = m.original_code " +
@@ -395,7 +395,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.medication_statement oo on oo.patient_id = m.patient_id " +
                     "    and oo.original_code = m.original_code " +
@@ -713,7 +713,7 @@ public class MedicationExtracts {
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.medication_statement m on m.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -780,7 +780,7 @@ public class MedicationExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = m.id and pcrm.resource_type = 'MedicationStatement' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = m.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.medication_amount ma on ma.id = m.medication_amount_id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = m.original_code " +
+                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.sct_concept_id = m.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 44 " +
