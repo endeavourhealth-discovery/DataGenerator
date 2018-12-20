@@ -24,7 +24,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -43,7 +43,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -81,7 +81,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -100,7 +100,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -144,7 +144,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -163,7 +163,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -206,7 +206,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -225,7 +225,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -274,7 +274,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -293,7 +293,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -336,7 +336,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -355,7 +355,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -407,7 +407,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -426,7 +426,7 @@ public class ObservationExtracts {
                     "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
-                    "  mc.result_date, " +
+                    "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
                     "  mc.result_concept_id, " +
                     "  mc.reference_range_id, " +
@@ -463,7 +463,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -482,7 +482,7 @@ public class ObservationExtracts {
                     "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
-                    "  mc.result_date, " +
+                    "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
                     "  mc.result_concept_id, " +
                     "  mc.reference_range_id, " +
@@ -519,7 +519,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -538,7 +538,7 @@ public class ObservationExtracts {
                     "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
-                    "  mc.result_date, " +
+                    "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
                     "  mc.result_concept_id, " +
                     "  mc.reference_range_id, " +
@@ -575,7 +575,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -594,7 +594,7 @@ public class ObservationExtracts {
                     "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
-                    "  mc.result_date, " +
+                    "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
                     "  mc.result_concept_id, " +
                     "  mc.reference_range_id, " +
@@ -630,7 +630,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -649,7 +649,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +
@@ -695,7 +695,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  o.effective_date, " +
+                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -714,7 +714,7 @@ public class ObservationExtracts {
                     "  o.is_consent, " +
                     "  ov.result_value, " +
                     "  ov.result_value_units, " +
-                    "  ov.result_date, " +
+                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
                     "  ov.result_text, " +
                     "  ov.result_concept_id, " +
                     "  ov.reference_range_id, " +

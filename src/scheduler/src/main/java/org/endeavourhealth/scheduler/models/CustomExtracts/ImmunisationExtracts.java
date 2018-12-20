@@ -24,7 +24,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -41,7 +41,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -78,7 +78,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -95,7 +95,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -138,7 +138,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -155,7 +155,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -197,7 +197,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -214,7 +214,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -262,7 +262,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -279,7 +279,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -321,7 +321,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -338,7 +338,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -389,7 +389,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -406,7 +406,7 @@ public class ImmunisationExtracts {
                     "  mc.body_location_concept_id, " +
                     "  mc.method_concept_id, " +
                     "  mc.batch_number, " +
-                    "  mc.expiry_date, " +
+                    "  date_format(mc.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  mc.manufacturer, " +
                     "  mc.dose_ordinal, " +
                     "  mc.doses_required, " +
@@ -443,7 +443,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -460,7 +460,7 @@ public class ImmunisationExtracts {
                     "  mc.body_location_concept_id, " +
                     "  mc.method_concept_id, " +
                     "  mc.batch_number, " +
-                    "  mc.expiry_date, " +
+                    "  date_format(mc.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  mc.manufacturer, " +
                     "  mc.dose_ordinal, " +
                     "  mc.doses_required, " +
@@ -497,7 +497,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -514,7 +514,7 @@ public class ImmunisationExtracts {
                     "  mc.body_location_concept_id, " +
                     "  mc.method_concept_id, " +
                     "  mc.batch_number, " +
-                    "  mc.expiry_date, " +
+                    "  date_format(mc.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  mc.manufacturer, " +
                     "  mc.dose_ordinal, " +
                     "  mc.doses_required, " +
@@ -551,7 +551,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -568,7 +568,7 @@ public class ImmunisationExtracts {
                     "  mc.body_location_concept_id, " +
                     "  mc.method_concept_id, " +
                     "  mc.batch_number, " +
-                    "  mc.expiry_date, " +
+                    "  date_format(mc.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  mc.manufacturer, " +
                     "  mc.dose_ordinal, " +
                     "  mc.doses_required, " +
@@ -603,7 +603,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -620,7 +620,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +
@@ -660,7 +660,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  i.effective_date, " +
+                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -677,7 +677,7 @@ public class ImmunisationExtracts {
                     "  i.body_location_concept_id, " +
                     "  i.method_concept_id, " +
                     "  i.batch_number, " +
-                    "  i.expiry_date, " +
+                    "  date_format(i.expiry_date, '%d/%m/%Y') as expiry_date," +
                     "  i.manufacturer, " +
                     "  i.dose_ordinal, " +
                     "  i.doses_required, " +

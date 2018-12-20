@@ -19,13 +19,13 @@ public class PatientExtracts {
 
         try {
             String sql = "SELECT DISTINCT " +
-                    " p.id, " +
-                    " pcrm.resource_id, " +
+                    " p.id," +
+                    " pcrm.resource_id," +
                     " p.organisation_id," +
                     " p.nhs_number," +
                     " p.nhs_number_verification_concept_id," +
-                    " p.date_of_birth," +
-                    " p.date_of_death," +
+                    " date_format(p.date_of_birth, '%d/%m/%Y') as date_of_birth," +
+                    " date_format(p.date_of_death, '%d/%m/%Y') as date_of_death," +
                     " p.gender_concept_id," +
                     " p.usual_practitioner_id," +
                     " p.care_provider_id," +
@@ -44,12 +44,12 @@ public class PatientExtracts {
                     " a.address_line_4," +
                     " a.postcode," +
                     " a.uprn," +
-                    " a.approximation_concept_id, " +
-                    " a.property_type_concept_id, " +
-                    " org.ods_code, " +
-                    " org.name as organisation_name, " +
-                    " grs.effective_date as registered_date, " +
-                    " pid.value as usual_practitioner_number " +
+                    " a.approximation_concept_id," +
+                    " a.property_type_concept_id," +
+                    " org.ods_code," +
+                    " org.name as organisation_name," +
+                    " date_format(grs.effective_date, '%d/%m/%Y') as registered_date," +
+                    " pid.value as usual_practitioner_number" +
                     " FROM pcr2.patient p " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = p.id and pcrm.resource_type = 'Patient' " +
                     " left outer join pcr2.patient_address pa on pa.address_id = p.home_address_id and pa.patient_id = p.id " +
@@ -58,7 +58,7 @@ public class PatientExtracts {
                     " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id " +
                     " left outer join pcr2.practitioner_identifier pid on pid.practitioner_id = p.usual_practitioner_id " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
-                    " where cr.bulked = 0;";
+                    " where cr.bulked = 0; ";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId);
 
@@ -79,12 +79,12 @@ public class PatientExtracts {
         try {
             String sql = "SELECT DISTINCT" +
                     " p.id," +
-                    " pcrm.resource_id, " +
+                    " pcrm.resource_id," +
                     " p.organisation_id," +
                     " p.nhs_number," +
                     " p.nhs_number_verification_concept_id," +
-                    " p.date_of_birth," +
-                    " p.date_of_death," +
+                    " date_format(p.date_of_birth, '%d/%m/%Y') as date_of_birth," +
+                    " date_format(p.date_of_death, '%d/%m/%Y') as date_of_death," +
                     " p.gender_concept_id," +
                     " p.usual_practitioner_id," +
                     " p.care_provider_id," +
@@ -103,11 +103,11 @@ public class PatientExtracts {
                     " a.address_line_4," +
                     " a.postcode," +
                     " a.uprn," +
-                    " a.approximation_concept_id, " +
-                    " a.property_type_concept_id, " +
-                    " org.ods_code, " +
-                    " org.name as organisation_name, " +
-                    " grs.effective_date as registered_date, " +
+                    " a.approximation_concept_id," +
+                    " a.property_type_concept_id," +
+                    " org.ods_code," +
+                    " org.name as organisation_name," +
+                    " date_format(grs.effective_date, '%d/%m/%Y') as registered_date," +
                     " pid.value as usual_practitioner_number" +
                     " FROM pcr2.patient p " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = p.id and pcrm.resource_type = 'Patient' " +

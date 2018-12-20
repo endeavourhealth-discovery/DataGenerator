@@ -194,7 +194,6 @@ select 3, '{
 {"header" : "first name", "index" : "12"},
 {"header" : "middle names", "index" : "13"},
 {"header" : "last name", "index" : "14"},
-{"header" : "previous last name", "index" : "15"},
 {"header" : "home address id", "index" : "16"},
 {"header" : "address line 1", "index" : "19"},
 {"header" : "address line 2", "index" : "20"},
@@ -235,9 +234,7 @@ select 3, '{
 {"header" : "original code", "index" : "12"},
 {"header" : "original term", "index" : "13"},
 {"header" : "result value", "index" : "21"},
-{"header" : "result value units", "index" : "22"},
-{"header" : "result date", "index" : "23"},
-{"header" : "result text", "index" : "24"}],
+{"header" : "result value units", "index" : "22"}],
  		"codeSets": [
 {"codeSetId": 2, "extractType": "latest"},
 {"codeSetId": 3, "extractType": "latest"},

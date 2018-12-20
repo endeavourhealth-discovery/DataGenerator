@@ -24,7 +24,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -40,12 +40,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -86,7 +86,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -102,12 +102,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -154,7 +154,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -170,12 +170,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -221,7 +221,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -237,12 +237,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -294,7 +294,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -310,12 +310,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -361,7 +361,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -377,12 +377,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -437,7 +437,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date, " +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -453,12 +453,12 @@ public class MedicationExtracts {
                     "  mc.type_concept_id, " +
                     "  mc.medication_amount_id, " +
                     "  mc.issues_authorised, " +
-                    "  mc.review_date, " +
+                    "  date_format(mc.review_date, '%d/%m/%Y') as review_date," +
                     "  mc.course_length_per_issue_days, " +
                     "  mc.patient_instructions_free_text_id, " +
                     "  mc.pharmacy_instructions_free_text_id, " +
                     "  mc.is_active, " +
-                    "  mc.end_date, " +
+                    "  date_format(mc.end_date, '%d/%m/%Y') as end_date," +
                     "  mc.end_reason_concept_id, " +
                     "  mc.end_reason_free_text_id, " +
                     "  mc.issues, " +
@@ -498,7 +498,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -514,12 +514,12 @@ public class MedicationExtracts {
                     "  mc.type_concept_id, " +
                     "  mc.medication_amount_id, " +
                     "  mc.issues_authorised, " +
-                    "  mc.review_date, " +
+                    "  date_format(mc.review_date, '%d/%m/%Y') as review_date," +
                     "  mc.course_length_per_issue_days, " +
                     "  mc.patient_instructions_free_text_id, " +
                     "  mc.pharmacy_instructions_free_text_id, " +
                     "  mc.is_active, " +
-                    "  mc.end_date, " +
+                    "  date_format(mc.end_date, '%d/%m/%Y') as end_date," +
                     "  mc.end_reason_concept_id, " +
                     "  mc.end_reason_free_text_id, " +
                     "  mc.issues, " +
@@ -559,7 +559,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -575,12 +575,12 @@ public class MedicationExtracts {
                     "  mc.type_concept_id, " +
                     "  mc.medication_amount_id, " +
                     "  mc.issues_authorised, " +
-                    "  mc.review_date, " +
+                    "  date_format(mc.review_date, '%d/%m/%Y') as review_date," +
                     "  mc.course_length_per_issue_days, " +
                     "  mc.patient_instructions_free_text_id, " +
                     "  mc.pharmacy_instructions_free_text_id, " +
                     "  mc.is_active, " +
-                    "  mc.end_date, " +
+                    "  date_format(mc.end_date, '%d/%m/%Y') as end_date," +
                     "  mc.end_reason_concept_id, " +
                     "  mc.end_reason_free_text_id, " +
                     "  mc.issues, " +
@@ -620,7 +620,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  mc.effective_date, " +
+                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -636,12 +636,12 @@ public class MedicationExtracts {
                     "  mc.type_concept_id, " +
                     "  mc.medication_amount_id, " +
                     "  mc.issues_authorised, " +
-                    "  mc.review_date, " +
+                    "  date_format(mc.review_date, '%d/%m/%Y') as review_date," +
                     "  mc.course_length_per_issue_days, " +
                     "  mc.patient_instructions_free_text_id, " +
                     "  mc.pharmacy_instructions_free_text_id, " +
                     "  mc.is_active, " +
-                    "  mc.end_date, " +
+                    "  date_format(mc.end_date, '%d/%m/%Y') as end_date," +
                     "  mc.end_reason_concept_id, " +
                     "  mc.end_reason_free_text_id, " +
                     "  mc.issues, " +
@@ -681,7 +681,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -697,12 +697,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
@@ -746,7 +746,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  m.effective_date, " +
+                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -762,12 +762,12 @@ public class MedicationExtracts {
                     "  m.type_concept_id, " +
                     "  m.medication_amount_id, " +
                     "  m.issues_authorised, " +
-                    "  m.review_date, " +
+                    "  date_format(m.review_date, '%d/%m/%Y') as review_date," +
                     "  m.course_length_per_issue_days, " +
                     "  m.patient_instructions_free_text_id, " +
                     "  m.pharmacy_instructions_free_text_id, " +
                     "  m.is_active, " +
-                    "  m.end_date, " +
+                    "  date_format(m.end_date, '%d/%m/%Y') as end_date," +
                     "  m.end_reason_concept_id, " +
                     "  m.end_reason_free_text_id, " +
                     "  m.issues, " +
