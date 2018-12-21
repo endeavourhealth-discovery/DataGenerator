@@ -24,7 +24,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -78,7 +78,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -138,7 +138,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -197,7 +197,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -262,7 +262,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -321,7 +321,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -389,7 +389,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -443,7 +443,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -497,7 +497,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -551,7 +551,7 @@ public class ImmunisationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -603,7 +603,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +
@@ -660,7 +660,7 @@ public class ImmunisationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  i.concept_id, " +
-                    "  date_format(i.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  i.effective_date, " +
                     "  i.effective_date_precision, " +
                     "  i.effective_practitioner_id, " +
                     "  i.entered_by_practitioner_id, " +

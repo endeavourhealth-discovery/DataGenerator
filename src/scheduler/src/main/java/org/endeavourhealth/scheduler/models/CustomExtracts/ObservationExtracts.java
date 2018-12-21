@@ -24,7 +24,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -81,7 +81,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -144,7 +144,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -206,7 +206,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -274,7 +274,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -336,7 +336,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -407,7 +407,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -463,7 +463,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -519,7 +519,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -575,7 +575,7 @@ public class ObservationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -630,7 +630,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +
@@ -695,7 +695,7 @@ public class ObservationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  o.concept_id, " +
-                    "  date_format(o.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  o.effective_date," +
                     "  o.effective_date_precision, " +
                     "  o.effective_practitioner_id, " +
                     "  o.entered_by_practitioner_id, " +

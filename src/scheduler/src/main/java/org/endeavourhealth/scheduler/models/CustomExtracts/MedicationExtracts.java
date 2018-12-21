@@ -24,7 +24,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -86,7 +86,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -154,7 +154,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -221,7 +221,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -294,7 +294,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -361,7 +361,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -437,7 +437,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date, " +
+                    "  mc.effective_date, " +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -498,7 +498,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -559,7 +559,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -620,7 +620,7 @@ public class MedicationExtracts {
                     "  mc.resource_id, " +
                     "  mc.patient_id, " +
                     "  mc.drug_concept_id, " +
-                    "  date_format(mc.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  mc.effective_date," +
                     "  mc.effective_date_precision, " +
                     "  mc.effective_practitioner_id, " +
                     "  mc.entered_by_practitioner_id, " +
@@ -681,7 +681,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
@@ -746,7 +746,7 @@ public class MedicationExtracts {
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
                     "  m.drug_concept_id, " +
-                    "  date_format(m.effective_date, '%d/%m/%Y') as effective_date," +
+                    "  m.effective_date," +
                     "  m.effective_date_precision, " +
                     "  m.effective_practitioner_id, " +
                     "  m.entered_by_practitioner_id, " +
