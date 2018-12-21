@@ -45,7 +45,7 @@ public class Main {
 
             File file = new File(args[3]);
             if (!file.getName().contains(".zip")) {
-                LOG.info("Parameter 5 needs to be a zip file.");
+                LOG.info("Parameter 4 needs to be a zip file.");
                 return;
             }
 

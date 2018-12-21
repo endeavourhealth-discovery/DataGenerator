@@ -8,10 +8,8 @@
     </encoder>
   </appender>
 
-  <appender name="fileout" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/var/log/data-generator/decrypt-%d{yyyyMMdd}.log</fileNamePattern>
-    </rollingPolicy>
+  <appender name="fileout" class="ch.qos.logback.core.FileAppender">
+    <file>/var/log/data-generator/data-generator-decrypt-%d{yyyyMMdd'T'HHmmss}.txt</file>
     <encoder>
       <pattern>%d{dd MMM HH:mm:ss.SSS} [%thread] %-5level %logger{10}:%-3line - %msg%n
       </pattern>
