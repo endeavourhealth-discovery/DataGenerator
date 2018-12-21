@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
+  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
   <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{dd MMM HH:mm:ss.SSS} [%thread] %-5level %logger{10}:%-3line - %msg%n
@@ -9,7 +11,7 @@
   </appender>
 
   <appender name="fileout" class="ch.qos.logback.core.FileAppender">
-    <file>/var/log/data-generator/data-generator-decrypt-%d{yyyyMMdd'T'HHmmss}.txt</file>
+    <file>/var/log/data-generator/data-generator-decrypt-${bySecond}.txt</file>
     <encoder>
       <pattern>%d{dd MMM HH:mm:ss.SSS} [%thread] %-5level %logger{10}:%-3line - %msg%n
       </pattern>
