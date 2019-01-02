@@ -25,7 +25,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         if (args.length != 4) {
-            LOG.info("Application requires 5 parameters.");
+            LOG.info("Application requires 4 parameters.");
             LOG.info("Parameter 1: P12 file");
             LOG.info("Parameter 2: Alias");
             LOG.info("Parameter 3: Password");
