@@ -19,7 +19,7 @@ public class ImmunisationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT " +
+            String sql = "SELECT DISTINCT " +
                     "  i.id, " +
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +

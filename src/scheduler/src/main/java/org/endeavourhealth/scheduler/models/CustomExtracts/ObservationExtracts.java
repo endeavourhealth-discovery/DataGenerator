@@ -19,7 +19,7 @@ public class ObservationExtracts {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         try {
-            String sql = "SELECT " +
+            String sql = "SELECT DISTINCT " +
                     "  o.id, " +
                     "  pcrm.resource_id, " +
                     "  pcrmpat.resource_id as patient_id, " +
