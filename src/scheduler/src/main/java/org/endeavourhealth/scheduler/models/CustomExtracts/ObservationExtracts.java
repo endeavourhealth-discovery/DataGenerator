@@ -12,7 +12,7 @@ public class ObservationExtracts {
 
     private static final Logger LOG = LoggerFactory.getLogger(ObservationExtracts.class);
 
-    public static List runBulkObservationAllCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkObservationAllCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk all");
         // LOG.info("Bulk observation all codes");
 
@@ -55,10 +55,12 @@ public class ObservationExtracts {
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId" +
-                    "  where cr.bulked = 0;";
+                    " where cr.bulked = 0 " +
+                    " limit :index, " + size + "; ";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", codeSetId);
+                    .setParameter("codeSetId", codeSetId)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 

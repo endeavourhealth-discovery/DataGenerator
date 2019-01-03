@@ -37,6 +37,7 @@ public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
     private boolean limitCols = false;
+    private static final int PAGE_SIZE = 10000;
 
     public void setLimitCols(boolean limit) {
         this.limitCols = limit;
@@ -155,8 +156,12 @@ public class GenerateData implements Job {
 
         List results;
 
-        results = PatientExtracts.runBulkPatientExtract(extractId);
-        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+        int page = 1;
+        results = PatientExtracts.runBulkPatientExtract(extractId, page++, PAGE_SIZE);
+        while (results.size() > 0) {
+            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+            results = PatientExtracts.runBulkPatientExtract(extractId, page++, PAGE_SIZE);
+        }
         if (currentTransactionId > 0) {
             results = PatientExtracts.runDeltaPatientExtract(extractId, currentTransactionId, maxTransactionId);
             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
@@ -200,8 +205,12 @@ public class GenerateData implements Job {
                 switch (codeSet.getExtractType())
                 {
                     case "all":
-                        results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId());
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                        int page = 1;
+                        results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        }
 
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationAllCodesQuery(extractId, codeSet.getCodeSetId(),
@@ -271,8 +280,12 @@ public class GenerateData implements Job {
                 switch (codeSet.getExtractType())
                 {
                     case "all":
-                        results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId());
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                        int page = 1;
+                        results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        }
 
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(),
@@ -342,8 +355,12 @@ public class GenerateData implements Job {
                 switch (codeSet.getExtractType())
                 {
                     case "all":
-                        results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId());
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                        int page = 1;
+                        results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        }
 
                         if (currentTransactionId > 0) {
                             results = ImmunisationExtracts.runDeltaImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(),
@@ -413,8 +430,12 @@ public class GenerateData implements Job {
                 switch (codeSet.getExtractType())
                 {
                     case "all":
-                        results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId());
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                        int page = 1;
+                        results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        }
 
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(),

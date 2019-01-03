@@ -12,7 +12,7 @@ public class AllergyExtracts {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllergyExtracts.class);
 
-    public static List runBulkAllergyAllCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyAllCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk all");
         // LOG.info("Bulk allergy all codes");
 
@@ -47,10 +47,12 @@ public class AllergyExtracts {
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = a.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = a.original_code " +
                     " and csc.code_set_id = :codeSetId" +
-                    "  where cr.bulked = 0;";
+                    " where cr.bulked = 0 " +
+                    " limit :index, " + size + "; ";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", codeSetId);
+                    .setParameter("codeSetId", codeSetId)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 

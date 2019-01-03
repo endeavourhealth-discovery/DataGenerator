@@ -12,7 +12,7 @@ public class PatientExtracts {
 
     private static final Logger LOG = LoggerFactory.getLogger(PatientExtracts.class);
 
-    public static List runBulkPatientExtract(int extractId) throws Exception {
+    public static List runBulkPatientExtract(int extractId, int page, int size) throws Exception {
         // System.out.println("bulk all patients");
         // LOG.info("Bulk all patients");
         EntityManager entityManager = PersistenceManager.getEntityManager();
@@ -58,9 +58,11 @@ public class PatientExtracts {
                     " left outer join pcr2.gp_registration_status grs on grs.patient_id = p.id " +
                     " left outer join pcr2.practitioner_identifier pid on pid.practitioner_id = p.usual_practitioner_id " +
                     " join data_generator.cohort_results cr on cr.patient_id = p.id and cr.extract_id = :extractId " +
-                    " where cr.bulked = 0; ";
+                    " where cr.bulked = 0 " +
+                    " limit :index, " + size + "; ";
             Query query = entityManager.createNativeQuery(sql)
-                    .setParameter("extractId", extractId);
+                    .setParameter("extractId", extractId)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 
