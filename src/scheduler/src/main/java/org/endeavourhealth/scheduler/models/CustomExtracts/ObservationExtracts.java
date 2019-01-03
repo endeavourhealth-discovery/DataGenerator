@@ -50,8 +50,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     "FROM data_generator.cohort_results cr" +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -108,8 +107,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -172,8 +170,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -235,8 +232,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -304,8 +300,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -367,8 +362,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " FROM data_generator.cohort_results cr " +
                     " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -662,8 +656,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
@@ -728,8 +721,7 @@ public class ObservationExtracts {
                     "  ov.operator_concept_id " +
                     " from data_generator.cohort_results cr " +
                     " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and pcrm.resource_type = 'Observation' " +
-                    " or pcrm.pcr_id = o.id and pcrm.resource_type = 'Condition' " +
+                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
                     " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
                     " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
