@@ -199,7 +199,7 @@ public class GenerateData implements Job {
 
             // create the headers and the actual file
             createCSV(fieldHeaders, sectionName, extractId);
-
+            List<Long> resultsIds = new ArrayList<>();
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
                 switch (codeSet.getExtractType())
@@ -230,6 +230,19 @@ public class GenerateData implements Job {
                         break;
                     case "latest_each":
                         results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+
+                        List<Object[]> localResults = null;
+                        localResults.addAll(results);
+                        for (Object[] result : localResults) {
+                            Long resultId = Long.parseLong(result[0].toString());
+                            if (resultsIds.contains(resultId)) {
+                                localResults.remove(result);
+                            } else {
+                                resultsIds.add(resultId);
+                            }
+                        }
+                        results = localResults;
+
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
