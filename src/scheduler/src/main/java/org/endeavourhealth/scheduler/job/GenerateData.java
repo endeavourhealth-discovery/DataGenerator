@@ -233,15 +233,16 @@ public class GenerateData implements Job {
 
                         List<Object[]> localResults = new ArrayList<>();
                         localResults.addAll(results);
+                        List<Object[]> localResultsToRemove = new ArrayList<>();
                         for (Object[] result : localResults) {
                             Long resultId = Long.parseLong(result[0].toString());
                             if (resultsIds.contains(resultId)) {
-                                localResults.remove(result);
+                                localResultsToRemove.add(result);
                             } else {
                                 resultsIds.add(resultId);
                             }
                         }
-                        results = localResults;
+                        if (!(localResultsToRemove.isEmpty())) {results.removeAll(localResultsToRemove);}
 
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
