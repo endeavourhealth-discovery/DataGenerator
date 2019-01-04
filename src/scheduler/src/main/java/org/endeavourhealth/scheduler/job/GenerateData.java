@@ -83,7 +83,7 @@ public class GenerateData implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Exception occurred with generating data extracts: " + e);
-                // e.printStackTrace();
+                e.printStackTrace();
             }
         }
         Main.generateFilesDone = true;
@@ -231,7 +231,7 @@ public class GenerateData implements Job {
                     case "latest_each":
                         results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
 
-                        List<Object[]> localResults = null;
+                        List<Object[]> localResults = new ArrayList<>();
                         localResults.addAll(results);
                         for (Object[] result : localResults) {
                             Long resultId = Long.parseLong(result[0].toString());
