@@ -39,6 +39,7 @@ public class GenerateData implements Job {
     private boolean limitCols = false;
     private static final int PAGE_SIZE = 10000;
     private List<Long> allergyResultsIds = new ArrayList<>();
+    private List<Long> immunisationResultsIds = new ArrayList<>();
     private List<Long> observationResultsIds = new ArrayList<>();
 
     public void setLimitCols(boolean limit) {
@@ -415,6 +416,7 @@ public class GenerateData implements Job {
 
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
+                List resultsToRemove;
                 switch (codeSet.getExtractType()) {
                     case "all":
                         int page = 1;
@@ -442,11 +444,23 @@ public class GenerateData implements Job {
                         break;
                     case "latest_each":
                         results = ImmunisationExtracts.runBulkImmunisationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+
+                        resultsToRemove = this.removeImmunisationDuplicateResultsBetweenCodeSets(results);
+                        if (!(resultsToRemove.isEmpty())) {
+                            results.removeAll(resultsToRemove);
+                        }
+
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
                             results = ImmunisationExtracts.runDeltaImmunisationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
+
+                            resultsToRemove = this.removeImmunisationDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
@@ -473,6 +487,20 @@ public class GenerateData implements Job {
                 }
             }
         }
+    }
+
+    private List<Object[]> removeImmunisationDuplicateResultsBetweenCodeSets(List<Object[]> results) {
+
+        List<Object[]> resultsToRemove = new ArrayList<>();
+        for (Object[] result : results) {
+            Long resultId = Long.parseLong(result[0].toString());
+            if (immunisationResultsIds.contains(resultId)) {
+                resultsToRemove.add(result);
+            } else {
+                immunisationResultsIds.add(resultId);
+            }
+        }
+        return resultsToRemove;
     }
 
     private void runMedicationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
