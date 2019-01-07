@@ -236,12 +236,12 @@ select 3, '{
 {"header" : "result value", "index" : "21"},
 {"header" : "result value units", "index" : "22"}],
  		"codeSets": [
-{"codeSetId": 2, "extractType": "latest"},
-{"codeSetId": 3, "extractType": "latest"},
-{"codeSetId": 4, "extractType": "latest"},
-{"codeSetId": 5, "extractType": "latest"},
-{"codeSetId": 49, "extractType": "latest"},
-{"codeSetId": 57, "extractType": "latest"}]
+{"codeSetId": 2, "extractType": "latest_each"},
+{"codeSetId": 3, "extractType": "latest_each"},
+{"codeSetId": 4, "extractType": "latest_each"},
+{"codeSetId": 5, "extractType": "latest_each"},
+{"codeSetId": 49, "extractType": "latest_each"},
+{"codeSetId": 57, "extractType": "latest_each"}]
 }]
 }';
 
@@ -375,11 +375,11 @@ select 6, 'Subscriber B Diabetes', 2, 1, 3, '{
 }',0;
 
 -- populate the cohort results table with data from the pcr tables
-insert into data_generator.cohort_results
-select 1, id, organisation_id, 0 from pcr.patient;
+-- insert into data_generator.cohort_results
+-- select 1, id, organisation_id, 0 from pcr.patient;
 
-insert into data_generator.cohort_results
-select 2, id, organisation_id, 0 from pcr.patient;
+-- insert into data_generator.cohort_results
+-- select 2, id, organisation_id, 0 from pcr.patient;
 
 -- look at the state of the file-transactions queue for the Java class processes 
 -- ZipCSVFiles, EncryptFiles, TransferEncryptedFilesToSftp & HousekeepFiles    
