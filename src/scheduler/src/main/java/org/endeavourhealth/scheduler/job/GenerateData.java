@@ -38,6 +38,8 @@ public class GenerateData implements Job {
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
     private boolean limitCols = false;
     private static final int PAGE_SIZE = 10000;
+    private List<Long> allergyResultsIds = new ArrayList<>();
+    private List<Long> observationResultsIds = new ArrayList<>();
 
     public void setLimitCols(boolean limit) {
         this.limitCols = limit;
@@ -199,11 +201,10 @@ public class GenerateData implements Job {
 
             // create the headers and the actual file
             createCSV(fieldHeaders, sectionName, extractId);
-            List<Long> resultsIds = new ArrayList<>();
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
-                switch (codeSet.getExtractType())
-                {
+                List resultsToRemove;
+                switch (codeSet.getExtractType()) {
                     case "all":
                         int page = 1;
                         results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
@@ -218,40 +219,47 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
+
                     case "earliest_each":
                         results = ObservationExtracts.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
+
+
+
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
+
+
+
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
+
                     case "latest_each":
                         results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
 
-                        List<Object[]> localResults = new ArrayList<>();
-                        localResults.addAll(results);
-                        List<Object[]> localResultsToRemove = new ArrayList<>();
-                        for (Object[] result : localResults) {
-                            Long resultId = Long.parseLong(result[0].toString());
-                            if (resultsIds.contains(resultId)) {
-                                localResultsToRemove.add(result);
-                            } else {
-                                resultsIds.add(resultId);
-                            }
+                        resultsToRemove = this.removeObservationDuplicateResultsBetweenCodeSets(results);
+                        if (!(resultsToRemove.isEmpty())) {
+                            results.removeAll(resultsToRemove);
                         }
-                        if (!(localResultsToRemove.isEmpty())) {results.removeAll(localResultsToRemove);}
 
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
+
+                            resultsToRemove = this.removeObservationDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
+
                     case "earliest":
                         results = ObservationExtracts.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
@@ -262,6 +270,7 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
+
                     case "latest":
                         results = ObservationExtracts.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId());
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
@@ -275,6 +284,20 @@ public class GenerateData implements Job {
                 }
             }
         }
+    }
+
+    private List<Object[]> removeObservationDuplicateResultsBetweenCodeSets(List<Object[]> results) {
+
+        List<Object[]> resultsToRemove = new ArrayList<>();
+        for (Object[] result : results) {
+            Long resultId = Long.parseLong(result[0].toString());
+            if (observationResultsIds.contains(resultId)) {
+            resultsToRemove.add(result);
+            } else {
+                observationResultsIds.add(resultId);
+            }
+        }
+        return resultsToRemove;
     }
 
     private void runAllergyExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
@@ -291,8 +314,8 @@ public class GenerateData implements Job {
 
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
-                switch (codeSet.getExtractType())
-                {
+                List resultsToRemove;
+                switch (codeSet.getExtractType()) {
                     case "all":
                         int page = 1;
                         results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
@@ -319,11 +342,23 @@ public class GenerateData implements Job {
                         break;
                     case "latest_each":
                         results = AllergyExtracts.runBulkAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
+
+                        resultsToRemove = this.removeAllergyDuplicateResultsBetweenCodeSets(results);
+                        if (!(resultsToRemove.isEmpty())) {
+                            results.removeAll(resultsToRemove);
+                        }
+
                         saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
+
+                            resultsToRemove = this.removeAllergyDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                         }
                         break;
@@ -352,6 +387,20 @@ public class GenerateData implements Job {
         }
     }
 
+    private List<Object[]> removeAllergyDuplicateResultsBetweenCodeSets(List<Object[]> results) {
+
+        List<Object[]> resultsToRemove = new ArrayList<>();
+        for (Object[] result : results) {
+            Long resultId = Long.parseLong(result[0].toString());
+            if (allergyResultsIds.contains(resultId)) {
+                resultsToRemove.add(result);
+            } else {
+                allergyResultsIds.add(resultId);
+            }
+        }
+        return resultsToRemove;
+    }
+
     private void runImmunisationExtractForCodeSets(DatasetConfigExtract extractConfig, int extractId, String sectionName, Long currentTransactionId, Long maxTransactionId) throws Exception {
 
         List<DatasetCodeSet> codeSets = extractConfig.getCodeSets();
@@ -366,8 +415,7 @@ public class GenerateData implements Job {
 
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
-                switch (codeSet.getExtractType())
-                {
+                switch (codeSet.getExtractType()) {
                     case "all":
                         int page = 1;
                         results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
@@ -441,8 +489,7 @@ public class GenerateData implements Job {
 
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
-                switch (codeSet.getExtractType())
-                {
+                switch (codeSet.getExtractType()) {
                     case "all":
                         int page = 1;
                         results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
@@ -519,8 +566,8 @@ public class GenerateData implements Job {
             int counter = 0;
             for (String field : fieldHeaders) {
                 fw.append("\"" + field + "\"");
-                counter ++;
-                if (counter < fieldHeaders.size()){
+                counter++;
+                if (counter < fieldHeaders.size()) {
                     fw.append(',');
                 }
             }
@@ -559,8 +606,8 @@ public class GenerateData implements Job {
                     } else {
                         bw.append("\"\"");
                     }
-                    counter ++;
-                    if (counter < fieldIndexes.size()){
+                    counter++;
+                    if (counter < fieldIndexes.size()) {
                         bw.append(',');
                     }
                 }
@@ -624,7 +671,7 @@ public class GenerateData implements Job {
         }
     }
 
-    private String createExtractIdAndTodayDateString(int extractId){
+    private String createExtractIdAndTodayDateString(int extractId) {
 
         Date todayDate = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
@@ -633,7 +680,7 @@ public class GenerateData implements Job {
         return extractIdAndTodayDate;
     }
 
-    private String createFilename(String sourceLocation, String extractIdAndTodayDate, String tableName){
+    private String createFilename(String sourceLocation, String extractIdAndTodayDate, String tableName) {
 
         String strTodayDir = sourceLocation + extractIdAndTodayDate;
         if (!(strTodayDir.endsWith(File.separator))) {
@@ -645,12 +692,18 @@ public class GenerateData implements Job {
 
     private int getTableId(String tableName) throws Exception {
         switch (tableName) {
-            case "observation": return 32;
-            case "patient": return 8;
-            case "immunisation" : return 40;
-            case "medication" : return 44;
-            case "allergy" : return 41;
-            default: throw new Exception("Table Id not found : " + tableName);
+            case "observation":
+                return 32;
+            case "patient":
+                return 8;
+            case "immunisation":
+                return 40;
+            case "medication":
+                return 44;
+            case "allergy":
+                return 41;
+            default:
+                throw new Exception("Table Id not found : " + tableName);
         }
     }
 }
