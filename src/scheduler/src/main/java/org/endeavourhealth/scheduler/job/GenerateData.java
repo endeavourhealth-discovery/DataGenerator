@@ -201,9 +201,10 @@ public class GenerateData implements Job {
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
                 List resultsToRemove;
+                int page;
                 switch (codeSet.getExtractType()) {
                     case "all":
-                        int page = 1;
+                        page = 1;
                         results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         while (results.size() > 0) {
                             resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
@@ -226,12 +227,16 @@ public class GenerateData implements Job {
                         break;
 
                     case "earliest_each":
-                        results = ObservationExtracts.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = ObservationExtracts.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ObservationExtracts.runBulkObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
 
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
@@ -245,13 +250,16 @@ public class GenerateData implements Job {
                         break;
 
                     case "latest_each":
-                        results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ObservationExtracts.runBulkObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -264,13 +272,16 @@ public class GenerateData implements Job {
                         break;
 
                     case "earliest":
-                        results = ObservationExtracts.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = ObservationExtracts.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ObservationExtracts.runBulkObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -283,13 +294,16 @@ public class GenerateData implements Job {
                         break;
 
                     case "latest":
-                        results = ObservationExtracts.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = ObservationExtracts.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = ObservationExtracts.runBulkObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
