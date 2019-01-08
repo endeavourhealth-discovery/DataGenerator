@@ -580,9 +580,10 @@ public class GenerateData implements Job {
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
                 List resultsToRemove;
+                int page;
                 switch (codeSet.getExtractType()) {
                     case "all":
-                        int page = 1;
+                        page = 1;
                         results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         while (results.size() > 0) {
                             resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
@@ -604,13 +605,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "earliest_each":
-                        results = MedicationExtracts.runBulkMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = MedicationExtracts.runBulkMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = MedicationExtracts.runBulkMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -622,13 +626,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "latest_each":
-                        results = MedicationExtracts.runBulkMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = MedicationExtracts.runBulkMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = MedicationExtracts.runBulkMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -640,13 +647,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "earliest":
-                        results = MedicationExtracts.runBulkMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = MedicationExtracts.runBulkMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = MedicationExtracts.runBulkMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -658,13 +668,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "latest":
-                        results = MedicationExtracts.runBulkMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = MedicationExtracts.runBulkMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = MedicationExtracts.runBulkMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationLatestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
