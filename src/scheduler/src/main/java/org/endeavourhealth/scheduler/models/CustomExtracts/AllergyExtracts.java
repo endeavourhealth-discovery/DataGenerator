@@ -118,7 +118,7 @@ public class AllergyExtracts {
         }
     }
 
-    public static List runBulkAllergyEarliestEachCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyEarliestEachCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk earliest each");
         // LOG.info("Bulk allergy earliest for each code");
 
@@ -158,10 +158,12 @@ public class AllergyExtracts {
                     "   and (a.effective_date < oo.effective_date " +
                     "     or (a.effective_date = oo.effective_date and a.id < oo.id)) " +
                     " where oo.patient_id is null " +
-                    "   and cr.bulked = 0;";
+                    "   and cr.bulked = 0 " +
+                    " limit :index, " + size + "; ";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", codeSetId);
+                    .setParameter("codeSetId", codeSetId)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 
@@ -232,7 +234,7 @@ public class AllergyExtracts {
         }
     }
 
-    public static List runBulkAllergyLatestEachCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyLatestEachCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk latest each");
         // LOG.info("Bulk allergy latest for each code");
 
@@ -272,10 +274,12 @@ public class AllergyExtracts {
                     "   and (a.effective_date > oo.effective_date " +
                     "     or (a.effective_date = oo.effective_date and a.id > oo.id)) " +
                     " where oo.patient_id is null " +
-                    "   and cr.bulked = 0;";
+                    "   and cr.bulked = 0 " +
+                    " limit :index, " + size + "; ";
             Query query = entityManager.createNativeQuery(sql)
                     .setParameter("extractId", extractId)
-                    .setParameter("codeSetId", codeSetId);
+                    .setParameter("codeSetId", codeSetId)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 
@@ -346,7 +350,7 @@ public class AllergyExtracts {
         }
     }
 
-    public static List runBulkAllergyLatestCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyLatestCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk latest");
         // LOG.info("Bulk allergy latest of all codes");
 
@@ -382,8 +386,10 @@ public class AllergyExtracts {
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
                     "     or (mc.effective_date = mcoo.effective_date and mc.id > mcoo.id)) " +
-                    " where mcoo.patient_id is null;";
-            Query query = entityManager.createNativeQuery(sql);
+                    " where mcoo.patient_id is null " +
+                    " limit :index, " + size + "; ";
+            Query query = entityManager.createNativeQuery(sql)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 
@@ -444,7 +450,7 @@ public class AllergyExtracts {
         }
     }
 
-    public static List runBulkAllergyEarliestCodesQuery(int extractId, int codeSetId) throws Exception {
+    public static List runBulkAllergyEarliestCodesQuery(int extractId, int codeSetId, int page, int size) throws Exception {
         // System.out.println("bulk earliest");
         // LOG.info("Bulk allergy earliest of all codes");
 
@@ -480,8 +486,10 @@ public class AllergyExtracts {
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
                     "     or (mc.effective_date = mcoo.effective_date and mc.id < mcoo.id)) " +
-                    " where mcoo.patient_id is null;";
-            Query query = entityManager.createNativeQuery(sql);
+                    " where mcoo.patient_id is null " +
+                    " limit :index, " + size + "; ";
+            Query query = entityManager.createNativeQuery(sql)
+                    .setParameter("index", ((page - 1) * size));
 
             List result = query.getResultList();
 

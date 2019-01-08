@@ -214,7 +214,6 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                             results = ObservationExtracts.runBulkObservationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-
                         if (currentTransactionId > 0) {
                             results = ObservationExtracts.runDeltaObservationAllCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -335,9 +334,10 @@ public class GenerateData implements Job {
             for (DatasetCodeSet codeSet : codeSets) {
                 List results;
                 List resultsToRemove;
+                int page;
                 switch (codeSet.getExtractType()) {
                     case "all":
-                        int page = 1;
+                        page = 1;
                         results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         while (results.size() > 0) {
                             resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
@@ -347,7 +347,6 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                             results = AllergyExtracts.runBulkAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyAllCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -359,13 +358,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "earliest_each":
-                        results = AllergyExtracts.runBulkAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = AllergyExtracts.runBulkAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = AllergyExtracts.runBulkAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyEarliestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -377,13 +379,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "latest_each":
-                        results = AllergyExtracts.runBulkAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = AllergyExtracts.runBulkAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = AllergyExtracts.runBulkAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyLatestEachCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -395,13 +400,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "earliest":
-                        results = AllergyExtracts.runBulkAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = AllergyExtracts.runBulkAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = AllergyExtracts.runBulkAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyEarliestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -413,13 +421,16 @@ public class GenerateData implements Job {
                         }
                         break;
                     case "latest":
-                        results = AllergyExtracts.runBulkAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId());
-                        resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
-                        if (!(resultsToRemove.isEmpty())) {
-                            results.removeAll(resultsToRemove);
+                        page = 1;
+                        results = AllergyExtracts.runBulkAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
+                        while (results.size() > 0) {
+                            resultsToRemove = this.removeDuplicateResultsBetweenCodeSets(results);
+                            if (!(resultsToRemove.isEmpty())) {
+                                results.removeAll(resultsToRemove);
+                            }
+                            saveToCSV(results, sectionName, fieldIndexes, extractId, true);
+                            results = AllergyExtracts.runBulkAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-                        saveToCSV(results, sectionName, fieldIndexes, extractId, true);
-
                         if (currentTransactionId > 0) {
                             results = AllergyExtracts.runDeltaAllergyLatestCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -464,7 +475,6 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                             results = ImmunisationExtracts.runBulkImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-
                         if (currentTransactionId > 0) {
                             results = ImmunisationExtracts.runDeltaImmunisationAllCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
@@ -593,7 +603,6 @@ public class GenerateData implements Job {
                             saveToCSV(results, sectionName, fieldIndexes, extractId, true);
                             results = MedicationExtracts.runBulkMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(), page++, PAGE_SIZE);
                         }
-
                         if (currentTransactionId > 0) {
                             results = MedicationExtracts.runDeltaMedicationAllCodesQuery(extractId, codeSet.getCodeSetId(),
                                     currentTransactionId, maxTransactionId);
