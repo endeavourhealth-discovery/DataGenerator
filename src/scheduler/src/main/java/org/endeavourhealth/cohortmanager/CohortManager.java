@@ -601,24 +601,8 @@ public class CohortManager {
 			pref = "";
 
 		if (valueFrom.equals("") && valueTo.equals(""))
-			q.sqlWhere += pref + " d.original_code = " + parameterize(q.whereParams, code);
+			q.sqlWhere += pref + " c.code_set_id = " + parameterize(q.whereParams, code);
 
-		if (valueFrom.contains("-")||valueTo.contains("-")) {
-			if (!valueFrom.equals("") && valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultDate >= " + parameterize(q.whereParams, convertToDate(valueFrom))+")";
-			if (valueFrom.equals("") && !valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultDate <= " + parameterize(q.whereParams, convertToDate(valueTo))+")";
-			if (!valueFrom.equals("") && !valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultDate >= " + parameterize(q.whereParams, convertToDate(valueFrom)) + " and d.resultDate <= " + parameterize(q.whereParams,convertToDate(valueTo)) + ")";
-
-		} else {
-			if (!valueFrom.equals("") && valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultValue >= " + parameterize(q.whereParams, Double.valueOf(valueFrom))+")";
-			if (valueFrom.equals("") && !valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultValue <= " + parameterize(q.whereParams, Double.valueOf(valueTo))+")";
-			if (!valueFrom.equals("") && !valueTo.equals(""))
-				q.sqlWhere += pref + " (d.original_code = " + parameterize(q.whereParams, code) + " and d.resultValue >= " + parameterize(q.whereParams, Double.valueOf(valueFrom)) + " and d.resultValue <= " + parameterize(q.whereParams, Double.valueOf(valueTo)) + ")";
-		}
 	}
 
 	private static void buildConceptPatientFilter(QueryMeta q, String term, String parentType, String valueFrom, String valueTo) {
@@ -774,6 +758,7 @@ public class CohortManager {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
+						"JOIN subscriber_transform_pcr.code_set_codes c on c.read2_concept_id = d.original_code "+
 						"where p.date_of_death IS NULL " +
 						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
@@ -792,6 +777,7 @@ public class CohortManager {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
 						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
+						"JOIN subscriber_transform_pcr.code_set_codes c on c.read2_concept_id = d.original_code "+
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
