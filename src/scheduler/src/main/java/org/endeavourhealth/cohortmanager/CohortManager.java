@@ -787,7 +787,7 @@ public class CohortManager {
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
-            System.out.println(sql);
+            // System.out.println(sql);
 			return sql;
 		} else if (cohortPopulation.equals("1")) { // all patients
 			String sql = "";
@@ -804,7 +804,7 @@ public class CohortManager {
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
-            System.out.println(sql);
+            // System.out.println(sql);
 			return sql;
 		}
 
