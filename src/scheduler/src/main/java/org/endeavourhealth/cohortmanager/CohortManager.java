@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
+import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -569,32 +570,47 @@ public class CohortManager {
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_statement";
-				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				break;
+				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
+                String prefMS = "and (";
+                if (valueFrom.equals("") && valueTo.equals(""))
+                    q.sqlWhere += prefMS += " c.code_set_id = " + parameterize(q.whereParams, code);
+                break;
 			case "Medication Order":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_order";
-				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				break;
+                // q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
+                String prefMO = "and (";
+                if (valueFrom.equals("") && valueTo.equals(""))
+                    q.sqlWhere += prefMO += " c.code_set_id = " + parameterize(q.whereParams, code);
+                break;
 			case "Allergy":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.allergy";
-				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				break;
+				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
+                String prefA = "and (";
+                if (valueFrom.equals("") && valueTo.equals(""))
+                    q.sqlWhere += prefA += " c.code_set_id = " + parameterize(q.whereParams, code);
+                break;
 			case "Referral":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.referral";
-				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				break;
+				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
+				String prefR = "and (";
+                if (valueFrom.equals("") && valueTo.equals(""))
+                    q.sqlWhere += prefR += " c.code_set_id = " + parameterize(q.whereParams, code);
+                break;
 			case "Encounter":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.encounter";
-				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				break;
+				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
+				String prefE = "and (";
+                if (valueFrom.equals("") && valueTo.equals(""))
+                    q.sqlWhere += prefE += " c.code_set_id = " + parameterize(q.whereParams, code);
+                break;
 		}
 	}
 
@@ -771,6 +787,7 @@ public class CohortManager {
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
+            System.out.println(sql);
 			return sql;
 		} else if (cohortPopulation.equals("1")) { // all patients
 			String sql = "";
@@ -787,6 +804,7 @@ public class CohortManager {
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
+            System.out.println(sql);
 			return sql;
 		}
 
