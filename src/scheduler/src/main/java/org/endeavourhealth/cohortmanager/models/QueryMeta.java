@@ -7,5 +7,6 @@ public class QueryMeta {
 	public String sqlWhere = "";
 	public String dataTable = "";
 	public String patientJoinField = "";
+	public String codesetTypeJoinField = "";
 	public List<Object> whereParams = new ArrayList<>();
 }

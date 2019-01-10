@@ -567,26 +567,31 @@ public class CohortManager {
 				break;
 			case "Medication Statement":
 				q.patientJoinField = "patient_id";
+                q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_statement";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Medication Order":
 				q.patientJoinField = "patient_id";
+                q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_order";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Allergy":
 				q.patientJoinField = "patient_id";
+                q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.allergy";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Referral":
 				q.patientJoinField = "patient_id";
+                q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.referral";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
 			case "Encounter":
 				q.patientJoinField = "patient_id";
+                q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.encounter";
 				q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
 				break;
@@ -595,6 +600,7 @@ public class CohortManager {
 
 	private static void buildConceptObservationFilter(QueryMeta q, Integer c, String code, String valueFrom, String valueTo) {
 		q.patientJoinField = "patient_id";
+        q.codesetTypeJoinField = "read2_concept_id";
 		q.dataTable = "pcr2.observation";
 		String pref = " or";
 		if (c == 1)
@@ -758,7 +764,7 @@ public class CohortManager {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"JOIN subscriber_transform_pcr.code_set_codes c on c.read2_concept_id = d.original_code "+
+                        "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
 						"where p.date_of_death IS NULL " +
 						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
@@ -777,7 +783,7 @@ public class CohortManager {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
 						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"JOIN subscriber_transform_pcr.code_set_codes c on c.read2_concept_id = d.original_code "+
+                        "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
 						"where 1=1 "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
