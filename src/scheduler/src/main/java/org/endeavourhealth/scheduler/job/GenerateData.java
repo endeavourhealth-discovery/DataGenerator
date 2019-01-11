@@ -37,7 +37,7 @@ public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
     private boolean limitCols = false;
-    private static final int PAGE_SIZE = 10000;
+    private static final int PAGE_SIZE = 200000;
     private List<Long> currentResultsIds = new ArrayList<>();
 
     public void setLimitCols(boolean limit) {
