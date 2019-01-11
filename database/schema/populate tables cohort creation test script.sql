@@ -103,6 +103,7 @@ values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes
     </query>
 </libraryItem>');
 
+
 -- Diabetes Aged 12+ Patient
 -- Cohort Count Test
 
@@ -285,6 +286,7 @@ values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
     </query>
 </libraryItem>');
 
+
 -- Asthma Patients
 -- Cohort Count Test
 
@@ -458,6 +460,7 @@ values (3, 'Asthma Patients', '<?xml version="1.0" encoding="UTF-8" standalone="
         </rule>
     </query>
 </libraryItem>');
+
 
 -- Health Check
 -- Cohort Count Test
@@ -782,6 +785,7 @@ values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
         </rule>
     </query>
 </libraryItem>');
+
 
 -- Child Immunisations
 -- Cohort Count Test

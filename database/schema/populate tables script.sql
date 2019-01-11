@@ -1,8 +1,11 @@
 -- delete the extract data to allow the datasets to be deleted
-delete from data_generator.extract where extract_id <= 6;
+delete from data_generator.extract where extract_id <= 5;
 
 -- delete some dataset data
-delete from data_generator.dataset where dataset_id <= 3;
+delete from data_generator.dataset where dataset_id <= 5;
+
+-- delete some cohort data
+delete from data_generator.cohort where id <= 5;
 
 -- insert into the dataset table
 insert into data_generator.dataset
@@ -245,400 +248,212 @@ select 3, '{
 }]
 }';
 
--- delete some extract data
-delete from data_generator.extract where extract_id <= 6;
+insert into data_generator.dataset
+select 4, '{
+ "name": "All Patients",
+ "id": "4",
+ "extract": [{
+  		"type": "patient",
+  		"fields": [
+{"header" : "patient id", "index" : "0"},
+{"header" : "patient resource id", "index" : "1"},
+{"header" : "nhs number", "index" : "3"},
+{"header" : "date of birth", "index" : "5"},
+{"header" : "date of death", "index" : "6"},
+{"header" : "gender concept id", "index": "7"},
+{"header" : "ethnic code", "index" : "18"},
+{"header" : "title", "index" : "11"},
+{"header" : "first name", "index" : "12"},
+{"header" : "middle names", "index" : "13"},
+{"header" : "last name", "index" : "14"},
+{"header" : "home address id", "index" : "16"},
+{"header" : "address line 1", "index" : "19"},
+{"header" : "address line 2", "index" : "20"},
+{"header" : "address line 3", "index" : "21"},
+{"header" : "address line 4", "index" : "22"},
+{"header" : "postcode", "index" : "23"},
+{"header" : "organisation id", "index" : "2"},
+{"header" : "ods code", "index" : "27"},
+{"header" : "organisation name", "index" : "28"},
+{"header" : "registered date", "index" : "29"},
+{"header" : "usual practitioner number", "index" : "30"}]
+}]
+}';
+
+insert into data_generator.dataset
+select 5, '{
+ "name": "Asthma",
+ "id": "3",
+ "extract": [{
+  		"type": "patient",
+  		"fields": [
+{"header" : "patient id", "index" : "0"},
+{"header" : "patient resource id", "index" : "1"},
+{"header" : "nhs number", "index" : "3"},
+{"header" : "date of birth", "index" : "5"},
+{"header" : "date of death", "index" : "6"},
+{"header" : "gender concept id", "index": "7"},
+{"header" : "ethnic code", "index" : "18"},
+{"header" : "title", "index" : "11"},
+{"header" : "first name", "index" : "12"},
+{"header" : "middle names", "index" : "13"},
+{"header" : "last name", "index" : "14"},
+{"header" : "home address id", "index" : "16"},
+{"header" : "address line 1", "index" : "19"},
+{"header" : "address line 2", "index" : "20"},
+{"header" : "address line 3", "index" : "21"},
+{"header" : "address line 4", "index" : "22"},
+{"header" : "postcode", "index" : "23"},
+{"header" : "organisation id", "index" : "2"},
+{"header" : "ods code", "index" : "27"},
+{"header" : "organisation name", "index" : "28"},
+{"header" : "registered date", "index" : "29"},
+{"header" : "usual practitioner number", "index" : "30"}]
+},{
+  		"type": "medication",
+  		"fields": [
+{"header" : "medication id", "index" : "0"},
+{"header" : "medication resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "13"},
+{"header" : "original term", "index" : "14"},
+{"header" : "issues authorised", "index" : "19"},
+{"header" : "is active", "index" : "24"},
+{"header" : "end date", "index" : "25"},
+{"header" : "issues", "index" : "28"},
+{"header" : "medication amount id", "index" : "18"},
+{"header" : "dose", "index" : "30"},
+{"header" : "quantity value", "index" : "31"},
+{"header" : "quantity units", "index" : "32"}],
+ 		"codeSets": [
+{"codeSetId": 69, "extractType": "latest_each"}]
+},{
+   		"type": "observation",
+  		"fields": [
+{"header" : "observation id", "index" : "0"},
+{"header" : "observation resource id", "index" : "1"},
+{"header" : "patient resource id", "index" : "2"},
+{"header" : "effective date", "index" : "4"},
+{"header" : "original code", "index" : "12"},
+{"header" : "original term", "index" : "13"},
+{"header" : "result value", "index" : "21"},
+{"header" : "result value units", "index" : "22"}],
+ 		"codeSets": [
+{"codeSetId": 68, "extractType": "latest_each"}]
+}]
+}';
 
 -- create some extract data for extract 1
 insert into data_generator.extract
-select 1, 'Subscriber A Child Imms', 4, 1, 1, '{
+select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
  "name": "Data Generator Extract Definition 1",
  "id": "1",
- "projectId": "R1D68",
+ "projectId": "DISCOCH",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberA/ChildImms/Source/",
-          "destination": "/endeavour/ftp/SubscriberA/ChildImms/",
-          "housekeep": "C:/DataGenerator/SubscriberA/ChildImms/Housekeep/"
+          "source": "/datagenerator/SubscriberA/ChildImms/Source/",
+          "destination": "/ftp/SubscriberA/ChildImms/",
+          "housekeep": "/datagenerator/SubscriberA/ChildImms/Housekeep/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "n3sftp01.discoverydataservice.net",
           "hostPublicKey": "",
-          "port": "22",
-          "username": "endeavour",
+          "port": "990",
+          "username": "",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
+          "clientPrivateKey": ""
 }
 }',0;
 
 -- create some extract data for extract 2
 insert into data_generator.extract
-select 2, 'Subscriber A Health Check', 1, 1, 2, '{
+select 2, 'Subscriber A Health Check', 2, 1, 2, '{
  "name": "Data Generator Extract Definition 2",
  "id": "2",
- "projectId": "R1D68",
+ "projectId": "DISCOHC",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberA/HealthCheck/Source/",
-          "destination": "/endeavour/ftp/SubscriberA/HealthCheck/",
-          "housekeep": "C:/DataGenerator/SubscriberA/HealthCheck/Housekeep/"
+          "source": "/datagenerator/SubscriberA/HealthCheck/Source/",
+          "destination": "/ftp/SubscriberA/HealthCheck/",
+          "housekeep": "/datagenerator/SubscriberA/HealthCheck/Housekeep/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "n3sftp01.discoverydataservice.net",
           "hostPublicKey": "",
-          "port": "22",
-          "username": "endeavour",
+          "port": "990",
+          "username": "",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
+          "clientPrivateKey": ""
 }
 }',0;
 
 -- create some extract data for extract 3
 insert into data_generator.extract
-select 3, 'Subscriber A Diabetes', 1, 1, 3, '{
+select 3, 'Subscriber A Diabetes', 3, 1, 3, '{
  "name": "Data Generator Extract Definition 3",
  "id": "3",
- "projectId": "R1D68",
+ "projectId": "DISCODE",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberA/Diabetes/Source/",
-          "destination": "/endeavour/ftp/SubscriberA/Diabetes/",
-          "housekeep": "C:/DataGenerator/SubscriberA/Diabetes/Housekeep/"
+          "source": "/datagenerator/SubscriberA/Diabetes/Source/",
+          "destination": "/ftp/SubscriberA/Diabetes/",
+          "housekeep": "/datagenerator/SubscriberA/Diabetes/Housekeep/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "n3sftp01.discoverydataservice.net",
           "hostPublicKey": "",
-          "port": "22",
-          "username": "endeavour",
+          "port": "990",
+          "username": "",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
+          "clientPrivateKey": ""
 }
 }',0;
 
 -- create some extract data for extract 4
 insert into data_generator.extract
-select 4, 'Subscriber B Child Imms', 4, 1, 1, '{
+select 4, 'Subscriber A All Patients', 4, 1, 4, '{
  "name": "Data Generator Extract Definition 4",
  "id": "4",
- "projectId": "8JM56",
+ "projectId": "DISCODE",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberB/ChildImms/Source/",
-          "destination": "/endeavour/ftp/SubscriberB/ChildImms/",
-          "housekeep": "C:/DataGenerator/SubscriberB/ChildImms/Housekeep/"
+          "source": "/datagenerator/SubscriberA/Asthma/Source/",
+          "destination": "/ftp/SubscriberA/Asthma/",
+          "housekeep": "/datagenerator/SubscriberA/Asthma/Housekeep/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "n3sftp01.discoverydataservice.net",
           "hostPublicKey": "",
-          "port": "22",
-          "username": "endeavour",
+          "port": "990",
+          "username": "",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
+          "clientPrivateKey": ""
 }
 }',0;
 
 -- create some extract data for extract 5
 insert into data_generator.extract
-select 5, 'Subscriber B Health Check', 2, 1, 2, '{
+select 5, 'Subscriber A Asthma', 5, 1, 5, '{
  "name": "Data Generator Extract Definition 5",
  "id": "5",
- "projectId": "8JM56",
+ "projectId": "DISCODE",
  "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberB/HealthCheck/Source/",
-          "destination": "/endeavour/ftp/SubscriberB/HealthCheck/",
-          "housekeep": "C:/DataGenerator/SubscriberB/HealthCheck/Housekeep/"
+          "source": "/datagenerator/SubscriberA/AllPatients/Source/",
+          "destination": "/ftp/SubscriberA/AllPatients/",
+          "housekeep": "/datagenerator/SubscriberA/AllPatients/Housekeep/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "n3sftp01.discoverydataservice.net",
           "hostPublicKey": "",
-          "port": "22",
+          "port": "990",
           "username": "endeavour",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
+          "clientPrivateKey": ""
 }
 }',0;
 
--- create some extract data for extract 6
-insert into data_generator.extract
-select 6, 'Subscriber B Diabetes', 2, 1, 3, '{
- "name": "Data Generator Extract Definition 6",
- "id": "6",
- "projectId": "8JM56",
- "fileLocationDetails": {
-          "source": "C:/DataGenerator/SubscriberB/Diabetes/Source/",
-          "destination": "/endeavour/ftp/SubscriberB/Diabetes/",
-          "housekeep": "C:/DataGenerator/SubscriberB/Diabetes/Housekeep/"
-},
- "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
-          "hostPublicKey": "",
-          "port": "22",
-          "username": "endeavour",
-          "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "PuTTY-User-Key"
-}
-}',0;
-
--- populate the cohort results table with data from the pcr tables
--- insert into data_generator.cohort_results
--- select 1, id, organisation_id, 0 from pcr.patient;
-
--- insert into data_generator.cohort_results
--- select 2, id, organisation_id, 0 from pcr.patient;
-
--- look at the state of the file-transactions queue for the Java class processes 
--- ZipCSVFiles, EncryptFiles, TransferEncryptedFilesToSftp & HousekeepFiles    
-select * from data_generator.file_transactions;
-
--- delete some file_transactions data
--- delete from data_generator.file_transactions where extract_id = 1;
-
--- create some file_transactions data 
--- insert into data_generator.file_transactions
--- select 1, '1_20181130', now(), null, null, null, null;
-
--- update data_generator.file_transactions
--- set encrypt_date = now() where extract_id = 1 and filename = '2_20181126.zip';
-
--- delete some cohort data
-delete from data_generator.cohort where id <= 4;
-
 insert into data_generator.cohort (id, title, xml_content)
-values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+values (1, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <libraryItem>
     <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>PCR All Patients</name>
-    <description>PCR All Patients</description>
-    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
-    <query>
-        <startingRules>
-            <ruleId>1</ruleId>
-        </startingRules>
-        <rule>
-            <description>Date of Birth</description>
-            <id>1</id>
-            <type>1</type>
-            <test>
-                <filter>
-                    <field>CONCEPT</field>
-                    <codeSet>
-                        <codingSystem>Endeavour</codingSystem>
-                        <codeSetValue>
-                            <code>8833263929279</code>
-                            <term>Date of Birth</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Patient</baseType>
-                            <present>1</present>
-                            <valueFrom>1800-01-01</valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>true</includeChildren>
-                        </codeSetValue>
-                    </codeSet>
-                    <negate>false</negate>
-                </filter>
-            </test>
-            <onPass>
-                <action>include</action>
-            </onPass>
-            <onFail>
-                <action>noAction</action>
-            </onFail>
-            <layout>
-                <x>547</x>
-                <y>202</y>
-            </layout>
-        </rule>
-    </query>
-</libraryItem>');
-
-insert into data_generator.cohort (id, title, xml_content)
-values (2, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<libraryItem>
-    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>PCR All Patients</name>
-    <description>PCR All Patients</description>
-    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
-    <query>
-        <startingRules>
-            <ruleId>1</ruleId>
-        </startingRules>
-        <rule>
-            <description>Date of Birth</description>
-            <id>1</id>
-            <type>1</type>
-            <test>
-                <filter>
-                    <field>CONCEPT</field>
-                    <codeSet>
-                        <codingSystem>Endeavour</codingSystem>
-                        <codeSetValue>
-                            <code>8833263929279</code>
-                            <term>Date of Birth</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Patient</baseType>
-                            <present>1</present>
-                            <valueFrom>1800-01-01</valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>true</includeChildren>
-                        </codeSetValue>
-                    </codeSet>
-                    <negate>false</negate>
-                </filter>
-            </test>
-            <onPass>
-                <action>include</action>
-            </onPass>
-            <onFail>
-                <action>noAction</action>
-            </onFail>
-            <layout>
-                <x>547</x>
-                <y>202</y>
-            </layout>
-        </rule>
-    </query>
-</libraryItem>');
-
-insert into data_generator.cohort (id, title, xml_content)
-values (3, 'Example Cohort with Multiple Rules', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<libraryItem>
-    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>Example Cohort with Multiple Rules</name>
-    <description>Example Cohort with Multiple Rules</description>
-    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
-    <query>
-        <startingRules>
-            <ruleId>1</ruleId>
-        </startingRules>
-        <rule>
-            <description>Date of Birth</description>
-            <id>1</id>
-            <type>1</type>
-            <test>
-                <filter>
-                    <field>CONCEPT</field>
-                    <codeSet>
-                        <codingSystem>Endeavour</codingSystem>
-                        <codeSetValue>
-                            <code>8833263929279</code>
-                            <term>Date of Birth</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Patient</baseType>
-                            <present>1</present>
-                            <valueFrom>1967-01-01</valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>true</includeChildren>
-                        </codeSetValue>
-                    </codeSet>
-                    <negate>false</negate>
-                </filter>
-            </test>
-            <onPass>
-                <action>gotoRules</action>
-                <ruleId>2</ruleId>
-            </onPass>
-            <onFail>
-                <action>noAction</action>
-            </onFail>
-            <layout>
-                <x>194</x>
-                <y>5</y>
-            </layout>
-        </rule>
-        <rule>
-            <description>Asthma</description>
-            <id>2</id>
-            <type>1</type>
-            <test>
-                <filter>
-                    <field>CONCEPT</field>
-                    <codeSet>
-                        <codingSystem>Endeavour</codingSystem>
-                        <codeSetValue>
-                            <code>H33..</code>
-                            <term>Asthma</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Observation</baseType>
-                            <present>1</present>
-                            <valueFrom></valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>true</includeChildren>
-                        </codeSetValue>
-                        <codeSetValue>
-                            <code>C10..</code>
-                            <term>Diabetes mellitus (disorder)</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Observation</baseType>
-                            <present>1</present>
-                            <valueFrom></valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>false</includeChildren>
-                        </codeSetValue>
-                    </codeSet>
-                    <negate>false</negate>
-                </filter>
-            </test>
-            <onPass>
-                <action>gotoRules</action>
-                <ruleId>3</ruleId>
-            </onPass>
-            <onFail>
-                <action>noAction</action>
-            </onFail>
-            <layout>
-                <x>566</x>
-                <y>7</y>
-            </layout>
-        </rule>
-        <rule>
-            <description>Co-codamol 30mg/500mg capsules</description>
-            <id>3</id>
-            <type>1</type>
-            <test>
-                <filter>
-                    <field>CONCEPT</field>
-                    <codeSet>
-                        <codingSystem>Endeavour</codingSystem>
-                        <codeSetValue>
-                            <code>XYZ..</code>
-                            <term>Co-codamol 30mg/500mg capsules</term>
-                            <dataType>11</dataType>
-                            <parentType></parentType>
-                            <baseType>Medication Statement</baseType>
-                            <present>1</present>
-                            <valueFrom></valueFrom>
-                            <valueTo></valueTo>
-                            <units></units>
-                            <includeChildren>true</includeChildren>
-                        </codeSetValue>
-                    </codeSet>
-                    <negate>false</negate>
-                </filter>
-            </test>
-            <onPass>
-                <action>include</action>
-            </onPass>
-            <onFail>
-                <action>noAction</action>
-            </onFail>
-            <layout>
-                <x>547</x>
-                <y>202</y>
-            </layout>
-        </rule>
-    </query>
-</libraryItem>');
-
-insert into data_generator.cohort (id, title, xml_content)
-values (4, 'Under 20s', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<libraryItem>
-    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>Under 20s</name>
+    <name>Child Immunisation Patients Under 20</name>
     <description>Under 20s</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
     <query>
@@ -679,6 +494,523 @@ values (4, 'Under 20s', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <layout>
                 <x>547</x>
                 <y>202</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (2, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>Health Check Patients</name>
+    <description>Health Check Patients</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Age</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>0</code>
+                            <term>Age</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom>40</valueFrom>
+                            <valueTo>74</valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>gotoRules</action>
+                <ruleId>2</ruleId>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>194</x>
+                <y>5</y>
+            </layout>
+        </rule>
+        <rule>
+            <description>Inappropriate For NHS Health Check Exclusion</description>
+            <id>2</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>8</code>
+                            <term>Inappropriate for NHS Health Check codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>noAction</action>
+            </onPass>
+            <onFail>
+                <action>gotoRules</action>
+				<ruleId>3</ruleId>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+		<rule>
+            <description>Pre-existing Conditions Exclusion</description>
+            <id>3</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>14</code>
+                            <term>Coronary heart disease codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>11</code>
+                            <term>Chronic kidney disease codes 3-5</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>23</code>
+                            <term>Codes for diabetes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>17</code>
+                            <term>Hypertension diagnosis codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>9</code>
+                            <term>Atrial fibrillation codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>22</code>
+                            <term>TIA codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>15</code>
+                            <term>Familial and Non-Familial Hypercholesterolemia diagnostic codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>16</code>
+                            <term>Heart failure codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>20</code>
+                            <term>Peripheral arterial disease</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>21</code>
+                            <term>Stroke diagnosis codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>noAction</action>
+            </onPass>
+            <onFail>
+                <action>gotoRules</action>
+				<ruleId>4</ruleId>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+		<rule>
+            <description>Current Statin Prescription</description>
+            <id>4</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>25</code>
+                            <term>Statin Codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Medication Statement</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>noAction</action>
+            </onPass>
+            <onFail>
+                <action>include</action>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (3, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>Diabetes Patients Aged 12+</name>
+    <description>Diabetes Patients Aged 12+</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Age</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>0</code>
+                            <term>Age</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom>12</valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>gotoRules</action>
+                <ruleId>2</ruleId>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>194</x>
+                <y>5</y>
+            </layout>
+        </rule>
+        <rule>
+            <description>Diabetes</description>
+            <id>2</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>3</code>
+                            <term>Diabetes - National List</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>4</code>
+                            <term>Diabetes Resolved</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+						<codeSetValue>
+                            <code>5</code>
+                            <term>Diabetes - Local OOF List</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (4, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>PCR All Patients</name>
+    <description>All Patients</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Date of Birth</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>8833263929279</code>
+                            <term>Date of Birth</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Patient</baseType>
+                            <present>1</present>
+                            <valueFrom>1800-01-01</valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>true</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>547</x>
+                <y>202</y>
+            </layout>
+        </rule>
+    </query>
+</libraryItem>');
+
+insert into data_generator.cohort (id, title, xml_content)
+values (5, 'Asthma Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<libraryItem>
+    <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
+    <name>Asthma Patients</name>
+    <description>Asthma Patients</description>
+    <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <query>
+        <startingRules>
+            <ruleId>1</ruleId>
+        </startingRules>
+        <rule>
+            <description>Asthma Diagnosis</description>
+            <id>1</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+                        <codeSetValue>
+                            <code>68</code>
+                            <term>Asthma diagnosis codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Observation</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>gotoRules</action>
+				<ruleId>2</ruleId>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
+            </layout>
+        </rule>
+		<rule>
+            <description>Asthma Medication</description>
+            <id>2</id>
+            <type>1</type>
+            <test>
+                <filter>
+                    <field>CONCEPT</field>
+                    <codeSet>
+                        <codingSystem>Endeavour</codingSystem>
+						<codeSetValue>
+                            <code>69</code>
+                            <term>Asthma medication codes</term>
+                            <dataType>11</dataType>
+                            <parentType></parentType>
+                            <baseType>Medication Statement</baseType>
+                            <present>1</present>
+                            <valueFrom></valueFrom>
+                            <valueTo></valueTo>
+                            <units></units>
+                            <includeChildren>false</includeChildren>
+                        </codeSetValue>
+                    </codeSet>
+                    <negate>false</negate>
+                </filter>
+            </test>
+            <onPass>
+                <action>include</action>
+            </onPass>
+            <onFail>
+                <action>noAction</action>
+            </onFail>
+            <layout>
+                <x>566</x>
+                <y>7</y>
             </layout>
         </rule>
     </query>

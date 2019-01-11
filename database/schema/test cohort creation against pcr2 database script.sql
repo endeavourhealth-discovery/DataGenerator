@@ -5,7 +5,7 @@
 select * from data_generator.cohort_results where extract_id = 1;
 
 -- To count in PCR2
-select distinct p.id
+select count(distinct p.id) as 'All Patients Count'
 from pcr2.patient p
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
 and
@@ -21,7 +21,8 @@ p.date_of_death is null;
 select * from data_generator.cohort_results where extract_id = 2;
 
 -- To count in PCR2
-select count(distinct(p.nhs_number)) as 'Diabetics 12+ Patients Count' from pcr2.observation o
+select count(distinct(p.nhs_number)) as 'Diabetics 12+ Patients Count'
+from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
@@ -48,7 +49,8 @@ p.date_of_death is null;
 select * from data_generator.cohort_results where extract_id = 3;
 
 -- To count in PCR2
-select count(distinct(p.nhs_number)) as 'Asthma Patients' from pcr2.observation o
+select count(distinct(p.nhs_number)) as 'Asthma Patients Count'
+from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 join pcr2.medication_statement ms on ms.patient_id = p.id
@@ -67,8 +69,9 @@ and
 -- and
 -- mo.effective_date >= DATE(NOW() - INTERVAL 12 MONTH);
 
--- Just to count diagnosis, rather than medication as well
-select count(distinct(p.nhs_number)) as 'Asthma Patients Count' from pcr2.observation o
+-- Just to count diagnosis in PCR2, rather than medication as well
+select count(distinct(p.nhs_number)) as 'Asthma Diagnosis Patients Count'
+from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
@@ -90,7 +93,8 @@ p.date_of_death is null;
 select * from data_generator.cohort_results where extract_id = 4;
 
 -- To count in PCR2 (this query takes about 3/4 of an hour to run!)
-select count(distinct(p.nhs_number)) as 'Health Check Patients Count' from pcr2.observation o
+select count(distinct(p.nhs_number)) as 'Health Check Patients Count'
+from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 join pcr2.medication_statement ms on ms.patient_id = p.id
@@ -109,9 +113,10 @@ and
 -- and
 -- mo.effective_date >= DATE(NOW() - INTERVAL 12 MONTH);
 
--- To count either patients with observations to exclude,
--- or, alternatively, those with statin prescriptions to exclude
-select count(distinct(p.nhs_number)) as 'Health Check 40-74 Count' from pcr2.observation o
+-- To count in PCR2 either patients with observations (i.e. to exclude from cohort),
+-- or, alternatively, those with statin prescriptions (likewise to exclude)
+select count(distinct(p.nhs_number)) as 'Health Check Obs or Meds Patients Count'
+from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 -- join pcr2.medication_statement ms on ms.patient_id = p.id
@@ -139,6 +144,7 @@ and
 and
 p.date_of_death is null;
 
+
 -- Child Immunisations
 -- Cohort Count Test
 
@@ -146,7 +152,7 @@ p.date_of_death is null;
 select * from data_generator.cohort_results where extract_id = 5;
 
 -- To count in PCR2
-select distinct p.id
+select count(distinct p.id) as 'Child Imms Patients Count'
 from pcr2.patient p
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
 and
