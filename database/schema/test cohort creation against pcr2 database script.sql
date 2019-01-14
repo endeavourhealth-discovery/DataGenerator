@@ -109,6 +109,10 @@ where
 and
 p.date_of_death is null
 and
+p.date_of_birth <= DATE(NOW() - INTERVAL 40 year)
+and
+p.date_of_birth >= DATE(NOW() - INTERVAL 75 year)
+and
 ((csc1.code_set_id in (8,14,11,23,17,9,22,15,16,20,21)) or (csc2.code_set_id in (25)));
 -- and
 -- mo.effective_date >= DATE(NOW() - INTERVAL 12 MONTH);
@@ -136,13 +140,13 @@ o.original_code in (select read2_concept_id from subscriber_transform_pcr.code_s
 -- join pcr2.gp_registration_status reg on reg.patient_id = p.id
 --
 and
-p.date_of_birth <= DATE(NOW() - INTERVAL 40 year)
-and
-p.date_of_birth >= DATE(NOW() - INTERVAL 74 year)
-and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
-p.date_of_death is null;
+p.date_of_death is null
+and
+p.date_of_birth <= DATE(NOW() - INTERVAL 40 year)
+and
+p.date_of_birth >= DATE(NOW() - INTERVAL 75 year);
 
 
 -- Child Immunisations
@@ -159,4 +163,5 @@ and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
 p.date_of_death is null
-and p.date_of_birth >= DATE(NOW() - INTERVAL 20 year);
+and
+p.date_of_birth >= DATE(NOW() - INTERVAL 20 year);
