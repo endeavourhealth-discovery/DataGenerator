@@ -138,4 +138,18 @@ public class ExtractEntity {
 
         return ret;
     }
+
+    public static ExtractEntity deleteExtract(int extractId) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        ExtractEntity entry = entityManager.find(ExtractEntity.class, extractId);
+        entry = entityManager.merge(entry);
+        entityManager.remove(entry);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+        return entry;
+    }
+
 }
