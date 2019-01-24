@@ -57,8 +57,8 @@ insert into data_generator.cohort (id, title, xml_content)
 values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <libraryItem>
     <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>PCR All Patients</name>
-    <description>PCR All Patients</description>
+    <name>All Patients</name>
+    <description>All Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
     <query>
         <startingRules>
@@ -179,8 +179,8 @@ insert into data_generator.cohort (id, title, xml_content)
 values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <libraryItem>
     <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>Diabetes Aged 12+</name>
-    <description>Diabetes Aged 12+</description>
+    <name>Diabetes Patients Aged 12+</name>
+    <description>Diabetes Patients Aged 12+</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
     <query>
         <startingRules>
@@ -521,8 +521,8 @@ insert into data_generator.cohort (id, title, xml_content)
 values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <libraryItem>
     <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>Health Check Population</name>
-    <description>Health Check Population</description>
+    <name>Health Check Patients</name>
+    <description>Health Check Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
     <query>
         <startingRules>
@@ -545,7 +545,7 @@ values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
                             <baseType>Patient</baseType>
                             <present>1</present>
                             <valueFrom>40</valueFrom>
-                            <valueTo>74</valueTo>
+                            <valueTo>75</valueTo>
                             <units></units>
                             <includeChildren>false</includeChildren>
                         </codeSetValue>
@@ -850,8 +850,8 @@ insert into data_generator.cohort (id, title, xml_content)
 values (5, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <libraryItem>
     <uuid>c6b126ff-f457-4e08-9dbb-0f033b8bf4ab</uuid>
-    <name>Under 20s</name>
-    <description>Under 20s</description>
+    <name>Child Immunisation Patients Under 20</name>
+    <description>Child Immunisation Patients Under 20</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
     <query>
         <startingRules>

@@ -527,7 +527,7 @@ values (2, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
                             <baseType>Patient</baseType>
                             <present>1</present>
                             <valueFrom>40</valueFrom>
-                            <valueTo>74</valueTo>
+                            <valueTo>75</valueTo>
                             <units></units>
                             <includeChildren>false</includeChildren>
                         </codeSetValue>
