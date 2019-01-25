@@ -3,6 +3,10 @@ package org.endeavourhealth.scheduler.models.database;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -50,6 +54,25 @@ public class DataSetEntity {
         EntityManager entityManager = PersistenceManager.getEntityManager();
 
         DataSetEntity ret = entityManager.find(DataSetEntity.class, datasetId);
+
+        entityManager.close();
+
+        return ret;
+    }
+
+    public static List<DataSetEntity> getAllDatasets() throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<DataSetEntity> cq = cb.createQuery(DataSetEntity.class);
+        Root<DataSetEntity> rootEntry = cq.from(DataSetEntity.class);
+
+        /*Predicate predicate = cb.equal(rootEntry.get("isDeleted"), 0);
+
+        cq.where(predicate);*/
+
+        TypedQuery<DataSetEntity> query = entityManager.createQuery(cq);
+        List<DataSetEntity> ret = query.getResultList();
 
         entityManager.close();
 

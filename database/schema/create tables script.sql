@@ -11,7 +11,7 @@ drop table if exists data_generator.exported_ids;
 
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
-    definition mediumtext not null comment 'The json definition of the extract',
+    definition mediumtext not null comment 'The json definition of the dataset',
     
     constraint data_generator_dataset_dataset_id_pk primary key (dataset_id)
 );
