@@ -78,4 +78,17 @@ public class DataSetEntity {
 
         return ret;
     }
+
+    public static DataSetEntity deleteDataset(int datasetId) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        DataSetEntity entry = entityManager.find(DataSetEntity.class, datasetId);
+        entry = entityManager.merge(entry);
+        entityManager.remove(entry);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+        return entry;
+    }
 }
