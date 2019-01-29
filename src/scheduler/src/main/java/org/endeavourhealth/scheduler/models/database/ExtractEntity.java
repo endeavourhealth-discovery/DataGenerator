@@ -152,4 +152,21 @@ public class ExtractEntity {
         return entry;
     }
 
+    public static void createExtract(ExtractEntity extract) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.persist(extract);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+    }
+
+    public static void updateExtract(ExtractEntity extract) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.merge(extract);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+    }
 }
