@@ -152,21 +152,31 @@ public class ExtractEntity {
         return entry;
     }
 
-    public static void createExtract(ExtractEntity extract) throws Exception {
+    public static ExtractEntity createExtract(ExtractEntity extract) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        String sql = "select max(extract_id) from data_generator.extract;";
+        Query query = entityManager.createNativeQuery(sql);
+        Integer result = (Integer) query.getSingleResult();
+        extract.setExtractId(result + 1);
+
         entityManager.getTransaction().begin();
         entityManager.persist(extract);
         entityManager.getTransaction().commit();
         entityManager.close();
+
+        return extract;
     }
 
-    public static void updateExtract(ExtractEntity extract) throws Exception {
+    public static ExtractEntity updateExtract(ExtractEntity extract) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.merge(extract);
         entityManager.getTransaction().commit();
         entityManager.close();
+
+        return extract;
     }
 }
