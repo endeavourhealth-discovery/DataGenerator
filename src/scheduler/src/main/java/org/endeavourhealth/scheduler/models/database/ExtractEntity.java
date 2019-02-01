@@ -19,6 +19,7 @@ public class ExtractEntity {
     private int datasetId;
     private String definition;
     private long transactionId;
+    private String cron;
 
     @Id
     @Column(name = "extract_id")
@@ -90,6 +91,16 @@ public class ExtractEntity {
         this.transactionId = transactionId;
     }
 
+    @Basic
+    @Column(name = "cron")
+    public String getCron() {
+        return cron;
+    }
+
+    public void setCron(String cron) {
+        this.cron = cron;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,13 +112,14 @@ public class ExtractEntity {
                 datasetId == that.datasetId &&
                 transactionId == that.transactionId &&
                 Objects.equals(extractName, that.extractName) &&
-                Objects.equals(definition, that.definition);
+                Objects.equals(definition, that.definition) &&
+                Objects.equals(cron, that.cron);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition, transactionId);
+        return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition, transactionId, cron);
     }
 
     public static List<ExtractEntity> getAllExtracts() throws Exception {
