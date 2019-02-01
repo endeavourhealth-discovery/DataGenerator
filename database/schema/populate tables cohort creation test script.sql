@@ -182,6 +182,7 @@ values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
     <name>Diabetes Patients Aged 12+</name>
     <description>Diabetes Patients Aged 12+</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1,2</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>

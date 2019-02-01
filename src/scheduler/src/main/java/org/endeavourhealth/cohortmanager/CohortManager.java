@@ -54,7 +54,8 @@ public class CohortManager {
 	public static void runCohort(LibraryItem libraryItem, Integer extractId) throws Exception {
 
 		List<QueryResult> queryResults = new ArrayList<>();
-		executeRules(libraryItem, queryResults);
+		String organisations = libraryItem.getOrganisations();
+		executeRules(libraryItem, queryResults, organisations);
 		calculateAndStoreResults(libraryItem, queryResults, extractId);
 	}
 
@@ -167,7 +168,7 @@ public class CohortManager {
 		return finalPatients;
 	}
 
-	private static void executeRules(LibraryItem libraryItem, List<QueryResult> queryResults) throws Exception {
+	private static void executeRules(LibraryItem libraryItem, List<QueryResult> queryResults, String organisations) throws Exception {
 
 		for (Rule rule : libraryItem.getQuery().getRule()) { // execute each rule
 			List<Filter> filters = rule.getTest().getFilter();
@@ -176,12 +177,12 @@ public class CohortManager {
 
 			buildFilters(filters, q);
 
-			runRule(libraryItem, queryResults, rule, q, filters);
+			runRule(libraryItem, queryResults, rule, q, filters, organisations);
 		} // next Rule in Query
 
 	}
 
-	private static void runRule(LibraryItem libraryItem, List<QueryResult> queryResults, Rule rule, QueryMeta q, List<Filter> filters) throws Exception {
+	private static void runRule(LibraryItem libraryItem, List<QueryResult> queryResults, Rule rule, QueryMeta q, List<Filter> filters, String organisations) throws Exception {
 		String cohortPopulation = "0";
 
 		String restriction = "LATEST";
@@ -338,25 +339,35 @@ public class CohortManager {
 		} else if (rule.getType()==1) { // Feature rule
 			if (ruleSQL.contains("JOIN pcr2.observation")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
+				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientObservations = query.getResultList();
 			} else if (ruleSQL.contains("JOIN pcr2.medication_statement")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
+				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientMedicationStatements = query.getResultList();
 
 			} else if (ruleSQL.contains("JOIN pcr2.allergy")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
+				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientAllergy = query.getResultList();
 
 			} else if (ruleSQL.contains("JOIN pcr2.referral")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
+				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientReferral = query.getResultList();
 
 			} else if (ruleSQL.contains("JOIN pcr2.patient")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
+				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patients = query.getResultList();
 			}
@@ -772,7 +783,7 @@ public class CohortManager {
 				sql = "select p.id " +
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where p.date_of_death IS NULL " +
+						"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
 						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere;
@@ -781,7 +792,7 @@ public class CohortManager {
 						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
                         "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
-						"where p.date_of_death IS NULL " +
+						"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
 						"and e.gp_registration_status_concept_id = 2 " +
 						"and e.effective_date <= NOW() " +
 						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
@@ -795,13 +806,13 @@ public class CohortManager {
 				sql = "select p.id " +
 						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where 1=1 "+q.sqlWhere;
+						"where p.organisation_id IN (?0) "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
 						"from pcr2.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
                         "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
-						"where 1=1 "+q.sqlWhere+
+						"where p.organisation_id IN (?0) "+q.sqlWhere+
 						" order by p.id, d.effective_date "+order;
 			}
             // System.out.println(sql);

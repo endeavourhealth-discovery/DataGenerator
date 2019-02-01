@@ -21,6 +21,7 @@
             <xs:element name="name" type="xs:string"/>
             <xs:element name="description" type="xs:string" minOccurs="0"/>
             <xs:element name="folderUuid" type="xs:string"/>
+            <xs:element name="organisations" type="xs:string"/>
             <xs:choice>
                 <xs:element name="query" type="query"/>
                 <xs:element name="codeSet" type="codeSet"/>

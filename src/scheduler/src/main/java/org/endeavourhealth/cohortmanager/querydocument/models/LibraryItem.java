@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlType;
     "name",
     "description",
     "folderUuid",
+    "organisations",
     "query",
     "codeSet",
     "report"
@@ -53,6 +54,7 @@ public class LibraryItem {
     protected String description;
     @XmlElement(required = true)
     protected String folderUuid;
+    protected String organisations;
     protected Query query;
     protected CodeSet codeSet;
     protected Report report;
@@ -151,6 +153,30 @@ public class LibraryItem {
      */
     public void setFolderUuid(String value) {
         this.folderUuid = value;
+    }
+
+    /**
+     * Gets the value of the organisations property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getOrganisations() {
+        return organisations;
+    }
+
+    /**
+     * Sets the value of the organisations property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setOrganisations(String value) {
+        this.organisations = value;
     }
 
     /**
