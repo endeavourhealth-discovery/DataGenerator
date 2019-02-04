@@ -363,7 +363,7 @@ select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0, '', true;
 
 -- create some extract data for extract 2
 insert into data_generator.extract
@@ -384,7 +384,7 @@ select 2, 'Subscriber A Health Check', 2, 1, 2, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0, '', false;
 
 -- create some extract data for extract 3
 insert into data_generator.extract
@@ -405,7 +405,7 @@ select 3, 'Subscriber A Diabetes', 3, 1, 3, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0, '', true;
 
 -- create some extract data for extract 4
 insert into data_generator.extract
@@ -426,7 +426,7 @@ select 4, 'Subscriber A All Patients', 4, 1, 4, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0, '', true;
 
 -- create some extract data for extract 5
 insert into data_generator.extract
@@ -447,7 +447,7 @@ select 5, 'Subscriber A Asthma', 5, 1, 5, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0, '', true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (1, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
