@@ -62,7 +62,7 @@ public class CohortResultsEntity {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         entityManager.getTransaction().begin();
 
-        entityManager.persist(result);
+        entityManager.merge(result);
 
         entityManager.getTransaction().commit();
 

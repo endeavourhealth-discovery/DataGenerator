@@ -456,6 +456,7 @@ values (1, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding
     <name>Child Immunisation Patients Under 20</name>
     <description>Under 20s</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -506,6 +507,7 @@ values (2, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
     <name>Health Check Patients</name>
     <description>Health Check Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -775,6 +777,7 @@ values (3, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
     <name>Diabetes Patients Aged 12+</name>
     <description>Diabetes Patients Aged 12+</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -886,6 +889,7 @@ values (4, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes
     <name>PCR All Patients</name>
     <description>All Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -936,6 +940,7 @@ values (5, 'Asthma Patients', '<?xml version="1.0" encoding="UTF-8" standalone="
     <name>Asthma Patients</name>
     <description>Asthma Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
