@@ -41,13 +41,13 @@ public class CohortManager {
 		if (cohortPopulation.equals("0")) // currently registered
 			return "select distinct p.id " +
 					"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
-					"where p.date_of_death IS NULL " +
+					"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
 					"and e.gp_registration_status_concept_id = 2 " +
 					"and e.effective_date <= NOW() " +
 					"and (e.end_date > NOW() or e.end_date IS NULL)";
 		else if (cohortPopulation.equals("1")) // all patients
 			return "select distinct p.id " +
-					"from pcr2.patient p";
+					"from pcr2.patient p where p.organisation_id IN (?0)";
 		return "";
 	}
 
@@ -56,10 +56,10 @@ public class CohortManager {
 		List<QueryResult> queryResults = new ArrayList<>();
 		String organisations = libraryItem.getOrganisations();
 		executeRules(libraryItem, queryResults, organisations);
-		calculateAndStoreResults(libraryItem, queryResults, extractId);
+		calculateAndStoreResults(libraryItem, queryResults, extractId, organisations);
 	}
 
-	private static List<Integer> calculateAndStoreResults(LibraryItem libraryItem, List<QueryResult> queryResults, Integer extractId) throws Exception {
+	private static List<Integer> calculateAndStoreResults(LibraryItem libraryItem, List<QueryResult> queryResults, Integer extractId, String organisations) throws Exception {
 		Integer ruleId = libraryItem.getQuery().getStartingRules().getRuleId().get(0);
 
 		Integer i = 0;
@@ -69,6 +69,8 @@ public class CohortManager {
 		EntityManager entityManager = PersistenceManager.getEntityManager();
 
 		Query query = entityManager.createNativeQuery(denominatorSQL);
+		List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
+		query.setParameter(0, selectedValues);
 
 		List<Object> patients = query.getResultList();
 
