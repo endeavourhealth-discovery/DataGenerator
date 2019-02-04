@@ -547,18 +547,9 @@ public class CohortManager {
 			buildConceptTypeFilter(q, c, code, term, parentType, baseType, valueFrom, valueTo);
 		}
 
-		if (q.dataTable.equals("pcr2.allergy") ||
-				q.dataTable.equals("pcr2.referral") ||
-				q.dataTable.equals("pcr2.encounter")) {
-			q.sqlWhere = q.sqlWhere.replaceFirst("or d.original_code", "and (d.original_code");
-			q.sqlWhere += ")";
-		} else if (q.dataTable.equals("pcr2.observation")) {
+		if (!q.dataTable.equals("pcr2.patient"))
 			q.sqlWhere = "and (" + q.sqlWhere + ")";
-		} else if (q.dataTable.equals("pcr2.medication_statement") ||
-				q.dataTable.equals("pcr2.medication_order")) {
-			q.sqlWhere = q.sqlWhere.replaceFirst("or d.original_code", "and (d.original_code");
-			q.sqlWhere += ")";
-		}
+
 	}
 
 	private static String buildConceptList(Filter filter) {
@@ -577,60 +568,45 @@ public class CohortManager {
 				buildConceptPatientFilter(q, term, parentType, valueFrom, valueTo);
 				break;
 			case "Observation":
-				buildConceptObservationFilter(q, c, code, valueFrom, valueTo);
+				q.patientJoinField = "patient_id";
+				q.codesetTypeJoinField = "read2_concept_id";
+				q.dataTable = "pcr2.observation";
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
 				break;
 			case "Medication Statement":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_statement";
-				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-                String prefMS = "and (";
-                if (valueFrom.equals("") && valueTo.equals(""))
-                    q.sqlWhere += prefMS += " c.code_set_id = " + parameterize(q.whereParams, code);
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Medication Order":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
 				q.dataTable = "pcr2.medication_order";
-                // q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-                String prefMO = "and (";
-                if (valueFrom.equals("") && valueTo.equals(""))
-                    q.sqlWhere += prefMO += " c.code_set_id = " + parameterize(q.whereParams, code);
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Allergy":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.allergy";
-				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-                String prefA = "and (";
-                if (valueFrom.equals("") && valueTo.equals(""))
-                    q.sqlWhere += prefA += " c.code_set_id = " + parameterize(q.whereParams, code);
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Referral":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.referral";
-				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				String prefR = "and (";
-                if (valueFrom.equals("") && valueTo.equals(""))
-                    q.sqlWhere += prefR += " c.code_set_id = " + parameterize(q.whereParams, code);
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Encounter":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
 				q.dataTable = "pcr2.encounter";
-				// q.sqlWhere += " or d.original_code = " + parameterize(q.whereParams, code);
-				String prefE = "and (";
-                if (valueFrom.equals("") && valueTo.equals(""))
-                    q.sqlWhere += prefE += " c.code_set_id = " + parameterize(q.whereParams, code);
+				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 		}
 	}
 
-	private static void buildConceptObservationFilter(QueryMeta q, Integer c, String code, String valueFrom, String valueTo) {
-		q.patientJoinField = "patient_id";
-        q.codesetTypeJoinField = "read2_concept_id";
-		q.dataTable = "pcr2.observation";
+	private static void buildCodeSetFilter(QueryMeta q, Integer c, String code, String valueFrom, String valueTo) {
 		String pref = " or";
 		if (c == 1)
 			pref = "";
