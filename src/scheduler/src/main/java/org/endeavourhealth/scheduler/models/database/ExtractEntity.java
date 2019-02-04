@@ -20,6 +20,7 @@ public class ExtractEntity {
     private String definition;
     private long transactionId;
     private String cron;
+    private Byte clearCohortEveryRun;
 
     @Id
     @Column(name = "extract_id")
@@ -120,6 +121,16 @@ public class ExtractEntity {
     public int hashCode() {
 
         return Objects.hash(extractId, extractName, cohortId, codeSetId, datasetId, definition, transactionId, cron);
+    }
+
+    @Basic
+    @Column(name = "clear_cohort_every_run")
+    public Byte getClearCohortEveryRun() {
+        return clearCohortEveryRun;
+    }
+
+    public void setClearCohortEveryRun(Byte clearCohortEveryRun) {
+        this.clearCohortEveryRun = clearCohortEveryRun;
     }
 
     public static List<ExtractEntity> getAllExtracts() throws Exception {

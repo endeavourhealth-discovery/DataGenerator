@@ -25,6 +25,7 @@ create table data_generator.extract (
     definition varchar(5000) not null comment 'The json definition of the extract',
     transaction_id bigint not null comment 'The latest transaction id that was extracted',
     cron varchar(30) null comment 'The cron timing of the extract',
+    clear_cohort_every_run boolean comment 'Whether to clear down the cohort every time the extract is run or keep existing matching patients',
     
     constraint data_generator_extract_id_pk primary key (extract_id),
     foreign key data_generator_extract_dataset_id_fk (dataset_id) references data_generator.dataset(dataset_id)    

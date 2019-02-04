@@ -34,11 +34,14 @@ public class BuildCohort implements Job {
 
                 int extractId = entity.getExtractId();
                 int cohortId = entity.getCohortId();
+                boolean clearDownCohort = entity.getClearCohortEveryRun() != 0;
 
                 try {
                     // clear previous extract cohort results
                     CohortResultsEntity cohortResultsEntity = new CohortResultsEntity();
-                    cohortResultsEntity.clearCohortResults(extractId);
+                    if (clearDownCohort) {
+                        cohortResultsEntity.clearCohortResults(extractId);
+                    }
 
                     // get cohort query document for this extract
                     CohortEntityDG cohortEntity = new CohortEntityDG();
