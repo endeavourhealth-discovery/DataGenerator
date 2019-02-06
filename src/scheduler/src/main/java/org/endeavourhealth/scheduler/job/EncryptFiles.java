@@ -58,7 +58,7 @@ public class EncryptFiles implements Job {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
             certificate =
                     (X509Certificate) certFactory.generateCertificate(
-                            EncryptFiles.class.getClassLoader().getResourceAsStream("endeavour.cer"));
+                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
         } catch (CertificateException e) {
             LOG.error("Error encountered in certificate generation. " + e.getMessage());
         } catch (NoSuchProviderException e) {
