@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler.job;
 
+import org.endeavourhealth.scheduler.MainScheduledExtract;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.quartz.*;
@@ -51,5 +52,8 @@ public class Organizer implements Job {
             e.printStackTrace();
             LOG.error("Unknown error encountered in Organizer handling. " + e.getMessage());
         }
+
+        MainScheduledExtract.todaysJobs--;
+
     }
 }

@@ -1,5 +1,6 @@
 package org.endeavourhealth.scheduler;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MainScheduledExtract {
@@ -19,6 +22,7 @@ public class MainScheduledExtract {
     private static final Logger LOG = LoggerFactory.getLogger(MainScheduledExtract.class);
     public static final String FILE_JOB_GROUP = "fileJobGroup";
     public static final String ORGANIZER_JOB = "organize";
+    public static int todaysJobs = 0;
 
     public static void main(String[] args) throws Exception {
 
@@ -49,7 +53,7 @@ public class MainScheduledExtract {
             return;
         }
 
-        Scheduler mainScheduler =  new StdSchedulerFactory().getScheduler();
+        Scheduler mainScheduler = new StdSchedulerFactory().getScheduler();
         mainScheduler.start();
 
         for (ExtractEntity extract : validExtracts ) {
@@ -62,8 +66,33 @@ public class MainScheduledExtract {
                 JobDetail job = builder.build();
                 Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
                         CronScheduleBuilder.cronSchedule(extract.getCron())).build();
-                mainScheduler.scheduleJob(job, trigger);
+                Date date =  mainScheduler.scheduleJob(job, trigger);
+                LOG.info("Extract Id:" + extract.getExtractId() + " to run at: " + date);
+                if (DateUtils.isSameDay(date, Calendar.getInstance().getTime())) {
+                    todaysJobs++;
+                }
             }
+        }
+
+        LOG.info("Scheduled jobs for today: "+todaysJobs);
+
+        long counter = 0;
+        while(true) {
+            if (counter == 214748364700l) {
+                LOG.debug("Scheduler still running....");
+                counter = 0;
+            }
+            if (todaysJobs == 0) {
+                try {
+                    LOG.info("Scheduler shutting down....");
+                    mainScheduler.shutdown();
+                    mainScheduler = null;
+                    System.exit(0);
+                } catch (SchedulerException e) {
+                    LOG.error(e.getMessage());
+                }
+            }
+            counter++;
         }
     }
 }
