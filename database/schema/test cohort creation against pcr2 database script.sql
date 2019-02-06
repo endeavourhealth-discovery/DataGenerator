@@ -6,8 +6,8 @@ select * from data_generator.cohort_results where extract_id = 1;
 
 -- To count in PCR2
 select count(distinct p.id) as 'All Patients Count'
-from pcr.patient p
-join pcr.gp_registration_status reg on reg.patient_id = p.id
+from pcr2.patient p
+join pcr2.gp_registration_status reg on reg.patient_id = p.id
 and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
