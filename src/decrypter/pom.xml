@@ -14,6 +14,11 @@
     <artifactId>decrypter</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <sonar.projectKey>endeavourhealth-discovery_DataGenerator::decrypter</sonar.projectKey>
+        <sonar.exclusions>**/docs/**/*</sonar.exclusions>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
