@@ -51,7 +51,7 @@ select 1, 'Cohort Count Test All Patients', 1, 1, 1, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -60,6 +60,7 @@ values (1, 'All Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes
     <name>All Patients</name>
     <description>All Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -173,7 +174,7 @@ select 2, 'Cohort Count Test Diabetes', 2, 1, 2, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -182,7 +183,7 @@ values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
     <name>Diabetes Patients Aged 12+</name>
     <description>Diabetes Patients Aged 12+</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
-    <organisations>1,2</organisations>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -373,7 +374,7 @@ select 3, 'Cohort Count Test Asthma', 3, 1, 3, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (3, 'Asthma Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -382,6 +383,7 @@ values (3, 'Asthma Patients', '<?xml version="1.0" encoding="UTF-8" standalone="
     <name>Asthma Patients</name>
     <description>Asthma Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -516,7 +518,7 @@ select 4, 'Cohort Count Test Health Check', 4, 1, 4, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -525,6 +527,7 @@ values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
     <name>Health Check Patients</name>
     <description>Health Check Patients</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>
@@ -772,6 +775,16 @@ values (4, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
                     </codeSet>
                     <negate>false</negate>
                 </filter>
+                <filter>
+                   <field>MEDICATION_STATUS</field>
+                   <valueTo>
+                       <constant>1</constant>
+                       <absoluteUnit>numeric</absoluteUnit>
+                       <testField>is_active</testField>
+                       <operator>lessThanOrEqualTo</operator>
+                   </valueTo>
+                   <negate>false</negate>
+                </filter>
             </test>
             <onPass>
                 <action>noAction</action>
@@ -845,7 +858,7 @@ select 5, 'Cohort Count Test Child Imms', 5, 1, 5, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (5, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -854,6 +867,7 @@ values (5, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding
     <name>Child Immunisation Patients Under 20</name>
     <description>Child Immunisation Patients Under 20</description>
     <folderUuid>7f58e4d1-2f85-446b-b433-cdf3a6e21078</folderUuid>
+    <organisations>1</organisations>
     <query>
         <startingRules>
             <ruleId>1</ruleId>

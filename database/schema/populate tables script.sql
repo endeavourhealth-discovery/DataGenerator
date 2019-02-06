@@ -113,7 +113,9 @@ select 2, '{
 {"header" : "patient resource id", "index" : "2"},
 {"header" : "effective date", "index" : "4"},
 {"header" : "original code", "index" : "12"},
-{"header" : "original term", "index" : "13"}],
+{"header" : "original term", "index" : "13"},
+{"header" : "result value", "index" : "21"},
+{"header" : "result value units", "index" : "22"}],
  		"codeSets": [
 {"codeSetId": 6, "extractType": "latest"},
 {"codeSetId": 7, "extractType": "latest"},
@@ -156,7 +158,7 @@ select 2, '{
 {"codeSetId": 46, "extractType": "latest"},
 {"codeSetId": 47, "extractType": "latest"},
 {"codeSetId": 48, "extractType": "latest"},
-{"codeSetId": 49, "extractType": "latest"},
+{"codeSetId": 49, "extractType": "latest_each"},
 {"codeSetId": 50, "extractType": "latest"},
 {"codeSetId": 51, "extractType": "latest"},
 {"codeSetId": 52, "extractType": "latest"},
@@ -208,25 +210,6 @@ select 3, '{
 {"header" : "organisation name", "index" : "28"},
 {"header" : "registered date", "index" : "29"},
 {"header" : "usual practitioner number", "index" : "30"}]
-},{
-  		"type": "medication",
-  		"fields": [
-{"header" : "medication id", "index" : "0"},
-{"header" : "medication resource id", "index" : "1"},
-{"header" : "patient resource id", "index" : "2"},
-{"header" : "effective date", "index" : "4"},
-{"header" : "original code", "index" : "13"},
-{"header" : "original term", "index" : "14"},
-{"header" : "issues authorised", "index" : "19"},
-{"header" : "is active", "index" : "24"},
-{"header" : "end date", "index" : "25"},
-{"header" : "issues", "index" : "28"},
-{"header" : "medication amount id", "index" : "18"},
-{"header" : "dose", "index" : "30"},
-{"header" : "quantity value", "index" : "31"},
-{"header" : "quantity units", "index" : "32"}],
- 		"codeSets": [
-{"codeSetId": 19, "extractType": "latest_each"}]
 },{
    		"type": "observation",
   		"fields": [
@@ -363,7 +346,7 @@ select 1, 'Subscriber A Child Imms', 1, 1, 1, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0, '', true;
+}',0,'',true;
 
 -- create some extract data for extract 2
 insert into data_generator.extract
@@ -384,7 +367,7 @@ select 2, 'Subscriber A Health Check', 2, 1, 2, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0, '', false;
+}',0,'',false;
 
 -- create some extract data for extract 3
 insert into data_generator.extract
@@ -405,7 +388,7 @@ select 3, 'Subscriber A Diabetes', 3, 1, 3, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0, '', true;
+}',0,'',true;
 
 -- create some extract data for extract 4
 insert into data_generator.extract
@@ -426,7 +409,7 @@ select 4, 'Subscriber A All Patients', 4, 1, 4, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0, '', true;
+}',0,'',true;
 
 -- create some extract data for extract 5
 insert into data_generator.extract
@@ -447,7 +430,7 @@ select 5, 'Subscriber A Asthma', 5, 1, 5, '{
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
 }
-}',0, '', true;
+}',0,'',true;
 
 insert into data_generator.cohort (id, title, xml_content)
 values (1, 'Child Immunisation Patients Under 20', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -754,6 +737,16 @@ values (2, 'Health Check Patients', '<?xml version="1.0" encoding="UTF-8" standa
                         </codeSetValue>
                     </codeSet>
                     <negate>false</negate>
+                </filter>
+                <filter>
+                   <field>MEDICATION_STATUS</field>
+                   <valueTo>
+                       <constant>1</constant>
+                       <absoluteUnit>numeric</absoluteUnit>
+                       <testField>is_active</testField>
+                       <operator>lessThanOrEqualTo</operator>
+                   </valueTo>
+                   <negate>false</negate>
                 </filter>
             </test>
             <onPass>

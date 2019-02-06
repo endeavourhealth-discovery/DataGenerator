@@ -6,12 +6,13 @@ select * from data_generator.cohort_results where extract_id = 1;
 
 -- To count in PCR2
 select count(distinct p.id) as 'All Patients Count'
-from pcr2.patient p
-join pcr2.gp_registration_status reg on reg.patient_id = p.id
+from pcr.patient p
+join pcr.gp_registration_status reg on reg.patient_id = p.id
 and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
-p.date_of_death is null;
+p.date_of_death is null
+where p.organisation_id = '1';
 
 
 -- Diabetes Aged 12+ Patient
@@ -36,7 +37,8 @@ p.date_of_birth <= DATE(NOW() - INTERVAL 12 year)
 and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
-p.date_of_death is null;
+p.date_of_death is null
+and p.organisation_id = '1';
 
 
 -- Asthma Patients
@@ -59,8 +61,8 @@ join pcr2.gp_registration_status reg on reg.patient_id = p.id
 join subscriber_transform_pcr.code_set_codes csc1 on csc1.read2_concept_id = o.original_code
 join subscriber_transform_pcr.code_set_codes csc2 on csc2.sct_concept_id = ms.original_code
 where
--- org.ods_code =  _odscode
--- and
+org.ods_code = 'F82612'
+and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
 p.date_of_death is null
@@ -75,9 +77,9 @@ from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
--- where
--- org.ods_code = _odscode
 where
+org.ods_code = 'F82612'
+and
 o.original_code in (select read2_concept_id from subscriber_transform_pcr.code_set_codes
 						where code_set_id in (68))
 and
@@ -93,7 +95,7 @@ p.date_of_death is null;
 select * from data_generator.cohort_results where extract_id = 4;
 
 -- To count in PCR2 (this query takes about 3/4 of an hour to run!)
-select count(distinct(p.nhs_number)) as 'Health Check Patients Count'
+select count(distinct(p.nhs_number)) as 'Patients Count To Exclude From Health Check'
 from pcr2.observation o
 join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
@@ -103,8 +105,8 @@ join pcr2.gp_registration_status reg on reg.patient_id = p.id
 join subscriber_transform_pcr.code_set_codes csc1 on csc1.read2_concept_id = o.original_code
 join subscriber_transform_pcr.code_set_codes csc2 on csc2.sct_concept_id = ms.original_code
 where
--- org.ods_code =  _odscode
--- and
+org.ods_code = 'F82612'
+and
 (reg.gp_registration_status_concept_id = 2 and reg.is_current = true)
 and
 p.date_of_death is null
@@ -125,9 +127,9 @@ join pcr2.organisation org on org.id = o.owning_organisation_id
 join pcr2.patient p on p.id = o.patient_id
 -- join pcr2.medication_statement ms on ms.patient_id = p.id
 join pcr2.gp_registration_status reg on reg.patient_id = p.id
--- where
--- org.ods_code = _odscode
 where
+org.ods_code = 'F82612'
+and
 o.original_code in (select read2_concept_id from subscriber_transform_pcr.code_set_codes
 	 					where code_set_id in (8,9,11,14,15,16,17,20,21,22,23))
 -- where
@@ -164,4 +166,5 @@ and
 and
 p.date_of_death is null
 and
-p.date_of_birth >= DATE(NOW() - INTERVAL 20 year);
+p.date_of_birth >= DATE(NOW() - INTERVAL 20 year)
+where p.organisation_id = '1';
