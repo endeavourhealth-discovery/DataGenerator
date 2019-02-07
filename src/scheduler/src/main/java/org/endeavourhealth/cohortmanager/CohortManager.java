@@ -97,7 +97,6 @@ public class CohortManager {
 			Integer patientId = patient;
 			cohortPatientsEntity.setExtractId(extractId);
 			cohortPatientsEntity.setPatientId(patientId);
-			cohortPatientsEntity.setOrganisationId(0);
 
 			cohortPatientsEntity.saveCohortPatients(cohortPatientsEntity);
 		}

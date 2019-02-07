@@ -60,13 +60,21 @@ public class CohortResultsEntity {
 
     public static void saveCohortPatients(CohortResultsEntity result) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
-        entityManager.getTransaction().begin();
+        try {
+            String sql = "insert ignore into cohort_results (extract_id, patient_id, organisation_id)" +
+                    " values (:extractId, :patientId, :orgId)";
 
-        entityManager.merge(result);
+            Query query = entityManager.createNativeQuery(sql)
+                    .setParameter("extractId", result.extractId)
+                    .setParameter("patientId", result.patientId)
+                    .setParameter("orgId", result.organisationId);
 
-        entityManager.getTransaction().commit();
-
-        entityManager.close();
+            entityManager.getTransaction().begin();
+            query.executeUpdate();
+            entityManager.getTransaction().commit();
+        } finally {
+            entityManager.close();
+        }
     }
 
     public static void clearCohortResults(Integer extractId) throws Exception {
