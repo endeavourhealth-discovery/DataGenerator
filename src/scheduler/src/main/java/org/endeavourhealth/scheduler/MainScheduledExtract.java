@@ -23,6 +23,7 @@ public class MainScheduledExtract {
     public static final String FILE_JOB_GROUP = "fileJobGroup";
     public static final String ORGANIZER_JOB = "organize";
     public static int todaysJobs = 0;
+    private static Scheduler mainScheduler = null;
 
     public static void main(String[] args) {
 
@@ -61,7 +62,6 @@ public class MainScheduledExtract {
             System.exit(1);
         }
 
-        Scheduler mainScheduler = null;
         JobBuilder builder = null;
         JobDetail job = null;
         Trigger trigger = null;
@@ -115,4 +115,18 @@ public class MainScheduledExtract {
             }
         }
     }
+
+    public static void terminateScheduler() {
+        try {
+            if (todaysJobs == 0 && mainScheduler != null) {
+                LOG.info("Scheduler shutting down....");
+                mainScheduler.shutdown();
+                mainScheduler = null;
+                System.exit(0);
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
+    }
+
 }

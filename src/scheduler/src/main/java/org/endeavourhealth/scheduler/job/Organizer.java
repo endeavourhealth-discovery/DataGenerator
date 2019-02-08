@@ -55,6 +55,6 @@ public class Organizer implements Job {
         }
 
         MainScheduledExtract.todaysJobs--;
-
+        MainScheduledExtract.terminateScheduler();
     }
 }
