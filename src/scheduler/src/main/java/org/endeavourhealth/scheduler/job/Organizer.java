@@ -46,8 +46,8 @@ public class Organizer implements Job {
             //TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
             //sendFilesSFTP.execute(jobContext);
 
-            HousekeepFiles housekeepFiles = new HousekeepFiles();
-            housekeepFiles.execute(jobContext);
+            //HousekeepFiles housekeepFiles = new HousekeepFiles();
+            //housekeepFiles.execute(jobContext);
 
         } catch (Exception e) {
             e.printStackTrace();
