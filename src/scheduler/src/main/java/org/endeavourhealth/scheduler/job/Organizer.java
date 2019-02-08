@@ -42,8 +42,9 @@ public class Organizer implements Job {
             EncryptFiles encryptFiles = new EncryptFiles();
             encryptFiles.execute(jobContext);
 
-            TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
-            sendFilesSFTP.execute(jobContext);
+            //TODO: Temporarily commented out
+            //TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
+            //sendFilesSFTP.execute(jobContext);
 
             HousekeepFiles housekeepFiles = new HousekeepFiles();
             housekeepFiles.execute(jobContext);

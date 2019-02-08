@@ -2,7 +2,6 @@ package org.endeavourhealth.scheduler;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.endeavourhealth.common.config.ConfigManager;
-import org.endeavourhealth.common.config.ConfigManagerException;
 import org.endeavourhealth.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.job.*;
@@ -59,6 +58,7 @@ public class MainScheduledExtract {
             }
         } catch (Exception e) {
             LOG.error(e.getMessage());
+            System.exit(1);
         }
 
         Scheduler mainScheduler = null;
@@ -75,7 +75,7 @@ public class MainScheduledExtract {
                     SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(1800).repeatForever()).build();
             mainScheduler.scheduleJob(job, trigger);
         } catch (SchedulerException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
 
         for (ExtractEntity extract : validExtracts ) {
