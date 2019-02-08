@@ -18,8 +18,6 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
 
-@DisallowConcurrentExecution
-@PersistJobDataAfterExecution
 public class ZipCsvFiles implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZipCsvFiles.class);

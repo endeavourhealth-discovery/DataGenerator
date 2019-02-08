@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 
-@DisallowConcurrentExecution
-@PersistJobDataAfterExecution
 public class HousekeepFiles implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(HousekeepFiles.class);

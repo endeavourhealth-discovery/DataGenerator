@@ -22,8 +22,6 @@ import java.sql.Timestamp;
 // import java.util.Calendar;
 import java.util.List;
 
-@DisallowConcurrentExecution
-@PersistJobDataAfterExecution
 public class TransferEncryptedFilesToSftp implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransferEncryptedFilesToSftp.class);

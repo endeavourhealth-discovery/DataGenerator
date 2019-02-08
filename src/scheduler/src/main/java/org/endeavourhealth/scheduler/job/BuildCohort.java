@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@DisallowConcurrentExecution
-@PersistJobDataAfterExecution
 public class BuildCohort implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(BuildCohort.class);

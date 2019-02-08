@@ -31,8 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@DisallowConcurrentExecution
-@PersistJobDataAfterExecution
 public class GenerateData implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenerateData.class);
