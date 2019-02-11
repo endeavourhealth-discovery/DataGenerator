@@ -113,13 +113,13 @@ public class CohortManager {
 
 			List<Integer> patients1 = getPatientsInRule(ruleId, queryResults);  // get patients in rule
 
-			if (i == 1 && ruleFailIncludeGoto(ruleFailAction)) {
+			if (i == 1 && ruleFailAction != null && ruleFailIncludeGoto(ruleFailAction)) {
 
 				List<Integer> denominatorPatients1 = new ArrayList<Integer>(denominatorPatients);
 				denominatorPatients1.removeAll(patients1); // fail action so calculate patients from denominator who have not met the rule's conditions
 				patients1 = new ArrayList<Integer>(denominatorPatients1);
 
-			} else if (i > 1 && (rulePassIncludeGoto(rulePassAction) || ruleFailIncludeGoto(ruleFailAction))) {
+			} else if (i > 1 && rulePassAction != null && ruleFailAction != null && (rulePassIncludeGoto(rulePassAction) || ruleFailIncludeGoto(ruleFailAction))) {
 
 				if (ruleFailIncludeGoto(ruleFailAction))
 					finalPatients.removeAll(patients1); // fail action so remove patients not matching criteria
@@ -130,7 +130,7 @@ public class CohortManager {
 					break;
 			}
 
-			if (rulePassFailGoto(rulePassAction, ruleFailAction)) { // Rule passes and moves to next rule
+			if (rulePassAction != null && ruleFailAction != null && rulePassFailGoto(rulePassAction, ruleFailAction)) { // Rule passes and moves to next rule
 
 				ruleId = getNextRuleIds(rulePassAction, ruleFailAction).get(0);
 
@@ -142,7 +142,7 @@ public class CohortManager {
 				if (finalPatients.isEmpty())
 					finalPatients = new ArrayList<Integer>(patients1); // first rule
 
-				if (ruleFailIncludeGoto(ruleFailAction))
+				if (ruleFailAction != null && ruleFailIncludeGoto(ruleFailAction))
 					finalPatients.removeAll(patients2); // fail action so remove patients not matching criteria
 				else
 					finalPatients.retainAll(patients2); // narrow down to patients common in both lists
@@ -150,13 +150,13 @@ public class CohortManager {
 				if (finalPatients.isEmpty())
 					break;
 
-				if (rulePassFailGoto(rulePassAction, ruleFailAction))  // Rule passes and moves to next rule
+				if (rulePassAction != null && ruleFailAction != null && rulePassFailGoto(rulePassAction, ruleFailAction))  // Rule passes and moves to next rule
 					ruleId = getNextRuleIds(rulePassAction, ruleFailAction).get(0);
 
-				else if (rulePassFailInclude(rulePassAction, ruleFailAction)) // Rule includes patients, so break out the loop
+				else if (rulePassAction != null && ruleFailAction != null && rulePassFailInclude(rulePassAction, ruleFailAction)) // Rule includes patients, so break out the loop
 					break;
 
-			} else if (rulePassFailInclude(rulePassAction, ruleFailAction)) { // Rule includes patients, so break out the loop
+			} else if (rulePassAction != null && ruleFailAction != null && rulePassFailInclude(rulePassAction, ruleFailAction)) { // Rule includes patients, so break out the loop
 
 				if (finalPatients.isEmpty()) // Only one rule in Query
 					finalPatients = new ArrayList<Integer>(patients1);
@@ -651,7 +651,7 @@ public class CohortManager {
 		RuleAction ruleAction = null;
 
 		for (QueryResult qr : queryResults) {
-			if (qr.getRuleId() == ruleId) {
+			if (qr.getRuleId().intValue() == ruleId.intValue()) {
 				if (pass)
 					ruleAction = qr.getOnPass();
 				else
@@ -668,7 +668,7 @@ public class CohortManager {
 		List<Integer> patients = null;
 
 		for (QueryResult qr : queryResults) {
-			if (qr.getRuleId() == ruleId) {
+			if (qr.getRuleId().intValue() == ruleId.intValue()) {
 				patients = qr.getPatients();  // get patients in rule
 				break;
 			}
@@ -682,7 +682,7 @@ public class CohortManager {
 		List<Object[]> observationEntities = null;
 
 		for (QueryResult qr : queryResults) {
-			if (qr.getRuleId() == ruleId) {
+			if (qr.getRuleId().intValue() == ruleId.intValue()) {
 				observationEntities = qr.getObservations();  // get observations in rule
 				break;
 			}
@@ -693,7 +693,7 @@ public class CohortManager {
 
 	public static List<Integer> getNextRuleIds(RuleAction rulePassAction, RuleAction ruleFailAction) throws Exception {
 
-		List<Integer> nextRuleIds = null;
+		List<Integer> nextRuleIds = new ArrayList();
 		if (rulePassAction.getAction().equals(RuleActionOperator.GOTO_RULES))
 			nextRuleIds = rulePassAction.getRuleId();
 		else if (ruleFailAction.getAction().equals(RuleActionOperator.GOTO_RULES))

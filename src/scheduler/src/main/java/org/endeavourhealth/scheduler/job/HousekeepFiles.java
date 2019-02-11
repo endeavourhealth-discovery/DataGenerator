@@ -46,6 +46,7 @@ public class HousekeepFiles implements Job {
         }
         LOG.info("Beginning of housekeeping files");
 
+        Main main = Main.getInstance();
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID: " + entity.getExtractId());
@@ -94,14 +95,14 @@ public class HousekeepFiles implements Job {
                                 LOG.error("Exception occurred with using the database: " + e);
                             }
                         } catch (IOException e) {
-                            Main.errorEncountered(++Main.errorCount);
+                            main.errorEncountered(main.incrememtErrorCount());
                             LOG.error("Error encountered in moving the file to housekeep. " + e.getMessage());
                         }
                     }
-                    Main.endScheduler(++Main.extractsProcessed);
+                    main.endScheduler(main.incrememtExtractsProcessed());
                 }
             } catch (Exception e) {
-                Main.errorEncountered(++Main.errorCount);
+                main.errorEncountered(main.incrememtErrorCount());
                 LOG.error("Exception occurred with using the database. " + e);
             }
         }

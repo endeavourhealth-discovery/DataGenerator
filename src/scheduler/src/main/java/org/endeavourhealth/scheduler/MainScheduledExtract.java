@@ -22,11 +22,26 @@ public class MainScheduledExtract {
     private static final Logger LOG = LoggerFactory.getLogger(MainScheduledExtract.class);
     public static final String FILE_JOB_GROUP = "fileJobGroup";
     public static final String ORGANIZER_JOB = "organize";
-    public static int todaysJobs = 0;
+    private int todaysJobs = 0;
     private static Scheduler mainScheduler = null;
+
+    private static MainScheduledExtract instance = null;
+
+    private MainScheduledExtract() {
+    }
+
+    public static MainScheduledExtract getInstance()
+    {
+        if (instance == null)
+            instance = new MainScheduledExtract();
+
+        return instance;
+    }
+
 
     public static void main(String[] args) {
 
+        MainScheduledExtract main = MainScheduledExtract.getInstance();
 
         List<ExtractEntity> validExtracts = new ArrayList<>();
 
@@ -91,7 +106,7 @@ public class MainScheduledExtract {
                 Date date = mainScheduler.scheduleJob(job, trigger);
                 LOG.info("Extract Id:" + extract.getExtractId() + " to run at: " + date);
                 if (DateUtils.isSameDay(date, Calendar.getInstance().getTime())) {
-                    todaysJobs++;
+                    main.incrementTodaysJobs();
                 }
             } catch (RuntimeException e) {
                 LOG.error("Failed to schedule Extract Id: " + extract.getExtractId() + ". Reason: " + e.getMessage());
@@ -100,25 +115,13 @@ public class MainScheduledExtract {
             }
         }
 
-        LOG.info("Scheduled jobs for today: "+todaysJobs);
-
-        while(true) {
-            if (todaysJobs == 0) {
-                try {
-                    LOG.info("Scheduler shutting down....");
-                    mainScheduler.shutdown();
-                    mainScheduler = null;
-                    System.exit(0);
-                } catch (SchedulerException e) {
-                    LOG.error(e.getMessage());
-                }
-            }
-        }
+        LOG.info("Scheduled jobs for today: " + main.getTodaysJobs());
+        main.terminateScheduler();
     }
 
-    public static void terminateScheduler() {
+    public void terminateScheduler() {
         try {
-            if (todaysJobs == 0 && mainScheduler != null) {
+            if (getTodaysJobs() == 0 && mainScheduler != null) {
                 LOG.info("Scheduler shutting down....");
                 mainScheduler.shutdown();
                 mainScheduler = null;
@@ -129,4 +132,15 @@ public class MainScheduledExtract {
         }
     }
 
+    public int getTodaysJobs() {
+        return this.todaysJobs;
+    }
+
+    public void incrementTodaysJobs() {
+        this.todaysJobs++;
+    }
+
+    public void decrementTodaysJobs() {
+        this.todaysJobs--;
+    }
 }

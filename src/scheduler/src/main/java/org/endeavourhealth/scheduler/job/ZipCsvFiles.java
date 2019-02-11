@@ -49,6 +49,7 @@ public class ZipCsvFiles implements Job {
         }
         LOG.info("Beginning of zipping CSV files");
 
+        Main main = Main.getInstance();
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID: " + entity.getExtractId());
@@ -110,7 +111,7 @@ public class ZipCsvFiles implements Job {
                                 newFileTransEntityForCreation.setZipDate(new Timestamp(System.currentTimeMillis()));
                                 FileTransactionsEntity.create(newFileTransEntityForCreation);
                                 LOG.info("File: " + fileName + " record created");
-                                Main.endJob(Main.ZIP_FILES_JOB, ++Main.zipProcessed);
+                                main.endJob(Main.ZIP_FILES_JOB, main.incrememtZipProcessed());
                             }
                             } catch (Exception e) {
                                 LOG.error("Exception occurred with using the database: " + e);
@@ -129,7 +130,7 @@ public class ZipCsvFiles implements Job {
 
                         } catch (Exception e) {
                             LOG.error("Exception occurred with creating the zip file: " + e);
-                            Main.errorEncountered(++Main.errorCount);
+                            main.errorEncountered(main.incrememtErrorCount());
                         }
                     }
                 }

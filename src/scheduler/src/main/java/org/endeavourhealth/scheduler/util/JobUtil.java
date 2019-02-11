@@ -18,7 +18,7 @@ public class JobUtil {
             for (String jobName : jobNames) {
                 if (jobName.equalsIgnoreCase(thisJobName) && groupName.equalsIgnoreCase(thisGroupName)
                         && !jobCtx.getFireTime().equals(jobExecutionContext.getFireTime())) {
-                    int randomNum = ThreadLocalRandom.current().nextInt(3, 5);
+                    long randomNum = ThreadLocalRandom.current().nextInt(3, 5);
                     Thread.sleep(randomNum * 1000);
                     return true;
                 }

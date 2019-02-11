@@ -28,6 +28,7 @@ public class PgpEncryptDecrypt {
                 // ", X509Certificate:" + encryptionCertificate +
                 ", Provider:" + provider);
 
+        FileOutputStream output = null;
         try {
             byte[] data = IOUtils.toByteArray(new FileInputStream(file));
             if (data != null && encryptionCertificate != null) {
@@ -40,10 +41,9 @@ public class PgpEncryptDecrypt {
                         new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(provider).build();
                 CMSEnvelopedData cmsEnvelopedData = cmsEnvelopedDataGenerator.generate(msg, encrypt);
 
-                FileOutputStream output = new FileOutputStream(file);
+                output = new FileOutputStream(file);
                 output.write(cmsEnvelopedData.getEncoded());
                 output.flush();
-                output.close();
 
                 LOG.info("File encryption was successful.");
                 return true;
@@ -56,6 +56,13 @@ public class PgpEncryptDecrypt {
             LOG.error("Error encountered in encryption handling. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Unknown error encountered in encryption handling. " + e.getMessage());
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                }
+            }
         }
 
         LOG.info("File encryption failed.");
@@ -67,6 +74,7 @@ public class PgpEncryptDecrypt {
         LOG.debug("File:" + file +
                 ", PrivateKey:" + decryptionKey);
 
+        FileOutputStream output = null;
         try {
             byte[] encryptedData = IOUtils.toByteArray(new FileInputStream(file));
             if (encryptedData != null && decryptionKey != null) {
@@ -76,10 +84,9 @@ public class PgpEncryptDecrypt {
                 KeyTransRecipientInformation recipientInfo = (KeyTransRecipientInformation) recipients.iterator().next();
                 JceKeyTransRecipient recipient = new JceKeyTransEnvelopedRecipient(decryptionKey);
 
-                FileOutputStream output = new FileOutputStream(file);
+                output = new FileOutputStream(file);
                 output.write(recipientInfo.getContent(recipient));
                 output.flush();
-                output.close();
 
                 LOG.info("File decryption was successful.");
                 return true;
@@ -90,6 +97,13 @@ public class PgpEncryptDecrypt {
             LOG.error("Error encountered in decryption handling. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Unknown error encountered in decryption handling. " + e.getMessage());
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                }
+            }
         }
 
         LOG.info("File decryption failed.");

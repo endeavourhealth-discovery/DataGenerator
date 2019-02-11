@@ -17,10 +17,6 @@ import java.util.List;
 
 public class Main {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    private static final int ERROR_LIMIT = 20;
-
-    private static Scheduler mainScheduler = null;
     public static final String FILE_JOB_GROUP = "fileJobGroup";
     public static final String BUILD_COHORT_JOB = "buildCohort";
     public static final String GENERATE_FILES_JOB = "generateFiles";
@@ -29,19 +25,38 @@ public class Main {
     public static final String SFTP_FILES_JOB = "sftpFiles";
     public static final String HOUSEKEEP_FILES_JOB = "housekeepFiles";
 
-    private static int totalExtracts = 0;
-    public static boolean buildCohortDone = false;
-    public static boolean generateFilesDone = false;
+    private static final int ERROR_LIMIT = 20;
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static Scheduler mainScheduler = null;
 
-    public static int zipProcessed = 0;
-    public static int encryptProcessed = 0;
-    public static int sftpProcessed = 0;
-    public static int extractsProcessed = 0;
-    public static int errorCount = 0;
+    private int totalExtracts = 0;
+    private boolean buildCohortDone = false;
+    private boolean generateFilesDone = false;
+
+    private int zipProcessed = 0;
+    private int encryptProcessed = 0;
+    private int sftpProcessed = 0;
+    private int extractsProcessed = 0;
+    private int errorCount = 0;
+
+    private static Main instance = null;
+
+    private Main() {
+    }
+
+    public static Main getInstance()
+    {
+        if (instance == null)
+            instance = new Main();
+
+        return instance;
+    }
 
     public static void main(String[] args) throws Exception {
 
         ConfigManager.Initialize("data-generator");
+
+        Main main = Main.getInstance();
 
         LOG.info("Checking for extractions");
 
@@ -54,6 +69,7 @@ public class Main {
                     + ", projectId : " + config.getProjectId());
 
             List<DataProcessingAgreementEntity> results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+            //results.add(new DataProcessingAgreementEntity());
             if (results != null && results.size() > 0) {
                 LOG.info("Project exists and is active, adding...");
                 extractsToProcess.add(extract);
@@ -66,19 +82,19 @@ public class Main {
             LOG.info("No extracts to process. Exiting.");
             return;
         } else {
-            totalExtracts = extractsToProcess.size();
+            main.setTotalExtracts(extractsToProcess.size());
         }
 
         if (args.length == 0) {
             // Run the whole process
-            generateData(extractsToProcess);
+            main.generateData(extractsToProcess);
             return;
         }
 
         String step = args[0];
 
         if (step.equals("buildCohort")) {
-            buildCohort(extractsToProcess);
+            main.buildCohort(extractsToProcess);
         }
 
         if (step.equals("getData")) {
@@ -88,27 +104,27 @@ public class Main {
                     limitCols = true;
                 }
             }
-            getData(limitCols, extractsToProcess);
+            main.getData(limitCols, extractsToProcess);
         }
 
         if (step.equals("zipFiles")){
-            zipFiles(extractsToProcess);
+            main.zipFiles(extractsToProcess);
         }
 
         if (step.equals("encryptFiles")) {
-            encryptFiles(extractsToProcess);
+            main.encryptFiles(extractsToProcess);
         }
 
         if (step.equals("moveFiles")) {
-            moveFilesToSFTP(extractsToProcess);
+            main.moveFilesToSFTP(extractsToProcess);
         }
 
         if (step.equals("housekeepFiles")) {
-            housekeepFiles(extractsToProcess);
+            main.housekeepFiles(extractsToProcess);
         }
     }
 
-    private static void generateData(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void generateData(List<ExtractEntity> extractsToProcess) throws Exception {
 
         LOG.info("Running full process");
 
@@ -161,7 +177,7 @@ public class Main {
                 counter = 0;
                 LOG.info("Waiting for Build Cohort to complete");
             }
-            if (buildCohortDone) {
+            if (getBuildCohortDone()) {
                 LOG.info("Build Cohort complete");
                 break;
             }
@@ -176,7 +192,7 @@ public class Main {
                 counter = 0;
                 LOG.info("Waiting for Generate Data to complete");
             }
-            if (generateFilesDone) {
+            if (getGenerateFilesDone()) {
                 LOG.info("Generate Data complete");
                 break;
             }
@@ -193,7 +209,7 @@ public class Main {
         mainScheduler.scheduleJob(housekeepFilesJob, housekeepFilesTrigger);
     }
 
-    public static void endJob(String job, int processed) {
+    public void endJob(String job, int processed) {
         if (processed == totalExtracts) {
             if (mainScheduler != null) {
                 try {
@@ -206,13 +222,13 @@ public class Main {
         }
     }
 
-    public static void endScheduler(int processed) {
+    public void endScheduler(int processed) {
         if (processed == totalExtracts) {
             terminateScheduler();
         }
     }
 
-    public static void errorEncountered(int errors) {
+    public void errorEncountered(int errors) {
         LOG.info("count:" + errors);
         if (errors == ERROR_LIMIT) {
             LOG.error("Application has reached its allowable error count.");
@@ -220,7 +236,7 @@ public class Main {
         }
     }
 
-    private static void terminateScheduler() {
+    private void terminateScheduler() {
         try {
             if (mainScheduler != null) {
                 mainScheduler.shutdown();
@@ -230,7 +246,7 @@ public class Main {
         }
     }
 
-    private static void buildCohort(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void buildCohort(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Building cohort information");
         BuildCohort buildCohort = new BuildCohort();
         PlainJobExecutionContext context = new PlainJobExecutionContext();
@@ -238,7 +254,7 @@ public class Main {
         buildCohort.execute(context);
     }
 
-    private static void getData(boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
+    private void getData(boolean limitCols, List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Generating CSV data files");
         GenerateData generateData = new GenerateData();
         generateData.setLimitCols(limitCols);
@@ -247,7 +263,7 @@ public class Main {
         generateData.execute(context);
     }
 
-    private static void zipFiles(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void zipFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Zipping CSV files");
         ZipCsvFiles zipFiles = new ZipCsvFiles();
         PlainJobExecutionContext context = new PlainJobExecutionContext();
@@ -255,7 +271,7 @@ public class Main {
         zipFiles.execute(context);
     }
 
-    private static void encryptFiles(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void encryptFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Encrypting zip files");
         EncryptFiles encryptFiles = new EncryptFiles();
         PlainJobExecutionContext context = new PlainJobExecutionContext();
@@ -263,7 +279,7 @@ public class Main {
         encryptFiles.execute(context);
     }
 
-    private static void moveFilesToSFTP(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void moveFilesToSFTP(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Transferring encrypted files to SFTP");
         TransferEncryptedFilesToSftp sendFilesSFTP = new TransferEncryptedFilesToSftp();
         PlainJobExecutionContext context = new PlainJobExecutionContext();
@@ -271,11 +287,56 @@ public class Main {
         sendFilesSFTP.execute(context);
     }
 
-    private static void housekeepFiles(List<ExtractEntity> extractsToProcess) throws Exception {
+    private void housekeepFiles(List<ExtractEntity> extractsToProcess) throws Exception {
         LOG.info("Housekeeping encrypted files");
         HousekeepFiles housekeepFiles = new HousekeepFiles();
         PlainJobExecutionContext context = new PlainJobExecutionContext();
         context.put("extractsToProcess", extractsToProcess);
         housekeepFiles.execute(context);
+    }
+
+    public boolean getBuildCohortDone() {
+        return this.buildCohortDone;
+    }
+
+    public void setBuildCohortDone(boolean buildCohortDone) {
+        this.buildCohortDone = buildCohortDone;
+    }
+
+    public boolean getGenerateFilesDone() {
+        return this.generateFilesDone;
+    }
+
+    public void setGenerateFilesDone(boolean generateFilesDone) {
+        this.generateFilesDone = generateFilesDone;
+    }
+
+    public void setTotalExtracts(int totalExtracts) {
+        this.totalExtracts = totalExtracts;
+    }
+
+    public int incrememtZipProcessed() {
+        this.zipProcessed++;
+        return this.zipProcessed;
+    }
+
+    public int incrememtEncryptProcessed() {
+        this.encryptProcessed++;
+        return this.encryptProcessed;
+    }
+
+    public int incrememtSftpProcessed() {
+        this.sftpProcessed++;
+        return this.sftpProcessed;
+    }
+
+    public int incrememtExtractsProcessed() {
+        this.extractsProcessed++;
+        return this.extractsProcessed;
+    }
+
+    public int incrememtErrorCount() {
+        this.errorCount++;
+        return this.errorCount;
     }
 }

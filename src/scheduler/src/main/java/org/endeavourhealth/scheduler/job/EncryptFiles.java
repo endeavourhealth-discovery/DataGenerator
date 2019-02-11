@@ -67,6 +67,7 @@ public class EncryptFiles implements Job {
 
         List<FileTransactionsEntity> toProcess;
         String location = null;
+        Main main = Main.getInstance();
         for (ExtractEntity entity : extractsToProcess) {
 
             LOG.info("Extract ID: " + entity.getExtractId());
@@ -104,7 +105,7 @@ public class EncryptFiles implements Job {
                                 entry.setEncryptDate(new Timestamp(System.currentTimeMillis()));
                                 FileTransactionsEntity.update(entry);
                                 LOG.info("File: " + entry.getFilename() + " record updated.");
-                                Main.endJob(Main.ENCRYPT_FILES_JOB, ++Main.encryptProcessed);
+                                main.endJob(Main.ENCRYPT_FILES_JOB, main.incrememtEncryptProcessed());
                             } catch (Exception e) {
                                 LOG.error("Exception occurred with using the database: " + e);
                             }
@@ -116,7 +117,7 @@ public class EncryptFiles implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Unknown error encountered in encryption handling: " + e.getMessage());
-                Main.errorEncountered(++Main.errorCount);
+                main.errorEncountered(main.incrememtErrorCount());
             }
         }
         LOG.info("End of encrypting zip files");

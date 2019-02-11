@@ -88,6 +88,7 @@ public class Main {
         LOG.debug("File:" + file +
                 ", PrivateKey:" + decryptionKey);
 
+        FileOutputStream output = null;
         try {
             byte[] encryptedData = IOUtils.toByteArray(new FileInputStream(file));
             if (encryptedData != null && decryptionKey != null) {
@@ -97,10 +98,9 @@ public class Main {
                 KeyTransRecipientInformation recipientInfo = (KeyTransRecipientInformation) recipients.iterator().next();
                 JceKeyTransRecipient recipient = new JceKeyTransEnvelopedRecipient(decryptionKey);
 
-                FileOutputStream output = new FileOutputStream(file);
+                output = new FileOutputStream(file);
                 output.write(recipientInfo.getContent(recipient));
                 output.flush();
-                output.close();
 
                 LOG.info("File decryption was successful.");
                 return true;
@@ -111,6 +111,14 @@ public class Main {
             LOG.error("Error encountered in decryption handling. " + e.getMessage());
         } catch (Exception e) {
             LOG.error("Unknown error encountered in decryption handling. " + e.getMessage());
+        } finally {
+            try {
+                if (output != null) {
+                    output.close();
+                }
+            } catch (IOException e) {
+                LOG.error("Error encountered in file handling. " + e.getMessage());
+            }
         }
 
         LOG.info("File decryption failed.");

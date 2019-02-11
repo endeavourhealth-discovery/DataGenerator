@@ -48,11 +48,10 @@ public class Organizer implements Job {
             //housekeepFiles.execute(jobContext);
 
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.error("Unknown error encountered in Organizer handling. " + e.getMessage());
         }
 
-        MainScheduledExtract.todaysJobs--;
-        MainScheduledExtract.terminateScheduler();
+        MainScheduledExtract.getInstance().decrementTodaysJobs();
+        MainScheduledExtract.getInstance().terminateScheduler();
     }
 }

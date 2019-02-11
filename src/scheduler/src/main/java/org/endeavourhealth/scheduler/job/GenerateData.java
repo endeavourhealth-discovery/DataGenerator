@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -82,10 +83,9 @@ public class GenerateData implements Job {
                 }
             } catch (Exception e) {
                 LOG.error("Exception occurred with generating data extracts: " + e);
-                e.printStackTrace();
             }
         }
-        Main.generateFilesDone = true;
+        Main.getInstance().setGenerateFilesDone(true);
         LOG.info("End of generating data extracts to CSV files");
     }
 
@@ -713,8 +713,9 @@ public class GenerateData implements Job {
         String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
         String filename = this.createFilename(sourceLocation, extractIdAndTodayDate, tableName);
 
-        FileWriter fw = new FileWriter(filename);
+        FileWriter fw = null;
         try {
+            fw = new FileWriter(filename);
             int counter = 0;
             for (String field : fieldHeaders) {
                 fw.append("\"" + field + "\"");
@@ -724,11 +725,15 @@ public class GenerateData implements Job {
                 }
             }
             fw.append(System.getProperty("line.separator"));
+        } catch (IOException e) {
+            throw e;
         } finally {
-            fw.flush();
-            fw.close();
-            // System.out.println("Headers saved in " + tableName + ".csv");
-            LOG.info(filename + " file created, with headers only");
+            if (fw != null) {
+                fw.flush();
+                fw.close();
+                // System.out.println("Headers saved in " + tableName + ".csv");
+                LOG.info(filename + " file created, with headers only");
+            }
         }
     }
 
