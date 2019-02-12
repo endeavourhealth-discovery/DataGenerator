@@ -12,10 +12,8 @@ import org.endeavourhealth.scheduler.models.CustomExtracts.*;
 import org.endeavourhealth.scheduler.models.database.ExportedIdsEntity;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -713,9 +711,7 @@ public class GenerateData implements Job {
         String extractIdAndTodayDate = this.createExtractIdAndTodayDateString(extractId);
         String filename = this.createFilename(sourceLocation, extractIdAndTodayDate, tableName);
 
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(filename);
+        try (FileWriter fw = new FileWriter(filename)) {
             int counter = 0;
             for (String field : fieldHeaders) {
                 fw.append("\"" + field + "\"");
@@ -725,15 +721,10 @@ public class GenerateData implements Job {
                 }
             }
             fw.append(System.getProperty("line.separator"));
+            fw.flush();
         } catch (IOException e) {
+            LOG.error(e.getMessage());
             throw e;
-        } finally {
-            if (fw != null) {
-                fw.flush();
-                fw.close();
-                // System.out.println("Headers saved in " + tableName + ".csv");
-                LOG.info(filename + " file created, with headers only");
-            }
         }
     }
 

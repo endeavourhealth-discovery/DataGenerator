@@ -3,9 +3,6 @@ package org.endeavourhealth.scheduler.job;
 import org.endeavourhealth.scheduler.Main;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
-// import org.endeavourhealth.sftpreader.sources.Connection;
-// import org.endeavourhealth.sftpreader.sources.ConnectionActivator;
-// import org.endeavourhealth.sftpreader.sources.ConnectionDetails;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 import org.endeavourhealth.scheduler.models.database.FileTransactionsEntity;
 import org.endeavourhealth.scheduler.util.Connection;
@@ -16,10 +13,8 @@ import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// import java.io.*;
 import java.io.File;
 import java.sql.Timestamp;
-// import java.util.Calendar;
 import java.util.List;
 
 public class TransferEncryptedFilesToSftp implements Job {
