@@ -8,6 +8,7 @@ import javax.xml.bind.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
@@ -26,7 +27,9 @@ public abstract class XmlSerializer {
 
         //parse XML string into DOM
         InputStream is = new ByteArrayInputStream(newXml.getBytes());
-        DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        DocumentBuilder docBuilder = factory.newDocumentBuilder();
         Document document = docBuilder.parse(is);
 
         return deserializeFromXmlDocument(cls, document, xsdName);
