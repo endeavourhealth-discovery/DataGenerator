@@ -1,5 +1,10 @@
 package org.endeavourhealth.scheduler;
 
+import com.cronutils.mapper.CronMapper;
+import com.cronutils.model.Cron;
+import com.cronutils.model.definition.CronDefinition;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.parser.CronParser;
 import org.apache.commons.lang3.time.DateUtils;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
@@ -16,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static com.cronutils.model.CronType.UNIX;
 
 public class MainScheduledExtract {
 
@@ -101,8 +108,18 @@ public class MainScheduledExtract {
             builder.usingJobData(map);
             job = builder.build();
             try {
+                String cronString = extract.getCron();
+                CronDefinition cronDefinition =
+                        CronDefinitionBuilder.instanceDefinitionFor(UNIX);
+                CronParser parser = new CronParser(cronDefinition);
+                Cron cron = parser.parse(cronString);
+
+                CronMapper mapper = CronMapper.fromUnixToQuartz();
+                cron = mapper.map(cron);
+                cronString = cron.asString();
+
                 trigger = TriggerBuilder.newTrigger().withSchedule(
-                        CronScheduleBuilder.cronSchedule(extract.getCron())).build();
+                        CronScheduleBuilder.cronSchedule(cronString)).build();
                 Date date = mainScheduler.scheduleJob(job, trigger);
                 LOG.info("Extract Id:" + extract.getExtractId() + " to run at: " + date);
                 if (DateUtils.isSameDay(date, Calendar.getInstance().getTime())) {

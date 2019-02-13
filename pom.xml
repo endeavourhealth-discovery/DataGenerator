@@ -27,6 +27,7 @@
         <mysql.version>8.0.12</mysql.version>
         <hibernate.version>5.2.12.Final</hibernate.version>
         <data-sharing-manager-models.version>0.0.4-SNAPSHOT</data-sharing-manager-models.version>
+        <cron.utils.version>7.0.5</cron.utils.version>
 
         <maven-sonar-plugin.version>3.5.0.1254</maven-sonar-plugin.version>
 
