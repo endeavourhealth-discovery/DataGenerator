@@ -91,4 +91,32 @@ public class DataSetEntity {
 
         return entry;
     }
+
+    public static DataSetEntity createDataset(DataSetEntity dataset) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        String sql = "select max(dataset_id) from data_generator.dataset;";
+        Query query = entityManager.createNativeQuery(sql);
+        Integer result = (Integer) query.getSingleResult();
+        dataset.setDatasetId(result + 1);
+
+        entityManager.getTransaction().begin();
+        entityManager.persist(dataset);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+        return dataset;
+    }
+
+    public static DataSetEntity updateDataset(DataSetEntity dataset) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.merge(dataset);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+
+        return dataset;
+    }
 }
