@@ -6,7 +6,6 @@ public class DatasetConfigExtract {
     private String type = null;
     private List<DatasetFields> fields;
     private List<DatasetCodeSet> codeSets;
-    private List<DatasetParameter> parameters;
 
     public String getType() {
         return type;
@@ -22,14 +21,6 @@ public class DatasetConfigExtract {
 
     public void setFields(List<DatasetFields> fields) {
         this.fields = fields;
-    }
-
-    public List<DatasetParameter> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(List<DatasetParameter> parameters) {
-        this.parameters = parameters;
     }
 
     public List<DatasetCodeSet> getCodeSets() {
