@@ -6,13 +6,19 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
@@ -108,5 +114,28 @@ public class PgpEncryptDecrypt {
 
         LOG.info("File decryption failed.");
         return false;
+    }
+
+    public static void main(String args[]) {
+
+        X509Certificate certificate = null;
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
+            certificate =
+                    (X509Certificate) certFactory.generateCertificate(
+                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
+        } catch (CertificateException e) {
+            LOG.error("Error encountered in certificate generation. " + e.getMessage());
+        } catch (NoSuchProviderException e) {
+            LOG.error("Error encountered in certificate provider. " + e.getMessage());
+        }
+
+        File file = new File(args[0]);
+        boolean success = PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
+        if (success) {
+
+            LOG.info("File: " + args[0] + " encrypted.");
+        }
     }
 }
