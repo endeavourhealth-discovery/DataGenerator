@@ -30,10 +30,6 @@ public class PgpEncryptDecrypt {
                                       X509Certificate encryptionCertificate,
                                       String provider) {
 
-        LOG.debug("File:" + file +
-                // ", X509Certificate:" + encryptionCertificate +
-                ", Provider:" + provider);
-
         FileOutputStream output = null;
         try {
             byte[] data = IOUtils.toByteArray(new FileInputStream(file));
