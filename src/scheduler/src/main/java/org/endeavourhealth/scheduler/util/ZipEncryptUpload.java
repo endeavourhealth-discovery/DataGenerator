@@ -27,9 +27,22 @@ public class ZipEncryptUpload {
             System.exit(-1);
         }
 
+        LOG.info("");
+        LOG.info("Running Zip, Encrypt and Upload process with the following parameters:");
+        LOG.info("Source Directory  : " + args[0]);
+        LOG.info("Staging Directory : " + args[1]);
+        LOG.info("Hostname          : " + args[2]);
+        LOG.info("Port              : " + args[3]);
+        LOG.info("Username          : " + args[4]);
+        LOG.info("SFTP Location     : " + args[5]);
+        LOG.info("Key File          : " + args[6]);
+        LOG.info("");
+
         File source_dir = new File(args[0]);
         if (!source_dir.isDirectory() || !source_dir.exists() || source_dir.listFiles().length == 0) {
+            LOG.info("");
             LOG.error("Source directory is empty.");
+            LOG.info("");
             System.exit(-1);
         }
 
@@ -38,9 +51,14 @@ public class ZipEncryptUpload {
             staging_dir.mkdirs();
         } else {
             File[] files = staging_dir.listFiles();
-            for (File file : files) {
-                LOG.info("Deleting the file: " + file.getName());
-                file.delete();
+            if (files.length > 0) {
+                LOG.info("");
+                LOG.info("Staging directory is not empty.");
+                for (File file : files) {
+                    LOG.info("Deleting the file: " + file.getName());
+                    file.delete();
+                }
+                LOG.info("");
             }
         }
 
@@ -52,24 +70,33 @@ public class ZipEncryptUpload {
             con.setClientPrivateKey(FileUtils.readFileToString(new File(args[6]), (String) null));
             con.setClientPrivateKeyPassword("");
         } catch (IOException e) {
+            LOG.info("");
             LOG.error("Unable to read client private key file." + e.getMessage());
+            LOG.info("");
             System.exit(-1);
         }
 
         SftpConnection sftp = new SftpConnection(con);
         try {
             sftp.open();
+            LOG.info("");
             LOG.info("SFTP connection established");
+            LOG.info("");
             sftp.close();
         } catch (Exception e) {
+            LOG.info("");
             LOG.error("Unable to connect to the SFTP server. " + e.getMessage());
+            LOG.info("");
             System.exit(-1);
         }
 
         try {
             ZipEncryptUpload.zipDirectory(source_dir, staging_dir);
+
         } catch (Exception e) {
+            LOG.info("");
             LOG.error("Unable to create the zip file/s." + e.getMessage());
+            LOG.info("");
             System.exit(-1);
         }
 
@@ -78,9 +105,16 @@ public class ZipEncryptUpload {
                     File.separator +
                     source_dir.getName() +
                     ".zip");
-            ZipEncryptUpload.encryptFile(zipFile);
+            if (!ZipEncryptUpload.encryptFile(zipFile)) {
+                LOG.info("");
+                LOG.error("Unable to encrypt the zip file/s. ");
+                LOG.info("");
+                System.exit(-1);
+            }
         } catch (Exception e) {
+            LOG.info("");
             LOG.error("Unable to encrypt the zip file/s. " + e.getMessage());
+            LOG.info("");
             System.exit(-1);
         }
 
@@ -88,23 +122,29 @@ public class ZipEncryptUpload {
             sftp.open();
             String location = args[5];
             File[] files = staging_dir.listFiles();
+            LOG.info("");
             LOG.info("Starting file/s upload.");
             for (File file : files) {
                 LOG.info("Uploading file:" + file.getName());
                 sftp.put(file.getAbsolutePath(), location);
             }
+            LOG.info("");
             sftp.close();
         } catch (Exception e) {
+            LOG.info("");
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
+            LOG.info("");
             System.exit(-1);
         }
-
+        LOG.info("");
         LOG.info("Process completed.");
+        LOG.info("");
         System.exit(0);
     }
 
     public static void zipDirectory(File source, File staging) throws Exception {
 
+        LOG.info("");
         LOG.info("Compressing contents of: " + source.getAbsolutePath());
 
         ZipFile zipFile = new ZipFile(staging + File.separator + source.getName() + ".zip");
@@ -120,10 +160,11 @@ public class ZipEncryptUpload {
         // specified folder, using the zip file parameters
         zipFile.createZipFileFromFolder(source, parameters, true, 10485760);
 
-        LOG.info("File/s successfully created.");
+        LOG.info(staging.listFiles().length + " File/s successfully created.");
+        LOG.info("");
     }
 
-    public static void encryptFile(File file) throws Exception {
+    public static boolean encryptFile(File file) throws Exception {
 
         X509Certificate certificate = null;
         try {
@@ -141,6 +182,6 @@ public class ZipEncryptUpload {
         }
 
         LOG.info("Encrypting the file: " + file.getAbsolutePath());
-        PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
+        return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
     }
 }
