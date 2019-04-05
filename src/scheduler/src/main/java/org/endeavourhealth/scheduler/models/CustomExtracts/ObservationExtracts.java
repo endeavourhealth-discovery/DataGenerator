@@ -21,39 +21,21 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT DISTINCT " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     "FROM data_generator.cohort_results cr" +
-                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0 " +
                     " limit :index, " + size + "; ";
@@ -80,39 +62,21 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 32 " +
@@ -143,41 +107,23 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
+                    " left join ceg_compass_data.observation oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date < oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
@@ -207,41 +153,23 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
+                    " left join ceg_compass_data.observation oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date < oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id < oo.id)) " +
@@ -275,41 +203,23 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     " and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
+                    " left join ceg_compass_data.observation oo on oo.patient_id = o.patient_id " +
                     "   and oo.original_code = o.original_code " +
                     "   and (o.effective_date > oo.effective_date " +
                     "     or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
@@ -339,41 +249,23 @@ public class ObservationExtracts {
         try {
             String sql = "SELECT distinct " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " FROM data_generator.cohort_results cr " +
-                    " join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
-                    " left join pcr2.observation oo on oo.patient_id = o.patient_id " +
+                    " left join ceg_compass_data.observation oo on oo.patient_id = o.patient_id " +
                     "    and oo.original_code = o.original_code " +
                     "    and (o.effective_date > oo.effective_date " +
                     "       or (o.effective_date = oo.effective_date and o.id > oo.id)) " +
@@ -410,33 +302,18 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
-                    "  mc.resource_id, " +
-                    "  mc.patient_id, " +
-                    "  mc.concept_id, " +
-                    "  mc.effective_date," +
-                    "  mc.effective_date_precision, " +
-                    "  mc.effective_practitioner_id, " +
-                    "  mc.entered_by_practitioner_id, " +
-                    "  mc.care_activity_id, " +
-                    "  mc.care_activity_heading_concept_id, " +
-                    "  mc.owning_organisation_id, " +
-                    "  mc.is_confidential, " +
+                    "  mc.snomed_concept_id, " +
+                    "  mc.clinical_effective_date," +
+                    "  mc.date_precision_id, " +
+                    "  mc.practitioner_id, " +
+                    "  mc.organization_id, " +
                     "  mc.original_code, " +
                     "  mc.original_term, " +
-                    "  mc.original_code_scheme, " +
-                    "  mc.original_system, " +
-                    "  mc.episodicity_concept_id, " +
-                    "  mc.free_text_id, " +
-                    "  mc.data_entry_prompt_id, " +
-                    "  mc.significance_concept_id, " +
-                    "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
                     "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
-                    "  mc.result_concept_id, " +
-                    "  mc.reference_range_id, " +
-                    "  mc.operator_concept_id " +
+                    "  mc.result_concept_id " +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -468,33 +345,18 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
-                    "  mc.resource_id, " +
-                    "  mc.patient_id, " +
-                    "  mc.concept_id, " +
-                    "  mc.effective_date," +
-                    "  mc.effective_date_precision, " +
-                    "  mc.effective_practitioner_id, " +
-                    "  mc.entered_by_practitioner_id, " +
-                    "  mc.care_activity_id, " +
-                    "  mc.care_activity_heading_concept_id, " +
-                    "  mc.owning_organisation_id, " +
-                    "  mc.is_confidential, " +
+                    "  mc.snomed_concept_id, " +
+                    "  mc.clinical_effective_date," +
+                    "  mc.date_precision_id, " +
+                    "  mc.practitioner_id, " +
+                    "  mc.organization_id, " +
                     "  mc.original_code, " +
                     "  mc.original_term, " +
-                    "  mc.original_code_scheme, " +
-                    "  mc.original_system, " +
-                    "  mc.episodicity_concept_id, " +
-                    "  mc.free_text_id, " +
-                    "  mc.data_entry_prompt_id, " +
-                    "  mc.significance_concept_id, " +
-                    "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
                     "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
-                    "  mc.result_concept_id, " +
-                    "  mc.reference_range_id, " +
-                    "  mc.operator_concept_id " +
+                    "  mc.result_concept_id " +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date > mcoo.effective_date " +
@@ -524,33 +386,18 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
-                    "  mc.resource_id, " +
-                    "  mc.patient_id, " +
-                    "  mc.concept_id, " +
-                    "  mc.effective_date," +
-                    "  mc.effective_date_precision, " +
-                    "  mc.effective_practitioner_id, " +
-                    "  mc.entered_by_practitioner_id, " +
-                    "  mc.care_activity_id, " +
-                    "  mc.care_activity_heading_concept_id, " +
-                    "  mc.owning_organisation_id, " +
-                    "  mc.is_confidential, " +
+                    "  mc.snomed_concept_id, " +
+                    "  mc.clinical_effective_date," +
+                    "  mc.date_precision_id, " +
+                    "  mc.practitioner_id, " +
+                    "  mc.organization_id, " +
                     "  mc.original_code, " +
                     "  mc.original_term, " +
-                    "  mc.original_code_scheme, " +
-                    "  mc.original_system, " +
-                    "  mc.episodicity_concept_id, " +
-                    "  mc.free_text_id, " +
-                    "  mc.data_entry_prompt_id, " +
-                    "  mc.significance_concept_id, " +
-                    "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
                     "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
-                    "  mc.result_concept_id, " +
-                    "  mc.reference_range_id, " +
-                    "  mc.operator_concept_id " +
+                    "  mc.result_concept_id " +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -582,33 +429,18 @@ public class ObservationExtracts {
         try {
             String sql = "select distinct " +
                     "  mc.id, " +
-                    "  mc.resource_id, " +
-                    "  mc.patient_id, " +
-                    "  mc.concept_id, " +
-                    "  mc.effective_date," +
-                    "  mc.effective_date_precision, " +
-                    "  mc.effective_practitioner_id, " +
-                    "  mc.entered_by_practitioner_id, " +
-                    "  mc.care_activity_id, " +
-                    "  mc.care_activity_heading_concept_id, " +
-                    "  mc.owning_organisation_id, " +
-                    "  mc.is_confidential, " +
+                    "  mc.snomed_concept_id, " +
+                    "  mc.clinical_effective_date," +
+                    "  mc.date_precision_id, " +
+                    "  mc.practitioner_id, " +
+                    "  mc.organization_id, " +
                     "  mc.original_code, " +
                     "  mc.original_term, " +
-                    "  mc.original_code_scheme, " +
-                    "  mc.original_system, " +
-                    "  mc.episodicity_concept_id, " +
-                    "  mc.free_text_id, " +
-                    "  mc.data_entry_prompt_id, " +
-                    "  mc.significance_concept_id, " +
-                    "  mc.is_consent, " +
                     "  mc.result_value, " +
                     "  mc.result_value_units, " +
                     "  date_format(mc.result_date, '%d/%m/%Y') as result_date," +
                     "  mc.result_text, " +
-                    "  mc.result_concept_id, " +
-                    "  mc.reference_range_id, " +
-                    "  mc.operator_concept_id " +
+                    "  mc.result_concept_id " +
                     " from matching_codes mc " +
                     " left join matching_codes mcoo on mcoo.patient_id = mc.patient_id " +
                     "   and (mc.effective_date < mcoo.effective_date " +
@@ -637,39 +469,21 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -702,39 +516,21 @@ public class ObservationExtracts {
             String sql = "create table matching_codes as " +
                     " select " +
                     "  o.id, " +
-                    "  pcrm.resource_id, " +
-                    "  pcrmpat.resource_id as patient_id, " +
-                    "  o.concept_id, " +
-                    "  o.effective_date," +
-                    "  o.effective_date_precision, " +
-                    "  o.effective_practitioner_id, " +
-                    "  o.entered_by_practitioner_id, " +
-                    "  o.care_activity_id, " +
-                    "  o.care_activity_heading_concept_id, " +
-                    "  o.owning_organisation_id, " +
-                    "  o.is_confidential, " +
+                    "  o.snomed_concept_id, " +
+                    "  o.clinical_effective_date," +
+                    "  o.date_precision_id, " +
+                    "  o.practitioner_id, " +
+                    "  o.organization_id, " +
                     "  o.original_code, " +
                     "  o.original_term, " +
-                    "  o.original_code_scheme, " +
-                    "  o.original_system, " +
-                    "  o.episodicity_concept_id, " +
-                    "  o.free_text_id, " +
-                    "  o.data_entry_prompt_id, " +
-                    "  o.significance_concept_id, " +
-                    "  o.is_consent, " +
-                    "  ov.result_value, " +
-                    "  ov.result_value_units, " +
-                    "  date_format(ov.result_date, '%d/%m/%Y') as result_date," +
-                    "  ov.result_text, " +
-                    "  ov.result_concept_id, " +
-                    "  ov.reference_range_id, " +
-                    "  ov.operator_concept_id " +
+                    "  o.result_value, " +
+                    "  o.result_value_units, " +
+                    "  date_format(o.result_date, '%d/%m/%Y') as result_date," +
+                    "  o.result_text, " +
+                    "  o.result_concept_id " +
                     " from data_generator.cohort_results cr " +
-                    " inner join pcr2.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = o.id and (pcrm.resource_type in ('Observation','Condition')) " +
-                    " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = o.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " left outer join pcr2.observation_value ov on ov.patient_id = o.patient_id and ov.observation_id = o.id " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = o.original_code " +
+                    " inner join ceg_compass_data.observation o on o.patient_id = cr.patient_id and cr.extract_id = :extractId " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = o.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 32 " +

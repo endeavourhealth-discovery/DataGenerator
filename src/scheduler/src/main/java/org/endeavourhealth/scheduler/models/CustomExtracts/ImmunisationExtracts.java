@@ -50,7 +50,7 @@ public class ImmunisationExtracts {
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0 " +
                     " limit :index, " + size + "; ";
@@ -106,7 +106,7 @@ public class ImmunisationExtracts {
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 40 " +
@@ -166,7 +166,7 @@ public class ImmunisationExtracts {
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
                     "   and oo.original_code = i.original_code " +
@@ -227,7 +227,7 @@ public class ImmunisationExtracts {
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
                     "    and oo.original_code = i.original_code " +
@@ -292,7 +292,7 @@ public class ImmunisationExtracts {
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     " and csc.code_set_id = :codeSetId " +
                     " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
                     "   and oo.original_code = i.original_code " +
@@ -353,7 +353,7 @@ public class ImmunisationExtracts {
                     " join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " left join pcr2.immunisation oo on oo.patient_id = i.patient_id " +
                     "    and oo.original_code = i.original_code " +
@@ -639,7 +639,7 @@ public class ImmunisationExtracts {
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId" +
                     " where cr.bulked = 0;";
             Query query = entityManager.createNativeQuery(sql)
@@ -696,7 +696,7 @@ public class ImmunisationExtracts {
                     " inner join pcr2.immunisation i on i.patient_id = cr.patient_id and cr.extract_id = :extractId " +
                     " join subscriber_transform_pcr.pcr_id_map pcrm on pcrm.pcr_id = i.id and pcrm.resource_type = 'Immunization' " +
                     " join subscriber_transform_pcr.pcr_id_map pcrmpat on pcrmpat.pcr_id = i.patient_id and pcrmpat.resource_type = 'Patient' " +
-                    " inner join subscriber_transform_pcr.code_set_codes csc on csc.read2_concept_id = i.original_code " +
+                    " inner join rf2.code_set_codes csc on csc.read2_concept_id = i.original_code " +
                     "   and csc.code_set_id = :codeSetId " +
                     " join (select item_id from pcr2.event_log e " +
                     "       where e.table_id = 40 " +
