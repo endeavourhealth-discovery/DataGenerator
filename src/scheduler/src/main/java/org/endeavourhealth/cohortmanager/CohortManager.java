@@ -40,14 +40,14 @@ public class CohortManager {
 	private static String getDenominatorSQL(String cohortPopulation) {
 		if (cohortPopulation.equals("0")) // currently registered
 			return "select distinct p.id " +
-					"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
-					"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
-					"and e.gp_registration_status_concept_id = 2 " +
-					"and e.effective_date <= NOW() " +
-					"and (e.end_date > NOW() or e.end_date IS NULL)";
+					"from ceg_compass_data.patient p JOIN ceg_compass_data.episode_of_care e on e.patient_id = p.id " +
+					"where p.date_of_death IS NULL and p.organization_id IN (?0) " +
+					"and e.registration_type_id = 2 " +
+					"and e.date_registered <= NOW() " +
+					"and (e.date_registered_end > NOW() or e.date_registered_end IS NULL)";
 		else if (cohortPopulation.equals("1")) // all patients
 			return "select distinct p.id " +
-					"from pcr2.patient p where p.organisation_id IN (?0)";
+					"from ceg_compass_data.patient p where p.organization_id IN (?0)";
 		return "";
 	}
 
@@ -338,34 +338,34 @@ public class CohortManager {
 			patientObservations2 = new ArrayList<>();
 
 		} else if (rule.getType()==1) { // Feature rule
-			if (ruleSQL.contains("JOIN pcr2.observation")) {
+			if (ruleSQL.contains("JOIN ceg_compass_data.observation")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
 				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientObservations = query.getResultList();
-			} else if (ruleSQL.contains("JOIN pcr2.medication_statement")) {
+			} else if (ruleSQL.contains("JOIN ceg_compass_data.medication_statement")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
 				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientMedicationStatements = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr2.allergy")) {
+			} else if (ruleSQL.contains("JOIN ceg_compass_data.allergy_intolerance")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
 				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientAllergy = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr2.referral")) {
+			} else if (ruleSQL.contains("JOIN ceg_compass_data.referral_request")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
 				query.setParameter(0, selectedValues);
 				setQueryParams(query, q.whereParams);
 				patientReferral = query.getResultList();
 
-			} else if (ruleSQL.contains("JOIN pcr2.patient")) {
+			} else if (ruleSQL.contains("JOIN ceg_compass_data.patient")) {
 				Query query = entityManager.createNativeQuery(ruleSQL);
 				List<String> selectedValues = Arrays.asList(organisations.split("\\s*,\\s*"));
 				query.setParameter(0, selectedValues);
@@ -382,7 +382,7 @@ public class CohortManager {
 		queryResult.setOnFail(rule.getOnFail());
 		List<Integer> queryPatients = new ArrayList<>();
 
-		if (ruleSQL.contains("JOIN pcr2.patient")) {
+		if (ruleSQL.contains("JOIN ceg_compass_data.patient")) {
 			Integer patientId = 0;
 			for (Object patientEntity : patients) {
 				patientId = (Integer)patientEntity;
@@ -460,7 +460,7 @@ public class CohortManager {
 					buildEffectiveDateFilter(q, filter);
 					break;
 				case "OBSERVATION_PROBLEM":
-					q.sqlWhere += " "; // TODO problems
+					q.sqlWhere += " and d.is_problem = '1'";
 					break;
 				case "MEDICATION_STATUS":
 					q.sqlWhere += " and d.is_active = '1'";
@@ -478,20 +478,20 @@ public class CohortManager {
 		for (String value : filter.getValueSet().getValue()) {
 			switch (value) {
 				case "ACUTE":
-					q.sqlWhere += " or d.type_concept_id = '0'";
+					q.sqlWhere += " or d.medication_statement_authorisation_type_id = '0'";
 					break;
 				case "REPEAT":
-					q.sqlWhere += " or d.type_concept_id = '1'";
+					q.sqlWhere += " or d.medication_statement_authorisation_type_id = '1'";
 					break;
 				case "REPEAT_DISPENSING":
-					q.sqlWhere += " or d.type_concept_id = '2'";
+					q.sqlWhere += " or d.medication_statement_authorisation_type_id = '2'";
 					break;
 				case "AUTOMATIC":
-					q.sqlWhere += " or d.type_concept_id = '3'";
+					q.sqlWhere += " or d.medication_statement_authorisation_type_id = '3'";
 					break;
 			}
 		}
-		q.sqlWhere = q.sqlWhere.replaceFirst("or d.type_concept_id", "and (d.type_concept_id");
+		q.sqlWhere = q.sqlWhere.replaceFirst("or d.medication_statement_authorisation_type_id", "and (d.medication_statement_authorisation_type_id");
 		q.sqlWhere += ")";
 	}
 
@@ -502,14 +502,14 @@ public class CohortManager {
 				dateFrom = "-" + dateFrom;
 				dateFrom = getRelativeDateFromBaselineAsString(filter.getValueFrom().getRelativeUnit().value(),new Date(),dateFrom);
 			}
-			q.sqlWhere += " and d.effective_date >= " + parameterize(q.whereParams, convertToDate(dateFrom));
+			q.sqlWhere += " and d.clinical_effective_date >= " + parameterize(q.whereParams, convertToDate(dateFrom));
 		} else if (filter.getValueTo() != null) {
 			String dateTo = filter.getValueTo().getConstant();
 			if (filter.getValueTo().getRelativeUnit() != null) {
 				dateTo = "-" + dateTo;
 				dateTo = getRelativeDateFromBaselineAsString(filter.getValueTo().getRelativeUnit().value(),new Date(),dateTo);
 			}
-			q.sqlWhere += " and d.effective_date <= " + parameterize(q.whereParams, convertToDate(dateTo));
+			q.sqlWhere += " and d.clinical_effective_date <= " + parameterize(q.whereParams, convertToDate(dateTo));
 		}
 	}
 
@@ -546,7 +546,7 @@ public class CohortManager {
 			buildConceptTypeFilter(q, c, code, term, parentType, baseType, valueFrom, valueTo);
 		}
 
-		if (!q.dataTable.equals("pcr2.patient"))
+		if (!q.dataTable.equals("ceg_compass_data.patient"))
 			q.sqlWhere = "and (" + q.sqlWhere + ")";
 
 	}
@@ -569,37 +569,37 @@ public class CohortManager {
 			case "Observation":
 				q.patientJoinField = "patient_id";
 				q.codesetTypeJoinField = "read2_concept_id";
-				q.dataTable = "pcr2.observation";
+				q.dataTable = "ceg_compass_data.observation";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
 				break;
 			case "Medication Statement":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
-				q.dataTable = "pcr2.medication_statement";
+				q.dataTable = "ceg_compass_data.medication_statement";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Medication Order":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "sct_concept_id";
-				q.dataTable = "pcr2.medication_order";
+				q.dataTable = "ceg_compass_data.medication_order";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Allergy":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
-				q.dataTable = "pcr2.allergy";
+				q.dataTable = "ceg_compass_data.allergy_intolerance";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Referral":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
-				q.dataTable = "pcr2.referral";
+				q.dataTable = "ceg_compass_data.referral_request";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 			case "Encounter":
 				q.patientJoinField = "patient_id";
                 q.codesetTypeJoinField = "read2_concept_id";
-				q.dataTable = "pcr2.encounter";
+				q.dataTable = "ceg_compass_data.encounter";
 				buildCodeSetFilter(q, c, code, valueFrom, valueTo);
                 break;
 		}
@@ -617,11 +617,11 @@ public class CohortManager {
 
 	private static void buildConceptPatientFilter(QueryMeta q, String term, String parentType, String valueFrom, String valueTo) {
 		q.patientJoinField = "id";
-		q.dataTable = "pcr2.patient";
+		q.dataTable = "ceg_compass_data.patient";
 		if (term.equals("Male")) {
-			q.sqlWhere += " and p.gender_concept_id = '0'";
+			q.sqlWhere += " and p.patient_gender_id = '0'";
 		} else if (term.equals("Female")) {
-			q.sqlWhere += " and p.gender_concept_id = '1'";
+			q.sqlWhere += " and p.patient_gender_id = '1'";
 		} else if (term.equals("Date of Death")) {
 			if (!valueFrom.equals("") && !valueTo.equals(""))
 				q.sqlWhere += " and p.date_of_death between " + parameterize(q.whereParams, convertToDate(valueFrom))+" and "+ parameterize(q.whereParams, convertToDate(valueTo));
@@ -756,41 +756,41 @@ public class CohortManager {
 
 		if (cohortPopulation.equals("0")) { // currently registered
 			String sql = "";
-			if (q.dataTable.equals("pcr2.patient")) {
+			if (q.dataTable.equals("ceg_compass_data.patient")) {
 				sql = "select p.id " +
-						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
+						"from ceg_compass_data.patient p JOIN ceg_compass_data.episode_of_care e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
-						"and e.gp_registration_status_concept_id = 2 " +
-						"and e.effective_date <= NOW() " +
-						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere;
+						"where p.date_of_death IS NULL and p.organization_id IN (?0) " +
+						"and e.registration_type_id = 2 " +
+						"and e.date_registered <= NOW() " +
+						"and (e.date_registered_end > NOW() or e.date_registered_end IS NULL) "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
-						"from pcr2.patient p JOIN pcr2.gp_registration_status e on e.patient_id = p.id " +
+						"from ceg_compass_data.patient p JOIN ceg_compass_data.episode_of_care e on e.patient_id = p.id " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
                         "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
-						"where p.date_of_death IS NULL and p.organisation_id IN (?0) " +
-						"and e.gp_registration_status_concept_id = 2 " +
-						"and e.effective_date <= NOW() " +
-						"and (e.end_date > NOW() or e.end_date IS NULL) "+q.sqlWhere+
-						" order by p.id, d.effective_date "+order;
+						"where p.date_of_death IS NULL and p.organization_id IN (?0) " +
+						"and e.registration_type_id = 2 " +
+						"and e.date_registered <= NOW() " +
+						"and (e.date_registered_end > NOW() or e.date_registered_end IS NULL) "+q.sqlWhere+
+						" order by p.id, d.clinical_effective_date "+order;
 			}
             // System.out.println(sql);
 			return sql;
 		} else if (cohortPopulation.equals("1")) { // all patients
 			String sql = "";
-			if (q.dataTable.equals("pcr2.patient")) {
+			if (q.dataTable.equals("ceg_compass_data.patient")) {
 				sql = "select p.id " +
-						"from pcr2.patient p " +
+						"from ceg_compass_data.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
-						"where p.organisation_id IN (?0) "+q.sqlWhere;
+						"where p.organization_id IN (?0) "+q.sqlWhere;
 			} else {
 				sql = "select d.patient_id, d.effective_date, d.original_code " +
-						"from pcr2.patient p " +
+						"from ceg_compass_data.patient p " +
 						"JOIN " + q.dataTable + " d on d." + q.patientJoinField + " = p.id " +
                         "JOIN subscriber_transform_pcr.code_set_codes c on c." + q.codesetTypeJoinField + " = d.original_code " +
-						"where p.organisation_id IN (?0) "+q.sqlWhere+
-						" order by p.id, d.effective_date "+order;
+						"where p.organization_id IN (?0) "+q.sqlWhere+
+						" order by p.id, d.clinical_effective_date "+order;
 			}
             // System.out.println(sql);
 			return sql;
