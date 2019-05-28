@@ -57,6 +57,7 @@
         <module>src/scheduler</module>
         <module>src/decrypter</module>
         <module>src/filer</module>
+        <module>src/cegdatabasefilesender</module>
     </modules>
 
     <repositories>
