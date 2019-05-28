@@ -1,4 +1,4 @@
-package org.endeavourhealth.uploader;
+package org.endeavourhealth.filer.models;
 
 import org.apache.commons.csv.CSVRecord;
 

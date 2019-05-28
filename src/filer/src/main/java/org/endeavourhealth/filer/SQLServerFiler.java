@@ -1,16 +1,15 @@
-package org.endeavourhealth.uploader;
+package org.endeavourhealth.filer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
-import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
-import org.endeavourhealth.core.database.rdbms.enterprise.EnterpriseConnector;
+import org.endeavourhealth.filer.models.DeleteWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +19,11 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class SQLServerFiler {
+
     private static final Logger LOG = LoggerFactory.getLogger(SQLServerFiler.class);
 
     private static final String COLUMN_CLASS_MAPPINGS = "ColumnClassMappings.json";
@@ -32,38 +31,11 @@ public class SQLServerFiler {
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT;
 
     private static final String COL_IS_DELETE = "is_delete";
-    /*private static final String COL_SAVE_MODE = "save_mode";
-    private static final String UPSERT = "Upsert";
-    private static final String DELETE = "Delete";*/
     private static final String COL_ID = "id";
 
     private static final int UPSERT_ATTEMPTS = 10;
 
-    //private static final String ZIP_ENTRY = "EnterpriseData.xml";
-
-    //private static String keywordEscapeChar = null; //different DBs use different chars to escape keywords (" on pg, ` on mysql)
-
-    private static Map<String, HikariDataSource> connectionPools = new ConcurrentHashMap<>();
-    private static Map<String, String> escapeCharacters = new ConcurrentHashMap<>();
-    private static Map<String, Integer> batchSizes = new ConcurrentHashMap<>();
-
-    public static void file(UUID batchId, String base64, String configName) throws Exception {
-
-        byte[] bytes = Base64.getDecoder().decode(base64);
-        LOG.trace("Filing " + bytes.length + "b from batch " + batchId + " into " + configName);
-
-        //we may have multiple connections if we have replicas
-        List<EnterpriseConnector.ConnectionWrapper> connectionWrappers = EnterpriseConnector.openConnection(configName);
-        for (EnterpriseConnector.ConnectionWrapper connectionWrapper: connectionWrappers) {
-            file(connectionWrapper, bytes);
-        }
-    }
-
-    private static void file(EnterpriseConnector.ConnectionWrapper connectionWrapper, byte[] bytes) throws Exception {
-
-        Connection connection = connectionWrapper.getConnection();
-        String keywordEscapeChar = connectionWrapper.getKeywordEscapeChar();
-        int batchSize = connectionWrapper.getBatchSize();
+    public static void file(Connection connection, String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -105,7 +77,7 @@ public class SQLServerFiler {
             //if we get an exception, write out the zip file, so we can investigate what was being filed
             writeZipFile(bytes);
 
-            throw new Exception("Exception filing to " + connectionWrapper, ex);
+            throw new Exception("Exception filing to " + connection, ex);
         } finally {
             if (zis != null) {
                 zis.close();

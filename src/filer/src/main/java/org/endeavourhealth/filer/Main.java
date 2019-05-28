@@ -1,5 +1,6 @@
-package org.endeavourhealth.uploader;
+package org.endeavourhealth.filer;
 
+import com.amazonaws.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +18,39 @@ public class Main {
     private static final String JDBC_USER_ENV_VAR = "CONFIG_JDBC_USERNAME";
     private static final String JDBC_PASSWORD_ENV_VAR = "CONFIG_JDBC_PASSWORD";
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final int batchSize = 50;
 
     public static void main(String[] args) throws Exception {
 
         LOG.info("Starting MS SQL Server uploader");
-
+        System.getenv();
         try {
+
+            if (args.length < 1) {
+                LOG.error("Source directory is empty.");
+                System.exit(-1);
+            }
+
+            String sourceDir = args[0];
+            File[] files = getFilesFromDirectory(sourceDir, ".zip");
+            LOG.info("Files in source directory: " + files.length);
+
             Connection con = Main.getMSSqlServerConnection();
+            String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
+            String hostname = con.getMetaData().getURL();
             LOG.info("Connection established.");
+
+            FileInputStream stream = null;
+            for (File file : files) {
+                stream = new FileInputStream(file);
+                byte[] bytes = IOUtils.toByteArray(stream);
+                con = Main.getMSSqlServerConnection();
+                LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
+                SQLServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                stream.close();
+                file.delete();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,11 +67,11 @@ public class Main {
         return DriverManager.getConnection(envVars.getOrDefault(JDBC_URL_ENV_VAR,""), props);
     }
 
-    private static File[] getFilesFromDirectory(String directory, String prefix) {
-        final String str = prefix;
+    private static File[] getFilesFromDirectory(String directory, String extension) {
+        final String str = extension;
         FileFilter fileFilter = new FileFilter() {
             public boolean accept(File file) {
-                return file.getName().startsWith(str);
+                return file.getName().endsWith(str);
             }
         };
         return new File(directory).listFiles(fileFilter);
