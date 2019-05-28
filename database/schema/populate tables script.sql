@@ -40,7 +40,7 @@ select 1, '{
 {"header" : "original code", "index" : "13"},
 {"header" : "original term", "index" : "14"}],
  		"codeSets": [
-{"codeSetId" : 1, "extractType" : "latest_each"}]
+{"codeSetId" : 1, "extractType" : "all"}]
 }]
 }';
 
@@ -847,7 +847,7 @@ values (3, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
                         </codeSetValue>
 						<codeSetValue>
                             <code>5</code>
-                            <term>Diabetes - Local OOF List</term>
+                            <term>Diabetes - Local QOF List</term>
                             <dataType>11</dataType>
                             <parentType></parentType>
                             <baseType>Observation</baseType>

@@ -260,7 +260,7 @@ values (2, 'Diabetes Patients Aged 12+', '<?xml version="1.0" encoding="UTF-8" s
                         </codeSetValue>
 						<codeSetValue>
                             <code>5</code>
-                            <term>Diabetes - Local OOF List</term>
+                            <term>Diabetes - Local QOF List</term>
                             <dataType>11</dataType>
                             <parentType></parentType>
                             <baseType>Observation</baseType>
