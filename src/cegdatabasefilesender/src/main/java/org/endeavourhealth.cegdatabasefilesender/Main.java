@@ -6,7 +6,6 @@ import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
 // import org.endeavourhealth.core.database.rdbms.audit.models.RdbmsQueuedMessage;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
-// import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -55,8 +54,10 @@ public class Main {
         // Main main = Main.getInstance();
 
         // TODO Amend pathnames as required
-        File dataDir = new File("C:/JDBC/Data/");
-        File stagingDir = new File("C:/JDBC/Staging/");
+        File dataDir = new File("C:/Subscriber/Data/");
+        File stagingDir = new File("C:/Subscriber/Staging/");
+        String destinationDir = "/endeavour/ftp/Test/";
+        // File archiveDir = new File("C:/Subscriber/Archive/");
 
         LOG.info("**********");
         LOG.info("Starting Process.");
@@ -157,15 +158,13 @@ public class Main {
                 // LOG.info("SFTP connection opened.");
 
                 try {
-                    // TODO Amend SFTP location as required
-                    String location = "/endeavour/ftp/Test/";
                     File[] files = stagingDir.listFiles();
                     // LOG.info("**********");
                     // LOG.info("Starting file/s upload.");
                     for (File file : files) {
                         LOG.info("**********");
                         LOG.info("Uploading file: " + file.getName());
-                        sftp.put(file.getAbsolutePath(), location);
+                        sftp.put(file.getAbsolutePath(), destinationDir);
                     }
                     sftp.close();
 
@@ -183,14 +182,13 @@ public class Main {
 
         } catch (Exception ex) {
             LOG.info("**********");
-            LOG.error("Exception occurred while reading clientPrivateKey file. " + ex);
+            LOG.error("Exception occurred while reading clientPrivateKey file. " + ex.getMessage());
             System.exit(-1);
         }
 
         // LOG.info("**********");
         // LOG.info("Archiving contents of staging directory.");
         // TODO Put code here
-        File archiveDir = new File("C:/JDBC/Archive/");
 
         LOG.info("**********");
         LOG.info("Process Completed.");
@@ -339,7 +337,7 @@ public class Main {
         String clientPrivateKey = null;
         try {
             clientPrivateKey = FileUtils.readFileToString(
-                    new File("C:/JDBC/SFTPKey/sftp02endeavour.ppk"), (String) null);
+                    new File("C:/Subscriber/SFTPKey/sftp02endeavour.ppk"), (String) null);
 
         } catch (Exception ex) {
             throw ex;

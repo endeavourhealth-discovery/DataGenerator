@@ -9,6 +9,16 @@ drop table if exists data_generator.file_transactions;
 drop table if exists data_generator.cohort;
 drop table if exists data_generator.exported_ids;
 
+create table data_generator.subscriber_file_sender (
+	subscriber_id int not null comment 'The id of the subscriber file send.',
+    definition varchar(5000) not null comment 'The json definition of the subscriber file send.' 
+);
+
+create table data_generator.subscriber_zip_file_uuids (
+	queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
+													  in the audit.queued_message table.'
+);
+    
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
     definition mediumtext not null comment 'The json definition of the dataset',

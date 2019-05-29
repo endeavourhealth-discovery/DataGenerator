@@ -32,7 +32,6 @@
             <version>${endeavour-config.version}</version>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -98,7 +97,6 @@
             <artifactId>cron-utils</artifactId>
             <version>${cron.utils.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.endeavourhealth.dataSharingManager</groupId>
             <artifactId>Models</artifactId>
