@@ -20,7 +20,7 @@ public class ZipEncryptUpload {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ZipEncryptUpload.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         if (args == null || args.length != 7) {
             LOG.error("Invalid parameters.");
@@ -55,8 +55,14 @@ public class ZipEncryptUpload {
                 LOG.info("");
                 LOG.info("Staging directory is not empty.");
                 for (File file : files) {
-                    LOG.info("Deleting the file: " + file.getName());
-                    file.delete();
+                    if (file.isFile()) {
+                        LOG.info("Deleting the file: " + file.getName());
+                        file.delete();
+                    }
+                    if (file.isDirectory()) {
+                        LOG.info("Deleting the directory: " + file.getName());
+                        FileUtils.deleteDirectory(file);
+                    }
                 }
                 LOG.info("");
             }

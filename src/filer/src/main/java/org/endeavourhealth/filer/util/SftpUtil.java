@@ -118,6 +118,12 @@ public class SftpUtil {
         return channel.get(name);
     }
 
+    public InputStream getFile(String path, String file) throws SftpException {
+        channel.cd(path);
+        String name = FilenameUtils.getName(file);
+        return channel.get(name);
+    }
+
     public void deleteFile(String remotePath) throws SftpException {
         channel.rm(remotePath);
     }
