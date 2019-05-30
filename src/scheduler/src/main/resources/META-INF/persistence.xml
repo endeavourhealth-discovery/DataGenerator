@@ -7,6 +7,8 @@
         <class>org.endeavourhealth.scheduler.models.database.ExportedIdsEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.ExtractEntity</class>
         <class>org.endeavourhealth.scheduler.models.database.FileTransactionsEntity</class>
+        <class>org.endeavourhealth.scheduler.models.database.SubscriberFileSenderEntity</class>
+        <class>org.endeavourhealth.scheduler.models.database.SubscriberZipFileUUIDsEntity</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.show_sql" value="false" />

@@ -1,6 +1,7 @@
-package org.endeavourhealth.cegdatabasefilesender.database;
+package org.endeavourhealth.scheduler.models.database;
 
 import org.endeavourhealth.scheduler.models.PersistenceManager;
+
 import javax.persistence.*;
 import java.util.Objects;
 

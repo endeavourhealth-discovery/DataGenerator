@@ -1,7 +1,6 @@
-package org.endeavourhealth.cegdatabasefilesender.database;
+package org.endeavourhealth.scheduler.models.database;
 
 import org.endeavourhealth.scheduler.models.PersistenceManager;
-import org.endeavourhealth.scheduler.models.database.ExtractEntity;
 
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,6 +12,8 @@ import java.util.Objects;
 @Table(name = "subscriber_zip_file_uuids", schema = "data_generator")
 public class SubscriberZipFileUUIDsEntity {
 
+    //TODO Put code here to add in the other fields now in this table
+
     private String queuedMessageUUID;
 
     @Id
@@ -21,7 +22,7 @@ public class SubscriberZipFileUUIDsEntity {
         return queuedMessageUUID;
     }
 
-    public void getQueuedMessageUUID(String queuedMessageUUID) {
+    public void setQueuedMessageUUID(String queuedMessageUUID) {
         this.queuedMessageUUID = queuedMessageUUID;
     }
 

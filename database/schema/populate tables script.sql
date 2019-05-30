@@ -7,6 +7,25 @@ delete from data_generator.dataset where dataset_id <= 5;
 -- delete some cohort data
 delete from data_generator.cohort where id <= 5;
 
+-- insert into the subscriber_file_sender table
+insert into data_generator.subscriber_file_sender
+select 1, '{
+ "subscriberFileLocationDetails": {
+          "dataDir": "C:/Subscriber/Data/",
+          "stagingDir": "C:/Subscriber/Staging/",
+          "destinationDir": "/endeavour/ftp/Test/",
+          "archiveDir": "C:/Subscriber/Archive/"
+},
+ "sftpConnectionDetails": {
+          "hostname": "10.0.101.239",
+          "hostPublicKey": "",
+          "port": "22",
+          "username": "endeavour",
+          "clientPrivateKeyPassword": "",
+          "clientPrivateKey": ""
+}
+}';
+
 -- insert into the dataset table
 insert into data_generator.dataset
 select 1, '{

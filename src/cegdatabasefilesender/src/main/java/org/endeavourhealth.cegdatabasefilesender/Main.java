@@ -1,11 +1,15 @@
 package org.endeavourhealth.cegdatabasefilesender;
 
 // import org.endeavourhealth.common.config.ConfigManager;
+import org.apache.commons.lang3.StringUtils;
+import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
 // import org.endeavourhealth.core.database.rdbms.audit.models.RdbmsQueuedMessage;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
+import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
+import org.endeavourhealth.scheduler.models.database.SubscriberFileSenderEntity;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -19,10 +23,7 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -53,147 +54,237 @@ public class Main {
         // ConfigManager.Initialize("ceg-database-file-sender");
         // Main main = Main.getInstance();
 
-        // TODO Amend pathnames as required
-        File dataDir = new File("C:/Subscriber/Data/");
-        File stagingDir = new File("C:/Subscriber/Staging/");
-        String destinationDir = "/endeavour/ftp/Test/";
-        // File archiveDir = new File("C:/Subscriber/Archive/");
-
-        LOG.info("**********");
-        LOG.info("Starting Process.");
-
-        LOG.info("**********");
-        LOG.info("Getting stored zipped CSV files from audit.queued_message table, to write to data directory.");
+        int subscriberId = 1;
 
         try {
-            ResultSet results = checkAuditQueuedMessageTableForUUIDs();
+            SubscriberFileSenderEntity sfse = SubscriberFileSenderEntity.
+                    getSubscriberFileSenderEntity(subscriberId);
+            String definition = sfse.getDefinition();
 
-            while (results.next()) {
-                UUID queuedMessageId = UUID.fromString(results.getString("id"));
+            SubscriberFileSenderConfig config = null;
+            if (!StringUtils.isEmpty(definition)) {
+                config = ObjectMapperPool.getInstance().
+                        readValue(definition, SubscriberFileSenderConfig.class);
+            }
 
-                try {
-                    byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+            String dataDirString = addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getDataDir());
+            File dataDir = new File(dataDirString);
+            makeDirectory(dataDir);
+
+            String stagingDirString = addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getStagingDir());
+            File stagingDir = new File(stagingDirString);
+            makeDirectory(stagingDir);
+
+            String destinationDir = addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getDestinationDir());
+
+            String archiveDirString = addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getArchiveDir());
+            File archiveDir = new File(archiveDirString);
+            makeDirectory(archiveDir);
+
+            // TODO Amend pathnames as required
+            // File dataDir = new File("C:/Subscriber/Data/");
+            // File stagingDir = new File("C:/Subscriber/Staging/");
+            // String destinationDir = "/endeavour/ftp/Test/";
+            // File archiveDir = new File("C:/Subscriber/Archive/");
+
+            LOG.info("**********");
+            LOG.info("Starting Process.");
+
+            LOG.info("**********");
+            LOG.info("Getting stored zipped CSV files from audit.queued_message table, to write to data directory.");
+
+            // LOG.info("**********");
+            // LOG.info("Getting uuid, timestamp and queue_message_type_id from data_generator.subscriber_zip_file_uuids table.");
+            // TODO Put code here
+
+            try {
+                ResultSet results = checkAuditQueuedMessageTableForUUIDs();
+                int filenameCounter = 0;
+
+                while (results.next()) {
+                    filenameCounter++;
+                    UUID queuedMessageId = UUID.fromString(results.getString("id"));
+                    Timestamp timestamp = results.getTimestamp("timestamp");
+                    // LOG.info("UUID: " + queuedMessageId);
+                    // LOG.info("Timestamp: " + timestamp);
 
                     try {
-                        writeZipFileToDataDirectory(bytes, queuedMessageId, dataDir);
+                        byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
 
                         try {
-                            // TODO Uncomment out the line of code below when sure that this all works
-                            //  Once the file has been taken from audit.queued_message it can be deleted
-                            // deleteZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+                            // writeZipFileToDataDirectory(bytes, queuedMessageId, dataDir);
+                            writeZipFileToDataDirectory(bytes, filenameCounter, dataDir);
+
+                            try {
+                                // TODO Uncomment out the line of code below when sure that this all works
+                                //  Once the file has been taken from audit.queued_message it can be deleted
+                                // deleteZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+
+                            } catch (Exception ex) {
+                                LOG.info("**********");
+                                LOG.error("Error encountered in deleting zip file from audit.queued_message table: " + ex.getMessage());
+                                LOG.error("For UUID: " + queuedMessageId);
+                                System.exit(-1);
+                            }
 
                         } catch (Exception ex) {
                             LOG.info("**********");
-                            LOG.error("Error encountered in deleting zip file from audit.queued_message table: " + ex.getMessage());
+                            LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
                             LOG.error("For UUID: " + queuedMessageId);
                             System.exit(-1);
                         }
 
                     } catch (Exception ex) {
                         LOG.info("**********");
-                        LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
+                        LOG.error("Error encountered in getting zip file from audit.queued_message table: " + ex.getMessage());
                         LOG.error("For UUID: " + queuedMessageId);
                         System.exit(-1);
                     }
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in getting zip file from audit.queued_message table: " + ex.getMessage());
-                    LOG.error("For UUID: " + queuedMessageId);
-                    System.exit(-1);
                 }
-            }
 
-        } catch (Exception ex) {
-            LOG.info("**********");
-            LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
-            System.exit(-1);
-        }
-
-        LOG.info("**********");
-        LOG.info("Checking contents of data directory for zipped CSV files, to put into a multi-part zip in staging directory.");
-
-        try {
-            zipAllContentsOfDataDirectoryToStaging(dataDir, stagingDir);
-
-        } catch (Exception ex) {
-            LOG.info("**********");
-            LOG.error("Error encountered in zipping contents of data directory to staging directory: " + ex.getMessage());
-            System.exit(-1);
-        }
-
-        // LOG.info("**********");
-        // LOG.info("Deleting contents of data directory.");
-        // TODO Put code here
-
-        LOG.info("**********");
-        LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
-
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
-                     sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
-            if (!encryptFile(zipFile)) {
+            } catch (Exception ex) {
                 LOG.info("**********");
-                LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
+                LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
                 System.exit(-1);
             }
 
-        } catch (Exception ex) {
             LOG.info("**********");
-            LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory: " + ex.getMessage());
-            System.exit(-1);
-        }
-
-        LOG.info("**********");
-        LOG.info("Checking staging directory to send contents to CEG SFTP location.");
-
-        try {
-            ConnectionDetails con = setSubscriberConfigSftpConnectionDetails();
-            SftpConnection sftp = new SftpConnection(con);
+            LOG.info("Checking contents of data directory for zipped CSV files, to put into a multi-part zip in staging directory.");
 
             try {
-                sftp.open();
-                // LOG.info("**********");
-                // LOG.info("SFTP connection opened.");
+                zipAllContentsOfDataDirectoryToStaging(dataDir, stagingDir);
 
-                try {
-                    File[] files = stagingDir.listFiles();
-                    // LOG.info("**********");
-                    // LOG.info("Starting file/s upload.");
-                    for (File file : files) {
-                        LOG.info("**********");
-                        LOG.info("Uploading file: " + file.getName());
-                        sftp.put(file.getAbsolutePath(), destinationDir);
-                    }
-                    sftp.close();
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in zipping contents of data directory to staging directory: " + ex.getMessage());
+                System.exit(-1);
+            }
 
-                } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.info("Deleting contents of data directory.");
+
+            try {
+                // TODO Uncomment out the line of code below as necessary
+                // FileUtils.cleanDirectory(dataDir);
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in deleting contents of data directory: " + ex.getMessage());
+                System.exit(-1);
+            }
+
+            LOG.info("**********");
+            LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
+
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
+                        sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
+                if (!encryptFile(zipFile)) {
                     LOG.info("**********");
-                    LOG.error("Error encountered while uploading to the SFTP: " + ex.getMessage());
+                    LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
                     System.exit(-1);
                 }
 
             } catch (Exception ex) {
                 LOG.info("**********");
-                LOG.error("Error encountered while connecting to the SFTP: " + ex.getMessage());
+                LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory: " + ex.getMessage());
                 System.exit(-1);
             }
 
-        } catch (Exception ex) {
             LOG.info("**********");
-            LOG.error("Exception occurred while reading clientPrivateKey file. " + ex.getMessage());
+            LOG.info("Checking staging directory to send contents to CEG SFTP location.");
+
+            try {
+                ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
+                SftpConnection sftp = new SftpConnection(con);
+
+                try {
+                    sftp.open();
+                    // LOG.info("**********");
+                    // LOG.info("SFTP connection opened.");
+
+                    try {
+                        File[] files = stagingDir.listFiles();
+                        // LOG.info("**********");
+                        // LOG.info("Starting file/s upload.");
+                        for (File file : files) {
+                            LOG.info("**********");
+                            LOG.info("Uploading file: " + file.getName());
+                            sftp.put(file.getAbsolutePath(), destinationDir);
+                        }
+                        sftp.close();
+
+                    } catch (Exception ex) {
+                        LOG.info("**********");
+                        LOG.error("Error encountered while uploading to the SFTP: " + ex.getMessage());
+                        System.exit(-1);
+                    }
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered while connecting to the SFTP: " + ex.getMessage());
+                    System.exit(-1);
+
+                } finally {
+                    if (sftp != null)
+                        sftp.close();
+                }
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered while setting SFTP connection details: " + ex.getMessage());
+                System.exit(-1);
+            }
+
+            // LOG.info("**********");
+            // LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
+            // TODO Put code here
+
+            LOG.info("**********");
+            LOG.info("Archiving contents of staging directory.");
+
+            try {
+                FileUtils.copyDirectory(stagingDir, archiveDir);
+                FileUtils.cleanDirectory(stagingDir);
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in archiving contents of staging directory: " + ex.getMessage());
+                System.exit(-1);
+            }
+
+            LOG.info("**********");
+            LOG.info("Process Completed.");
+
+            System.exit(0);
+
+        } catch (SQLException ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered with accessing data_generator.subscriber_file_sender table: " + ex.getMessage());
             System.exit(-1);
         }
 
-        // LOG.info("**********");
-        // LOG.info("Archiving contents of staging directory.");
-        // TODO Put code here
 
-        LOG.info("**********");
-        LOG.info("Process Completed.");
-        System.exit(0);
 
+
+    }
+
+    private static String addFileSeparatorToEndOfDirString(String dirString) {
+        if (!(dirString.endsWith(File.separator))) {
+            dirString += File.separator;
+        }
+        return dirString;
+    }
+
+    private static void makeDirectory (File directory) {
+        if (!(directory.exists())) {
+            directory.mkdirs();
+        }
     }
 
     private static ResultSet checkAuditQueuedMessageTableForUUIDs() throws Exception {
@@ -205,9 +296,10 @@ public class Main {
             SessionImpl session = (SessionImpl) entityManager.getDelegate();
             Connection connection = session.connection();
 
-            String sql = "select id"
-                    + " from"
-                    + " queued_message";
+            String sql = "select id, timestamp"
+                    + " from queued_message"
+                    + " where queued_message_type_id = 2"
+                    + " order by timestamp ";
 
             ps = connection.prepareStatement(sql);
             ps.executeQuery();
@@ -241,12 +333,15 @@ public class Main {
         }
     }
 
-    private static void writeZipFileToDataDirectory(byte[] bytes, UUID queuedMessageId, File dataDir) throws Exception {
+    // private static void writeZipFileToDataDirectory(byte[] bytes, UUID queuedMessageId, File dataDir) throws Exception {
+    // private static void writeZipFileToDataDirectory(byte[] bytes, Timestamp timestamp, File dataDir) throws Exception {
+    private static void writeZipFileToDataDirectory(byte[] bytes, int filenameCounter, File dataDir) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         File file = new File(dataDir.getAbsolutePath() +
                 File.separator +
                 sdf.format(new Date()) + "_" +
-                queuedMessageId.toString() +
+                // queuedMessageId.toString() +
+                String.format("%07d", filenameCounter) +
                 "_Subscriber_Zip.zip");
 
         // Full UUID needs to be used in the filename because several different files can be
@@ -319,45 +414,51 @@ public class Main {
         return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
     }
 
-    private static ConnectionDetails setSubscriberConfigSftpConnectionDetails() throws Exception {
-    // private static ConnectionDetails setSubscriberConfigSftpConnectionDetails(ExtractConfig config) {
+    private static ConnectionDetails setSubscriberConfigSftpConnectionDetails(SubscriberFileSenderConfig config) throws Exception {
+    // private static ConnectionDetails setSubscriberConfigSftpConnectionDetails() throws Exception {
 
-        // TODO Amend SFTP logon details as required
-        // Setting up the connection details
+        try {
+            // TODO Amend SFTP logon details as required
+            // Setting up the connection details
 
-        String hostname = "10.0.101.239";
-        // String hostname = config.getSftpConnectionDetails().getHostname();
+            // String hostname = "10.0.101.239";
+            String hostname = config.getSftpConnectionDetails().getHostname();
 
-        int port = 22;
-        // int port = config.getSftpConnectionDetails().getPort();
+            // int port = 22;
+            int port = config.getSftpConnectionDetails().getPort();
 
-        String username = "endeavour";
-        // String username = config.getSftpConnectionDetails().getUsername();
+            // String username = "endeavour";
+            String username = config.getSftpConnectionDetails().getUsername();
 
-        String clientPrivateKey = null;
+        /* String clientPrivateKey = null;
         try {
             clientPrivateKey = FileUtils.readFileToString(
                     new File("C:/Subscriber/SFTPKey/sftp02endeavour.ppk"), (String) null);
 
         } catch (Exception ex) {
             throw ex;
+        } */
+
+            String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
+
+            // String clientPrivateKeyPassword = "";
+            String clientPrivateKeyPassword = config.getSftpConnectionDetails().getClientPrivateKeyPassword();
+
+            // String hostPublicKey = "";
+            String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
+
+            ConnectionDetails sftpConnectionDetails = new ConnectionDetails();
+            sftpConnectionDetails.setHostname(hostname);
+            sftpConnectionDetails.setPort(port);
+            sftpConnectionDetails.setUsername(username);
+            sftpConnectionDetails.setClientPrivateKey(clientPrivateKey);
+            sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
+            sftpConnectionDetails.setHostPublicKey(hostPublicKey);
+            return sftpConnectionDetails;
+
+        } catch (Exception ex) {
+            throw ex;
         }
-        // String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
-
-        String clientPrivateKeyPassword = "";
-        // String clientPrivateKeyPassword = config.getSftpConnectionDetails().getClientPrivateKeyPassword();
-
-        String hostPublicKey = "";
-        // String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
-
-        ConnectionDetails sftpConnectionDetails = new ConnectionDetails();
-        sftpConnectionDetails.setHostname(hostname);
-        sftpConnectionDetails.setPort(port);
-        sftpConnectionDetails.setUsername(username);
-        sftpConnectionDetails.setClientPrivateKey(clientPrivateKey);
-        sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
-        sftpConnectionDetails.setHostPublicKey(hostPublicKey);
-        return sftpConnectionDetails;
     }
 
     private static void helperMethod() {

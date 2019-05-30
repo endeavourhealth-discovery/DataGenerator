@@ -2,6 +2,8 @@ drop database if exists data_generator;
 
 create database data_generator;
 
+drop table if exists data_generator.subscriber_file_sender;
+drop table if exists data_generator.subscriber_zip_file_uuids;
 drop table if exists data_generator.dataset;
 drop table if exists data_generator.extract;
 drop table if exists data_generator.cohort_results;
@@ -15,8 +17,12 @@ create table data_generator.subscriber_file_sender (
 );
 
 create table data_generator.subscriber_zip_file_uuids (
-	queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
-													  in the audit.queued_message table.'
+	subscriber_id int not null comment 'The id of the subscriber file send.',
+    queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
+													  in the audit.queued_message table.',
+    queued_message_timestamp datetime not null comment 'The timestamp field of the entry in the audit.queued_message table.',
+    queued_message_type_id int(11) not null comment 'The type_id field of the entry in the audit.queued_message table.',
+    file_sent boolean not null default false comment 'Whether or not the file has been sent to the SFTP.'
 );
     
 create table data_generator.dataset (

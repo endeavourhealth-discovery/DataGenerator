@@ -1,4 +1,4 @@
-package org.endeavourhealth.cegdatabasefilesender.json;
+package org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition;
 
 public class SubscriberFileLocationDetails {
 

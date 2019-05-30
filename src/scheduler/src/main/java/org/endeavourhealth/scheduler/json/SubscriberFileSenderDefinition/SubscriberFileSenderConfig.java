@@ -1,4 +1,7 @@
-package org.endeavourhealth.cegdatabasefilesender.json;
+package org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition;
+
+import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SftpConnectionDetails;
+import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileLocationDetails;
 
 public class SubscriberFileSenderConfig {
 
