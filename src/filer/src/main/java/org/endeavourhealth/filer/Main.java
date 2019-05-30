@@ -1,6 +1,7 @@
 package org.endeavourhealth.filer;
 
 import com.amazonaws.util.IOUtils;
+import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -25,8 +26,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class Main {
 
@@ -177,31 +176,13 @@ public class Main {
             for (File file : files) {
                 LOG.info("Deflating zip file: " + file.getName());
                 ZipFile zipFile = new ZipFile(file);
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                while(entries.hasMoreElements()){
-                    ZipEntry entry = entries.nextElement();
-                    if(entry.isDirectory()){
-                        String destPath = staging_dir.getAbsolutePath() + File.separator + entry.getName();
-                        File dir = new File(destPath);
-                        dir.mkdirs();
-                    } else {
-                        String destPath = staging_dir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
-                        if (!locations.contains(destPath)) {
-                            locations.add(destPath);
-                        }
-                        File dir = new File(destPath);
-                        dir.mkdirs();
-                        destPath += File.separator + entry.getName();
-                        LOG.info("File: " + destPath + " extracted.");
-                        try(InputStream inputStream = zipFile.getInputStream(entry); FileOutputStream outputStream = new FileOutputStream(destPath)) {
-                            int data = inputStream.read();
-                            while(data != -1){
-                                outputStream.write(data);
-                                data = inputStream.read();
-                            }
-                        }
-                    }
+                String destPath = staging_dir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
+                if (!locations.contains(destPath)) {
+                    locations.add(destPath);
                 }
+                File dir = new File(destPath);
+                dir.mkdirs();
+                zipFile.extractAll(destPath);
             }
 
             for (String sourceDir : locations) {
@@ -217,6 +198,7 @@ public class Main {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
                     con = Main.getMSSqlServerConnection();
+                    con.setAutoCommit(false);
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
                     SQLServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
                     stream.close();

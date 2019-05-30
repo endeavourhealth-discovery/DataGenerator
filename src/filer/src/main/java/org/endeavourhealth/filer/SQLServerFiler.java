@@ -87,7 +87,7 @@ public class SQLServerFiler {
     }
 
     private static void writeZipFile(byte[] bytes) {
-        File f = new File("EnterpriseFileError.zip");
+        File f = new File("D:\\Temp\\SubscriberFileError.zip");
         try {
             FileUtils.writeByteArrayToFile(f, bytes);
             LOG.error("Written ZIP file to " + f);
