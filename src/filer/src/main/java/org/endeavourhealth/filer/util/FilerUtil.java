@@ -1,7 +1,6 @@
 package org.endeavourhealth.filer.util;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyTransRecipientInformation;
@@ -20,75 +19,58 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Properties;
 
 public class FilerUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilerUtil.class);
-    private static final String JDBC_CLASS_ENV_VAR = "CONFIG_JDBC_CLASS";
-    private static final String JDBC_URL_ENV_VAR = "CONFIG_JDBC_URL";
-    private static final String JDBC_USER_ENV_VAR = "CONFIG_JDBC_USERNAME";
-    private static final String JDBC_PASSWORD_ENV_VAR = "CONFIG_JDBC_PASSWORD";
 
-    public static void initialize(String args[]) {
-        if (args == null || args.length != 9) {
-            LOG.error("Invalid number of parameters.");
-            System.exit(-1);
-        } else {
-            for (int i = 0; i < 9; i++) {
-                if (StringUtils.isEmpty(args[i])) {
-                    LOG.error("Parameter " + (i + 1) + " is required." );
-                    System.exit(-1);
-                }
-            }
-        }
+    public static final String STAGING = "directory.staging";
+    public static final String SUCCESS = "directory.success";
+    public static final String FAILURE = "directory.failure";
 
-        LOG.info("");
-        LOG.info("Staging Directory : " + args[0]);
-        LOG.info("Hostname          : " + args[1]);
-        LOG.info("Port              : " + args[2]);
-        LOG.info("Username          : " + args[3]);
-        LOG.info("SFTP Location     : " + args[4]);
-        LOG.info("Key File          : " + args[5]);
-        LOG.info("");
-        LOG.info("P12 file          : " + args[6]);
-        LOG.info("Alias             : " + args[7]);
-        LOG.info("Key File          : " + args[8]);
-        LOG.info("");
+    public static final String HOSTNAME = "sftp.hostname";
+    public static final String PORT = "sftp.port";
+    public static final String USERNAME = "sftp.username";
+    public static final String LOCATION = "sftp.location";
+    public static final String KEY = "sftp.key";
+
+    public static final String P12 = "encrypt.p12";
+    public static final String ALIAS = "encrypt.alias";
+    public static final String PASSWORD = "encrypt.password";
+
+    public static final String URL = "db.url";
+    public static final String DB_USERNAME = "db.username";
+    public static final String DB_PASSWORD = "db.password";
+    public static final String JDBC = "db.jdbc";
+
+
+    public static Properties initialize() throws Exception {
+        Properties properties = new Properties();
+        String path = "config.properties";
+        InputStream stream = FilerUtil.class.getClassLoader().getResourceAsStream(path);
+        properties.load(stream);
+        return properties;
     }
 
     public static void setupStagingDir(File dir) throws Exception {
+        FileUtils.deleteDirectory(dir);
         if (!dir.exists()) {
             dir.mkdirs();
         } else {
-            File[] files = dir.listFiles();
-            if (files.length > 0) {
-                LOG.info("");
-                LOG.info("Staging directory is not empty.");
-                for (File file : files) {
-                    if (file.isFile()) {
-                        LOG.info("Deleting the file: " + file.getName());
-                        file.delete();
-                    }
-                    if (file.isDirectory()) {
-                        LOG.info("Deleting the directory: " + file.getName());
-                        FileUtils.deleteDirectory(file);
-                    }
-                }
-                LOG.info("");
-            }
+            FileUtils.deleteDirectory(dir);
+            dir.mkdirs();
         }
     }
 
-    public static SftpUtil setupSftp(String args[]) {
+    public static SftpUtil setupSftp(Properties properties) {
 
         ConnectionDetails sftpCon = new ConnectionDetails();
-        sftpCon.setHostname(args[1]);
-        sftpCon.setPort(Integer.valueOf(args[2]));
-        sftpCon.setUsername(args[3]);
+        sftpCon.setHostname(properties.getProperty(HOSTNAME));
+        sftpCon.setPort(Integer.valueOf(properties.getProperty(PORT)));
+        sftpCon.setUsername(properties.getProperty(USERNAME));
         try {
-            sftpCon.setClientPrivateKey(FileUtils.readFileToString(new File(args[5])));
+            sftpCon.setClientPrivateKey(FileUtils.readFileToString(new File(properties.getProperty(KEY))));
             sftpCon.setClientPrivateKeyPassword("");
         } catch (IOException e) {
             LOG.info("");
@@ -114,16 +96,16 @@ public class FilerUtil {
         return sftp;
     }
 
-    public static void decryptFiles(File[] files, String args[]) {
+    public static void decryptFiles(File[] files, Properties properties) {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
-            char[] keystorePassword = args[8].toCharArray();
+            char[] keystorePassword = properties.getProperty(PASSWORD).toCharArray();
             KeyStore keystore = KeyStore.getInstance("PKCS12");
-            keystore.load(new FileInputStream(args[6]), keystorePassword);
+            keystore.load(new FileInputStream(properties.getProperty(P12)), keystorePassword);
 
-            char[] keyPassword = args[8].toCharArray();
-            PrivateKey key = (PrivateKey) keystore.getKey(args[7], keyPassword);
+            char[] keyPassword = properties.getProperty(PASSWORD).toCharArray();
+            PrivateKey key = (PrivateKey) keystore.getKey(properties.getProperty(ALIAS), keyPassword);
 
             for (File file : files) {
                 boolean decrypted = decryptFile(file, key);
@@ -143,13 +125,12 @@ public class FilerUtil {
         }
     }
 
-    public static Connection getMSSqlServerConnection() throws SQLException, ClassNotFoundException {
-        Map<String, String> envVars = System.getenv();
-        Class.forName(envVars.getOrDefault(JDBC_CLASS_ENV_VAR, "com.microsoft.sqlserver.jdbc.SQLServerDriver"));
+    public static Connection getMSSqlServerConnection(Properties properties) throws SQLException, ClassNotFoundException {
+        Class.forName(properties.getProperty(JDBC));
         Properties props = new Properties();
-        props.setProperty("user", envVars.getOrDefault(JDBC_USER_ENV_VAR,""));
-        props.setProperty("password", envVars.getOrDefault(JDBC_PASSWORD_ENV_VAR, ""));
-        return DriverManager.getConnection(envVars.getOrDefault(JDBC_URL_ENV_VAR,""), props);
+        props.setProperty("user", properties.getProperty(DB_USERNAME));
+        props.setProperty("password", properties.getProperty(DB_PASSWORD));
+        return DriverManager.getConnection(properties.getProperty(URL), props);
     }
 
     private static boolean decryptFile(File file, PrivateKey decryptionKey) {

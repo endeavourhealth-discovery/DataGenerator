@@ -22,17 +22,25 @@ public class Main {
 
         LOG.info("Starting MS SQL Server uploader");
 
-        FilerUtil.initialize(args);
+        Properties properties = null;
+        try {
+            properties = FilerUtil.initialize();
+        } catch (Exception e) {
+            LOG.info("");
+            LOG.error("Error in reading config.properties " + e.getMessage());
+            LOG.info("");
+            System.exit(-1);
+        }
 
         try {
 
-            File stagingDir = new File(args[0]);
+            File stagingDir = new File(properties.getProperty(FilerUtil.STAGING));
             FilerUtil.setupStagingDir(stagingDir);
 
-            SftpUtil sftp = FilerUtil.setupSftp(args);
+            SftpUtil sftp = FilerUtil.setupSftp(properties);
             try {
                 sftp.open();
-                List<RemoteFile> list = sftp.getFileList(args[4]);
+                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerUtil.LOCATION));
                 if (list.size() == 0) {
                     LOG.info("SFTP server location is empty.");
                     LOG.info("Ending MS SQL Server uploader");
@@ -72,7 +80,7 @@ public class Main {
             }
 
             File[] files = FilerUtil.getFilesFromDirectory(stagingDir.getAbsolutePath(), ".zip");
-            FilerUtil.decryptFiles(files, args);
+            FilerUtil.decryptFiles(files, properties);
 
             files = FilerUtil.getFilesFromDirectory(stagingDir.getAbsolutePath(), ".zip");
             ArrayList<String> locations = new ArrayList<>();
@@ -92,7 +100,7 @@ public class Main {
                 files = FilerUtil.getFilesFromDirectory(sourceDir, ".zip");
                 LOG.info("Files in source directory: " + files.length);
 
-                Connection con = FilerUtil.getMSSqlServerConnection();
+                Connection con = FilerUtil.getMSSqlServerConnection(properties);
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
 
@@ -100,7 +108,7 @@ public class Main {
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
-                    con = FilerUtil.getMSSqlServerConnection();
+                    con = FilerUtil.getMSSqlServerConnection(properties);
                     con.setAutoCommit(false);
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
                     SQLServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
