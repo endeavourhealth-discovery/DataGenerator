@@ -9,6 +9,7 @@ import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
+import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.models.database.SubscriberFileSenderEntity;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
@@ -97,18 +98,23 @@ public class Main {
             LOG.info("**********");
             LOG.info("Getting stored zipped CSV files from audit.queued_message table, to write to data directory.");
 
-            // LOG.info("**********");
-            // LOG.info("Getting uuid, timestamp and queue_message_type_id from data_generator.subscriber_zip_file_uuids table.");
-            // TODO Put code here
-
             try {
-                ResultSet results = checkAuditQueuedMessageTableForUUIDs();
-                int filenameCounter = 0;
+                // ResultSet results = checkAuditQueuedMessageTableForUUIDs();
 
-                while (results.next()) {
-                    filenameCounter++;
-                    UUID queuedMessageId = UUID.fromString(results.getString("id"));
-                    Timestamp timestamp = results.getTimestamp("timestamp");
+                LOG.info("**********");
+                LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
+
+                ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
+
+                // int filenameCounter = 0;
+                while (resultSet.next()) {
+                    // filenameCounter++;
+
+                    int filenameCounter = resultSet.getInt("filing_order");
+                    UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
+
+                    // UUID queuedMessageId = UUID.fromString(results.getString("id"));
+                    // Timestamp timestamp = results.getTimestamp("timestamp");
                     // LOG.info("UUID: " + queuedMessageId);
                     // LOG.info("Timestamp: " + timestamp);
 
@@ -148,7 +154,8 @@ public class Main {
 
             } catch (Exception ex) {
                 LOG.info("**********");
-                LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
+                // LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
+                LOG.error("Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
                 System.exit(-1);
             }
 
@@ -241,10 +248,6 @@ public class Main {
                 System.exit(-1);
             }
 
-            // LOG.info("**********");
-            // LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
-            // TODO Put code here
-
             LOG.info("**********");
             LOG.info("Archiving contents of staging directory.");
 
@@ -258,19 +261,40 @@ public class Main {
                 System.exit(-1);
             }
 
-            LOG.info("**********");
-            LOG.info("Process Completed.");
-
-            System.exit(0);
-
         } catch (SQLException ex) {
             LOG.info("**********");
             LOG.error("Error encountered with accessing data_generator.subscriber_file_sender table: " + ex.getMessage());
             System.exit(-1);
         }
 
+        LOG.info("**********");
+        LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
 
+        try {
+            ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
+            while (resultSet.next()) {
+                String queuedMessageId = resultSet.getString("queued_message_uuid");
 
+                try {
+                    updateFileSentToTrueInUUIDTable(queuedMessageId);
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in updating entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    System.exit(-1);
+                }
+            }
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Process Completed.");
+
+        System.exit(0);
 
     }
 
@@ -278,10 +302,11 @@ public class Main {
         if (!(dirString.endsWith(File.separator))) {
             dirString += File.separator;
         }
+
         return dirString;
     }
 
-    private static void makeDirectory (File directory) {
+    private static void makeDirectory(File directory) {
         if (!(directory.exists())) {
             directory.mkdirs();
         }
@@ -299,20 +324,90 @@ public class Main {
             String sql = "select id, timestamp"
                     + " from queued_message"
                     + " where queued_message_type_id = 2"
-                    + " order by timestamp ";
+                    + " order by timestamp";
 
             ps = connection.prepareStatement(sql);
             ps.executeQuery();
             ResultSet results = ps.getResultSet();
             return results;
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
+        }
+    }
+
+    private static ResultSet getUUIDsFromDataGenTable(int subscriberId) throws Exception {
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+
+        try {
+            entityManager.getTransaction().begin();
+            SessionImpl session = (SessionImpl) entityManager.getDelegate();
+            Connection connection = session.connection();
+
+            String sql = "select queued_message_uuid, filing_order"
+                    + " from data_generator.subscriber_zip_file_uuids"
+                    + " where subscriber_id = ?"
+                    + " and file_sent is false"
+                    + " order by filing_order";
+
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, subscriberId);
+            ps.executeQuery();
+            ResultSet resultSet = ps.getResultSet();
+            return resultSet;
+
+        } catch (Exception ex) {
+            throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
+        }
+    }
+
+    private static void updateFileSentToTrueInUUIDTable(String queuedMessageId) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+
+        try {
+            entityManager.getTransaction().begin();
+            SessionImpl session = (SessionImpl) entityManager.getDelegate();
+            Connection connection = session.connection();
+
+            String sql = "update data_generator.subscriber_zip_file_uuids"
+                    + " set file_sent = true"
+                    + " where queued_message_uuid = ?";
+
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, queuedMessageId);
+            ps.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
         }
     }
 
     private static byte[] getZipFileByteArrayFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
         QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
+
         try {
             String payload = queuedMessageDal.getById(queuedMessageId);
             byte[] bytes = Base64.getDecoder().decode(payload);
@@ -323,8 +418,9 @@ public class Main {
         }
     }
 
-    private static void deleteZipFileByteArrayFromQueuedMessageTable (UUID queuedMessageId) throws Exception {
+    private static void deleteZipFileByteArrayFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
         QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
+
         try {
             queuedMessageDal.delete(queuedMessageId);
 
@@ -389,6 +485,7 @@ public class Main {
     private static boolean encryptFile(File file) throws Exception {
 
         X509Certificate certificate = null;
+
         try {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
@@ -415,7 +512,7 @@ public class Main {
     }
 
     private static ConnectionDetails setSubscriberConfigSftpConnectionDetails(SubscriberFileSenderConfig config) throws Exception {
-    // private static ConnectionDetails setSubscriberConfigSftpConnectionDetails() throws Exception {
+        // private static ConnectionDetails setSubscriberConfigSftpConnectionDetails() throws Exception {
 
         try {
             // TODO Amend SFTP logon details as required
@@ -454,15 +551,12 @@ public class Main {
             sftpConnectionDetails.setClientPrivateKey(clientPrivateKey);
             sftpConnectionDetails.setClientPrivateKeyPassword(clientPrivateKeyPassword);
             sftpConnectionDetails.setHostPublicKey(hostPublicKey);
+
             return sftpConnectionDetails;
 
         } catch (Exception ex) {
             throw ex;
         }
-    }
-
-    private static void helperMethod() {
-
     }
 
 }

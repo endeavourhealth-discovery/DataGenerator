@@ -14,7 +14,20 @@ public class SubscriberZipFileUUIDsEntity {
 
     //TODO Put code here to add in the other fields now in this table
 
+    private int subscriberId;
     private String queuedMessageUUID;
+    private int filingOrder;
+    private Boolean fileSent;
+
+    @Basic
+    @Column(name = "subscriber_id")
+    public int getSubscriberId() {
+        return subscriberId;
+    }
+
+    public void setSubscriberId(int subscriberId) {
+        this.subscriberId = subscriberId;
+    }
 
     @Id
     @Column(name = "queued_message_uuid")
@@ -26,17 +39,40 @@ public class SubscriberZipFileUUIDsEntity {
         this.queuedMessageUUID = queuedMessageUUID;
     }
 
+    @Basic
+    @Column(name = "filing_order")
+    public int getFilingOrder() {
+        return filingOrder;
+    }
+
+    public void setFilingOrder(int filingOrder) {
+        this.filingOrder = filingOrder;
+    }
+
+    @Basic
+    @Column(name = "file_sent")
+    public Boolean getFileSent() {
+        return fileSent;
+    }
+
+    public void setFileSent(Boolean fileSent) {
+        this.fileSent = fileSent;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubscriberZipFileUUIDsEntity that = (SubscriberZipFileUUIDsEntity) o;
-        return Objects.equals(queuedMessageUUID, that.queuedMessageUUID);
+        return subscriberId == that.subscriberId &&
+                Objects.equals(queuedMessageUUID, that.queuedMessageUUID) &&
+                filingOrder == that.filingOrder &&
+                Objects.equals(fileSent, that.fileSent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(queuedMessageUUID);
+        return Objects.hash(subscriberId, queuedMessageUUID, filingOrder, fileSent);
     }
 
     public static SubscriberZipFileUUIDsEntity getSubscriberZipFileUUIDsEntity(String queuedMessageUUID) throws Exception {
@@ -59,14 +95,20 @@ public class SubscriberZipFileUUIDsEntity {
     }
 
     public static SubscriberZipFileUUIDsEntity createSubscriberZipFileUUIDsEntity(
-            SubscriberZipFileUUIDsEntity subscriberZipFileUUIDsEntity) throws Exception {
+            SubscriberZipFileUUIDsEntity szfue) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
+
+        String sql = "select max(filing_order) from data_generator.subscriber_zip_file_uuids;";
+        Query query = entityManager.createNativeQuery(sql);
+        Integer result = (Integer) query.getSingleResult();
+        szfue.setFilingOrder(result + 1);
+
         entityManager.getTransaction().begin();
-        entityManager.persist(subscriberZipFileUUIDsEntity);
+        entityManager.persist(szfue);
         entityManager.getTransaction().commit();
         entityManager.close();
-        return subscriberZipFileUUIDsEntity;
+        return szfue;
     }
 
 }
