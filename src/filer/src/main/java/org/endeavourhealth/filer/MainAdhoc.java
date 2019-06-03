@@ -24,7 +24,7 @@ public class MainAdhoc {
 
     public static void main(String[] args) {
 
-        LOG.info("Starting MS SQL Server Adhoc updater");
+        LOG.info("Starting Subscriber Server Adhoc updater");
 
         Properties properties = null;
         try {
@@ -119,6 +119,6 @@ public class MainAdhoc {
             System.exit(-1);
         }
 
-        LOG.info("Ending MS SQL Server uploader");
+        LOG.info("Ending Subscriber Server uploader");
     }
 }

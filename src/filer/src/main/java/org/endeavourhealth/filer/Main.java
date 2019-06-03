@@ -2,6 +2,7 @@ package org.endeavourhealth.filer;
 
 import com.amazonaws.util.IOUtils;
 import net.lingala.zip4j.core.ZipFile;
+import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
@@ -22,7 +24,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        LOG.info("Starting MS SQL Server uploader");
+        LOG.info("Starting Subscriber Server uploader");
 
         Properties properties = null;
         try {
@@ -45,7 +47,7 @@ public class Main {
                 List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.LOCATION));
                 if (list.size() == 0) {
                     LOG.info("SFTP server location is empty.");
-                    LOG.info("Ending MS SQL Server uploader");
+                    LOG.info("Ending Subscriber Server uploader");
                     System.exit(0);
                 }
 
@@ -59,19 +61,22 @@ public class Main {
                 }
                 if (!zipFound) {
                     LOG.info("SFTP server location contains no valid zip file.");
-                    LOG.info("Ending MS SQL Server uploader");
+                    LOG.info("Ending Subscriber Server Server uploader");
                     System.exit(0);
                 }
 
                 for (RemoteFile file : list) {
-                    String remoteFilePath = file.getFullPath();
-                    LOG.info("Downloading file: " + file.getFilename());
-                    InputStream inputStream = sftp.getFile(remoteFilePath);
-                    File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
-                    Files.copy(inputStream, dest.toPath());
-                    inputStream.close();
-                    LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
-                    sftp.deleteFile(remoteFilePath);
+                    if (file.getFilename().endsWith(".zip") &&
+                            !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
+                        String remoteFilePath = file.getFullPath();
+                        LOG.info("Downloading file: " + file.getFilename());
+                        InputStream inputStream = sftp.getFile(remoteFilePath);
+                        File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
+                        Files.copy(inputStream, dest.toPath());
+                        inputStream.close();
+                        LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
+                        sftp.deleteFile(remoteFilePath);
+                    }
                 }
                 sftp.close();
             } catch (Exception e) {
@@ -106,19 +111,39 @@ public class Main {
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
 
+                boolean success = true;
                 FileInputStream stream = null;
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
                     con = FilerUtil.getConnection(properties);
-                    if (ConnectionManager.isSqlServer(con)) {
-                        con.setAutoCommit(false);
-                    }
+                    con.setAutoCommit(false);
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
-                    RemoteServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                    try {
+                        RemoteServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                    } catch (Exception e) {
+                        success = false;
+                    }
                     stream.close();
                     file.delete();
                 }
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+                File source = new File(sourceDir);
+                File sourceFile = new File(source.getAbsolutePath() + ".zip");
+                String filename = sourceFile.getName();
+                if (success) {
+                    File dest = new File(properties.getProperty(FilerConstants.SUCCESS) +
+                            File.separator + format.format(new Date()) + "_" + filename);
+                    LOG.info("Moving " + filename + " to success directory.");
+                    FileUtils.copyFile(sourceFile, dest);
+                } else {
+                    File dest = new File(properties.getProperty(FilerConstants.FAILURE) +
+                            File.separator + format.format(new Date()) + "_" + filename);
+                    LOG.info("Moving " + filename + " to failure directory.");
+                    FileUtils.copyFile(sourceFile, dest);
+                }
+                FileUtils.deleteDirectory(source);
+                FileUtils.forceDelete(sourceFile);
             }
         } catch (Exception e) {
             LOG.info("");
@@ -127,6 +152,6 @@ public class Main {
             System.exit(-1);
         }
 
-        LOG.info("Ending MS SQL Server uploader");
+        LOG.info("Ending Subscriber Server uploader");
     }
 }
