@@ -2,6 +2,7 @@ package org.endeavourhealth.filer;
 
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
+import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.SftpUtil;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class MainAdhoc {
 
         try {
 
-            File stagingDir = new File(properties.getProperty(FilerUtil.STAGING));
+            File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
             FilerUtil.setupStagingDir(stagingDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
@@ -46,7 +47,7 @@ public class MainAdhoc {
             try {
                 sftp.open();
                 LOG.info("Downloading file: " + ADHOC_FILENAME);
-                InputStream inputStream = sftp.getFile(properties.getProperty(FilerUtil.LOCATION), ADHOC_FILENAME);
+                InputStream inputStream = sftp.getFile(properties.getProperty(FilerConstants.LOCATION), ADHOC_FILENAME);
                 adhocFile = new File(stagingDir.getAbsolutePath() + File.separator + ADHOC_FILENAME);
                 Files.copy(inputStream, adhocFile.toPath());
                 inputStream.close();
@@ -69,7 +70,7 @@ public class MainAdhoc {
             dir.mkdirs();
             zipFile.extractAll(destPath);
 
-            Connection connection = FilerUtil.getMSSqlServerConnection(properties);
+            Connection connection = FilerUtil.getConnection(properties);
             connection.setAutoCommit(false);
             LOG.info("Database connection established.");
 
@@ -97,14 +98,14 @@ public class MainAdhoc {
             if (success) {
                 LOG.info("Committing all transactions.");
                 connection.commit();
-                File dest = new File(properties.getProperty(FilerUtil.SUCCESS) +
+                File dest = new File(properties.getProperty(FilerConstants.SUCCESS) +
                         File.separator + format.format(new Date()) + "_" + ADHOC_FILENAME);
                 LOG.info("Moving " + ADHOC_FILENAME + " to success directory.");
                 FileUtils.copyFile(adhocFile, dest);
             } else {
                 LOG.info("Rolling back all transactions.");
                 connection.rollback();
-                File dest = new File(properties.getProperty(FilerUtil.FAILURE) +
+                File dest = new File(properties.getProperty(FilerConstants.FAILURE) +
                         File.separator + format.format(new Date()) + "_" + ADHOC_FILENAME);
                 LOG.info("Moving " + ADHOC_FILENAME + " to failure directory.");
                 FileUtils.copyFile(adhocFile, dest);

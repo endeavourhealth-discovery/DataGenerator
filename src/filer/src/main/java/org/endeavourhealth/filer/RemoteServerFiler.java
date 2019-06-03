@@ -22,9 +22,9 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class SQLServerFiler {
+public class RemoteServerFiler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SQLServerFiler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteServerFiler.class);
 
     private static final String COLUMN_CLASS_MAPPINGS = "ColumnClassMappings.json";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -605,8 +605,9 @@ public class SQLServerFiler {
                 //LOG.debug("" + insert);
                 insert.addBatch();
             }
-
-            connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON");
+            if (ConnectionManager.isSqlServer(connection)) {
+                connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON");
+            }
             insert.executeBatch();
 
             connection.commit();
@@ -617,7 +618,9 @@ public class SQLServerFiler {
             throw new Exception("Exception with upsert " + insert.toString(), ex);
 
         } finally {
-            connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF");
+            if (ConnectionManager.isSqlServer(connection)) {
+                connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF");
+            }
             if (insert != null) {
                 insert.close();
             }

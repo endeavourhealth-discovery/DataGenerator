@@ -2,6 +2,8 @@ package org.endeavourhealth.filer;
 
 import com.amazonaws.util.IOUtils;
 import net.lingala.zip4j.core.ZipFile;
+import org.endeavourhealth.core.database.rdbms.ConnectionManager;
+import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.RemoteFile;
 import org.endeavourhealth.filer.util.SftpUtil;
@@ -34,13 +36,13 @@ public class Main {
 
         try {
 
-            File stagingDir = new File(properties.getProperty(FilerUtil.STAGING));
+            File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
             FilerUtil.setupStagingDir(stagingDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
             try {
                 sftp.open();
-                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerUtil.LOCATION));
+                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.LOCATION));
                 if (list.size() == 0) {
                     LOG.info("SFTP server location is empty.");
                     LOG.info("Ending MS SQL Server uploader");
@@ -100,7 +102,7 @@ public class Main {
                 files = FilerUtil.getFilesFromDirectory(sourceDir, ".zip");
                 LOG.info("Files in source directory: " + files.length);
 
-                Connection con = FilerUtil.getMSSqlServerConnection(properties);
+                Connection con = FilerUtil.getConnection(properties);
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
 
@@ -108,10 +110,12 @@ public class Main {
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
-                    con = FilerUtil.getMSSqlServerConnection(properties);
-                    con.setAutoCommit(false);
+                    con = FilerUtil.getConnection(properties);
+                    if (ConnectionManager.isSqlServer(con)) {
+                        con.setAutoCommit(false);
+                    }
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
-                    SQLServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                    RemoteServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
                     stream.close();
                     file.delete();
                 }
