@@ -13,7 +13,9 @@ drop table if exists data_generator.exported_ids;
 
 create table data_generator.subscriber_file_sender (
 	subscriber_id int not null comment 'The id of the subscriber file send.',
-    definition varchar(5000) not null comment 'The json definition of the subscriber file send.' 
+    definition varchar(5000) not null comment 'The json definition of the subscriber file send.' ,
+    
+    primary key (subscriber_id)
 );
 
 create table data_generator.subscriber_zip_file_uuids (
@@ -23,7 +25,9 @@ create table data_generator.subscriber_zip_file_uuids (
     filing_order int not null comment 'Incrementing field to retain the order of applying the zip files.',                                                  
     -- queued_message_timestamp datetime not null comment 'The timestamp field of the entry in the audit.queued_message table.',
     -- queued_message_type_id int(11) not null comment 'The type_id field of the entry in the audit.queued_message table.',
-    file_sent boolean not null default false comment 'Whether or not the file has been sent to the SFTP.'
+    file_sent boolean not null default false comment 'Whether or not the file has been sent to the SFTP.',
+    
+    primary key (queued_message_uuid)
 );
     
 create table data_generator.dataset (

@@ -78,8 +78,8 @@ public class Main {
             File stagingDir = new File(stagingDirString);
             makeDirectory(stagingDir);
 
-            String destinationDir = addFileSeparatorToEndOfDirString(
-                    config.getSubscriberFileLocationDetails().getDestinationDir());
+            String destinationDir = // addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getDestinationDir(); // );
 
             String archiveDirString = addFileSeparatorToEndOfDirString(
                     config.getSubscriberFileLocationDetails().getArchiveDir());
@@ -367,12 +367,12 @@ public class Main {
         } catch (Exception ex) {
             throw ex;
 
-        } finally {
+        } /* finally {
             if (ps != null) {
                 ps.close();
             }
             entityManager.close();
-        }
+        } */
     }
 
     private static void updateFileSentToTrueInUUIDTable(String queuedMessageId) throws Exception {

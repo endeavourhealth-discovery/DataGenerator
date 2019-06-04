@@ -12,8 +12,6 @@ import java.util.Objects;
 @Table(name = "subscriber_zip_file_uuids", schema = "data_generator")
 public class SubscriberZipFileUUIDsEntity {
 
-    //TODO Put code here to add in the other fields now in this table
-
     private int subscriberId;
     private String queuedMessageUUID;
     private int filingOrder;
@@ -102,7 +100,14 @@ public class SubscriberZipFileUUIDsEntity {
         String sql = "select max(filing_order) from data_generator.subscriber_zip_file_uuids;";
         Query query = entityManager.createNativeQuery(sql);
         Integer result = (Integer) query.getSingleResult();
-        szfue.setFilingOrder(result + 1);
+
+        if (result == null)
+        {
+            szfue.setFilingOrder(1);
+        }
+        else {
+            szfue.setFilingOrder(result + 1);
+        }
 
         entityManager.getTransaction().begin();
         entityManager.persist(szfue);
