@@ -10,7 +10,6 @@ delete from data_generator.cohort where id <= 5;
 -- insert into the subscriber_file_sender table
 -- delete from data_generator.subscriber_file_sender where subscriber_id = 1;
 insert into data_generator.subscriber_file_sender
--- need to add in file location for PGP .cer file
 select 1, '{
  "subscriberFileLocationDetails": {
           "dataDir": "C:/Subscriber/Data/",

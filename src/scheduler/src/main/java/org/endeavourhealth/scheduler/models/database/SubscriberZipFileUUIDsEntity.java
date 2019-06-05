@@ -5,6 +5,7 @@ import org.endeavourhealth.scheduler.models.PersistenceManager;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.util.List;
 import java.util.Objects;
@@ -137,14 +138,14 @@ public class SubscriberZipFileUUIDsEntity {
 
         String sql = "select max(filing_order) from data_generator.subscriber_zip_file_uuids;";
         Query query = entityManager.createNativeQuery(sql);
-        Long result = (Long) query.getSingleResult();
+        BigInteger bigResult = (BigInteger) query.getSingleResult();
+        Long longResult = bigResult.longValue();
 
-        if (result == null)
-        {
+        if (longResult == null) {
             szfue.setFilingOrder(1);
         }
         else {
-            szfue.setFilingOrder(result + 1);
+            szfue.setFilingOrder(longResult + 1);
         }
 
         entityManager.getTransaction().begin();
