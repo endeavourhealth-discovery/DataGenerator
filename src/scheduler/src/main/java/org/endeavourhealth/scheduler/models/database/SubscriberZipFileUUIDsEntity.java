@@ -119,7 +119,7 @@ public class SubscriberZipFileUUIDsEntity {
         return ret;
     }
 
-    public static List<SubscriberZipFileUUIDsEntity> getAllSubcriberZipFileUUIDsEntities() throws Exception {
+    public static List<SubscriberZipFileUUIDsEntity> getAllSubscriberZipFileUUIDsEntities() throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -137,7 +137,7 @@ public class SubscriberZipFileUUIDsEntity {
 
         String sql = "select max(filing_order) from data_generator.subscriber_zip_file_uuids;";
         Query query = entityManager.createNativeQuery(sql);
-        Integer result = (Integer) query.getSingleResult();
+        Long result = (Long) query.getSingleResult();
 
         if (result == null)
         {

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
-// import org.endeavourhealth.core.database.rdbms.audit.models.RdbmsQueuedMessage;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
@@ -25,9 +24,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.*;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Date;
 import java.util.UUID;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
@@ -86,17 +85,24 @@ public class Main {
             File archiveDir = new File(archiveDirString);
             makeDirectory(archiveDir);
 
-            // TODO Amend pathnames as required
+            String pgpDirString  = addFileSeparatorToEndOfDirString(
+                    config.getSubscriberFileLocationDetails().getPgpCertDir());
+            File pgpCertDir = new File(pgpDirString);
+
+            // Can set the directories without using the database, and amend
+            // the pathnames below, if needed, when working on this locally
+
             // File dataDir = new File("C:/Subscriber/Data/");
             // File stagingDir = new File("C:/Subscriber/Staging/");
             // String destinationDir = "/endeavour/ftp/Test/";
             // File archiveDir = new File("C:/Subscriber/Archive/");
+            // File pgpCertDir = new File("C:/Subscriber/PGPCert/");
 
             LOG.info("**********");
             LOG.info("Starting Process.");
 
             LOG.info("**********");
-            LOG.info("Getting stored zipped CSV files from audit.queued_message table, to write to data directory.");
+            LOG.info("Getting stored zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
 
             try {
                 // ResultSet results = checkAuditQueuedMessageTableForUUIDs();
@@ -106,51 +112,44 @@ public class Main {
 
                 ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
 
-                // int filenameCounter = 0;
-                while (resultSet.next()) {
-                    // filenameCounter++;
+                    while (resultSet.next()) {
 
-                    int filenameCounter = resultSet.getInt("filing_order");
-                    UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
-
-                    // UUID queuedMessageId = UUID.fromString(results.getString("id"));
-                    // Timestamp timestamp = results.getTimestamp("timestamp");
-                    // LOG.info("UUID: " + queuedMessageId);
-                    // LOG.info("Timestamp: " + timestamp);
-
-                    try {
-                        byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+                        long filenameCounter = resultSet.getLong("filing_order");
+                        UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
 
                         try {
-                            // writeZipFileToDataDirectory(bytes, queuedMessageId, dataDir);
-                            writeZipFileToDataDirectory(bytes, filenameCounter, dataDir);
+                            // byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+                            byte[] bytes = Base64.getDecoder().decode(resultSet.getString("queued_message_body"));
 
                             try {
-                                // TODO Uncomment out the line of code below when sure that this all works
-                                //  Once the file has been taken from audit.queued_message it can be deleted
-                                // deleteZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+                                writeZipFileToDataDirectory(bytes, filenameCounter, queuedMessageId, dataDir);
+
+                                try {
+                                    // TODO Uncomment out the line of code below when sure that this all works
+                                    //  Once the file has been taken from audit.queued_message it can be deleted
+                                    // deleteEntryFromQueuedMessageTable(queuedMessageId);
+
+                                } catch (Exception ex) {
+                                    LOG.info("**********");
+                                    LOG.error("Error encountered in deleting zip file from audit.queued_message table: " + ex.getMessage());
+                                    LOG.error("For UUID: " + queuedMessageId);
+                                    System.exit(-1);
+                                }
 
                             } catch (Exception ex) {
                                 LOG.info("**********");
-                                LOG.error("Error encountered in deleting zip file from audit.queued_message table: " + ex.getMessage());
+                                LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
                                 LOG.error("For UUID: " + queuedMessageId);
                                 System.exit(-1);
                             }
 
                         } catch (Exception ex) {
                             LOG.info("**********");
-                            LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
+                            LOG.error("Error encountered in getting zip file from data_generator.subscriber_zip_file_uuids table: " + ex.getMessage());
                             LOG.error("For UUID: " + queuedMessageId);
                             System.exit(-1);
                         }
-
-                    } catch (Exception ex) {
-                        LOG.info("**********");
-                        LOG.error("Error encountered in getting zip file from audit.queued_message table: " + ex.getMessage());
-                        LOG.error("For UUID: " + queuedMessageId);
-                        System.exit(-1);
                     }
-                }
 
             } catch (Exception ex) {
                 LOG.info("**********");
@@ -171,8 +170,8 @@ public class Main {
                 System.exit(-1);
             }
 
-            LOG.info("**********");
-            LOG.info("Deleting contents of data directory.");
+            // LOG.info("**********");
+            // LOG.info("Deleting contents of data directory.");
 
             try {
                 // TODO Uncomment out the line of code below as necessary
@@ -188,7 +187,7 @@ public class Main {
             LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
 
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
                         sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
                 if (!encryptFile(zipFile)) {
@@ -270,17 +269,30 @@ public class Main {
         LOG.info("**********");
         LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
 
+        // TODO Does doing this separately potentially mean that more UUIDs could have been written to the table by the
+        // SubscriberFiler in EDS in the meantime, so that they are marked as sent, when in fact they have not been?
+
         try {
             ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
             while (resultSet.next()) {
                 String queuedMessageId = resultSet.getString("queued_message_uuid");
 
                 try {
-                    updateFileSentToTrueInUUIDTable(queuedMessageId);
+                    updateFileSentDateTimeInUUIDsTable(queuedMessageId);
 
                 } catch (Exception ex) {
                     LOG.info("**********");
-                    LOG.error("Error encountered in updating entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    System.exit(-1);
+                }
+
+                try {
+                    // TODO Uncomment out the line of code below as necessary
+                    // deleteQueuedMessageBodyFromUUIDsTable(queuedMessageId);
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
                     System.exit(-1);
                 }
             }
@@ -312,7 +324,7 @@ public class Main {
         }
     }
 
-    private static ResultSet checkAuditQueuedMessageTableForUUIDs() throws Exception {
+    /* private static ResultSet checkAuditQueuedMessageTableForUUIDs() throws Exception {
 
         EntityManager entityManager = ConnectionManager.getAuditEntityManager();
         PreparedStatement ps = null;
@@ -340,6 +352,30 @@ public class Main {
             }
             entityManager.close();
         }
+    } */
+
+    /* private static byte[] getZipFileByteArrayFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
+        QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
+
+        try {
+            String payload = queuedMessageDal.getById(queuedMessageId);
+            byte[] bytes = Base64.getDecoder().decode(payload);
+            return bytes;
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    } */
+
+    private static void deleteEntryFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
+        QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
+
+        try {
+            queuedMessageDal.delete(queuedMessageId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     private static ResultSet getUUIDsFromDataGenTable(int subscriberId) throws Exception {
@@ -352,10 +388,10 @@ public class Main {
             SessionImpl session = (SessionImpl) entityManager.getDelegate();
             Connection connection = session.connection();
 
-            String sql = "select queued_message_uuid, filing_order"
+            String sql = "select queued_message_uuid, queued_message_body, filing_order"
                     + " from data_generator.subscriber_zip_file_uuids"
                     + " where subscriber_id = ?"
-                    + " and file_sent is false"
+                    + " and file_sent is null"
                     + " order by filing_order";
 
             ps = connection.prepareStatement(sql);
@@ -375,7 +411,41 @@ public class Main {
         } */
     }
 
-    private static void updateFileSentToTrueInUUIDTable(String queuedMessageId) throws Exception {
+    private static void updateFileSentDateTimeInUUIDsTable(String queuedMessageId) throws Exception {
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+
+        try {
+            entityManager.getTransaction().begin();
+            SessionImpl session = (SessionImpl) entityManager.getDelegate();
+            Connection connection = session.connection();
+
+            java.util.Date date = new java.util.Date();
+            Timestamp timestamp = new java.sql.Timestamp(date.getTime());
+
+            String sql = "update data_generator.subscriber_zip_file_uuids"
+                    + " set file_sent = ?"
+                    + " where queued_message_uuid = ?";
+
+            ps = connection.prepareStatement(sql);
+            ps.setTimestamp(1, timestamp);
+            ps.setString(2, queuedMessageId);
+            ps.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
+        }
+    }
+
+    private static void deleteQueuedMessageBodyFromUUIDsTable(String queuedMessageId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
 
@@ -385,7 +455,7 @@ public class Main {
             Connection connection = session.connection();
 
             String sql = "update data_generator.subscriber_zip_file_uuids"
-                    + " set file_sent = true"
+                    + " set queued_message_body = null"
                     + " where queued_message_uuid = ?";
 
             ps = connection.prepareStatement(sql);
@@ -403,50 +473,19 @@ public class Main {
             }
             entityManager.close();
         }
+
     }
 
-    private static byte[] getZipFileByteArrayFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
-        QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
+    private static void writeZipFileToDataDirectory(byte[] bytes, long filenameCounter,
+                                                    UUID queuedMessageId, File dataDir) throws Exception {
 
-        try {
-            String payload = queuedMessageDal.getById(queuedMessageId);
-            byte[] bytes = Base64.getDecoder().decode(payload);
-            return bytes;
-
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-
-    private static void deleteZipFileByteArrayFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
-        QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
-
-        try {
-            queuedMessageDal.delete(queuedMessageId);
-
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-
-    // private static void writeZipFileToDataDirectory(byte[] bytes, UUID queuedMessageId, File dataDir) throws Exception {
-    // private static void writeZipFileToDataDirectory(byte[] bytes, Timestamp timestamp, File dataDir) throws Exception {
-    private static void writeZipFileToDataDirectory(byte[] bytes, int filenameCounter, File dataDir) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         File file = new File(dataDir.getAbsolutePath() +
                 File.separator +
                 sdf.format(new Date()) + "_" +
-                // queuedMessageId.toString() +
-                String.format("%07d", filenameCounter) +
-                "_Subscriber_Zip.zip");
-
-        // Full UUID needs to be used in the filename because several different files can be
-        // written in the same millisecond so using the code below to attempt filename
-        // uniqueness causes files to be overwritten, when this method is in a loop
-           /* SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmssSSS");
-              File file = new File("C:/JDBC/Output/" +
-                sdf.format(new Date()) + "_" +
-                "Subscriber_File.zip"); */
+                String.format("%014d", filenameCounter) + "_" +
+                queuedMessageId.toString() +
+                ".zip");
 
         try {
             FileUtils.writeByteArrayToFile(file, bytes);
@@ -457,13 +496,12 @@ public class Main {
         }
     }
 
-    private static void zipAllContentsOfDataDirectoryToStaging(File dataDir, File staging) throws Exception {
+    private static void zipAllContentsOfDataDirectoryToStaging(File dataDir, File stagingDir) throws Exception {
 
         // LOG.info("**********");
         // LOG.info("Compressing contents of: " + dataDir.getAbsolutePath());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        ZipFile zipFile = new ZipFile(staging + File.separator +
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        ZipFile zipFile = new ZipFile(stagingDir + File.separator +
                 sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
         // LOG.info("**********");
         // LOG.info("Creating file: " + zipFile.getFile().getAbsolutePath());
@@ -479,7 +517,7 @@ public class Main {
         zipFile.createZipFileFromFolder(dataDir, parameters, true, 10485760);
 
         // LOG.info("**********");
-        // LOG.info(staging.listFiles().length + " Multi-part zip file/s successfully created.");
+        // LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
     }
 
     private static boolean encryptFile(File file) throws Exception {
@@ -515,7 +553,10 @@ public class Main {
         // private static ConnectionDetails setSubscriberConfigSftpConnectionDetails() throws Exception {
 
         try {
-            // TODO Amend SFTP logon details as required
+
+            // Can hard code the SFTP details without using the
+            // database, if needed, when working on this locally
+
             // Setting up the connection details
 
             // String hostname = "10.0.101.239";

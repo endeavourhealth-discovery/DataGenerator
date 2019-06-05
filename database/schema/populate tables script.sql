@@ -10,12 +10,14 @@ delete from data_generator.cohort where id <= 5;
 -- insert into the subscriber_file_sender table
 -- delete from data_generator.subscriber_file_sender where subscriber_id = 1;
 insert into data_generator.subscriber_file_sender
+-- need to add in file location for PGP .cer file
 select 1, '{
  "subscriberFileLocationDetails": {
           "dataDir": "C:/Subscriber/Data/",
           "stagingDir": "C:/Subscriber/Staging/",
           "destinationDir": "/endeavour/ftp/Test/",
-          "archiveDir": "C:/Subscriber/Archive/"
+          "archiveDir": "C:/Subscriber/Archive/",
+          "pgpCertDir": "C:/Subscriber/PGPCert/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -23,7 +25,7 @@ select 1, '{
           "port": "22",
           "username": "endeavour",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "",
+          "clientPrivateKey": ""
 }
 }';
 
