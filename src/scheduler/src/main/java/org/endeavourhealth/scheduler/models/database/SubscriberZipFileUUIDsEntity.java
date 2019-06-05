@@ -5,6 +5,7 @@ import org.endeavourhealth.scheduler.models.PersistenceManager;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import java.sql.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,8 +15,11 @@ public class SubscriberZipFileUUIDsEntity {
 
     private int subscriberId;
     private String queuedMessageUUID;
-    private int filingOrder;
-    private Boolean fileSent;
+    private String queuedMessageBody;
+    private long filingOrder;
+    private Date fileSent;
+    private Date fileFilingAttempted;
+    private Boolean fileFilingSuccess;
 
     @Basic
     @Column(name = "subscriber_id")
@@ -38,23 +42,53 @@ public class SubscriberZipFileUUIDsEntity {
     }
 
     @Basic
+    @Column(name = "queued_message_body")
+    public String getQueuedMessageBody() {
+        return queuedMessageBody;
+    }
+
+    public void setQueuedMessageBody(String queuedMessageBody) {
+        this.queuedMessageBody = queuedMessageBody;
+    }
+
+    @Basic
     @Column(name = "filing_order")
-    public int getFilingOrder() {
+    public long getFilingOrder() {
         return filingOrder;
     }
 
-    public void setFilingOrder(int filingOrder) {
+    public void setFilingOrder(long filingOrder) {
         this.filingOrder = filingOrder;
     }
 
     @Basic
     @Column(name = "file_sent")
-    public Boolean getFileSent() {
+    public Date getFileSent() {
         return fileSent;
     }
 
-    public void setFileSent(Boolean fileSent) {
+    public void setFileSent(Date fileSent) {
         this.fileSent = fileSent;
+    }
+
+    @Basic
+    @Column(name = "file_filing_attempted")
+    public Date getFileFilingAttempted() {
+        return fileFilingAttempted;
+    }
+
+    public void setFileFilingAttempted(Date fileFilingAttempted) {
+        this.fileFilingAttempted = fileFilingAttempted;
+    }
+
+    @Basic
+    @Column(name = "file_filing_success")
+    public Boolean getFileFilingSuccess() {
+        return fileFilingSuccess;
+    }
+
+    public void setFileFilingSuccess(Boolean fileFilingSuccess) {
+        this.fileFilingSuccess = fileFilingSuccess;
     }
 
     @Override
@@ -64,13 +98,17 @@ public class SubscriberZipFileUUIDsEntity {
         SubscriberZipFileUUIDsEntity that = (SubscriberZipFileUUIDsEntity) o;
         return subscriberId == that.subscriberId &&
                 Objects.equals(queuedMessageUUID, that.queuedMessageUUID) &&
+                Objects.equals(queuedMessageBody, that.queuedMessageBody) &&
                 filingOrder == that.filingOrder &&
-                Objects.equals(fileSent, that.fileSent);
+                Objects.equals(fileSent, that.fileSent) &&
+                Objects.equals(fileFilingAttempted, that.fileFilingAttempted) &&
+                Objects.equals(fileFilingSuccess, that.fileFilingSuccess);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subscriberId, queuedMessageUUID, filingOrder, fileSent);
+        return Objects.hash(subscriberId, queuedMessageUUID, queuedMessageBody,
+                filingOrder, fileSent, fileFilingAttempted, fileFilingSuccess);
     }
 
     public static SubscriberZipFileUUIDsEntity getSubscriberZipFileUUIDsEntity(String queuedMessageUUID) throws Exception {

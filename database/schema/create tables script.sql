@@ -22,10 +22,13 @@ create table data_generator.subscriber_zip_file_uuids (
 	subscriber_id int not null comment 'The id of the subscriber file send.',
     queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
 													  in the audit.queued_message table.',
-    filing_order int not null comment 'Incrementing field to retain the order of applying the zip files.',                                                  
+	queued_message_body mediumtext comment 'The zip file (of the set of csv files) data that has come from that table.',
     -- queued_message_timestamp datetime not null comment 'The timestamp field of the entry in the audit.queued_message table.',
     -- queued_message_type_id int(11) not null comment 'The type_id field of the entry in the audit.queued_message table.',
-    file_sent boolean not null default false comment 'Whether or not the file has been sent to the SFTP.',
+    filing_order bigint not null comment 'Incrementing field to retain the order of applying the zip files.',
+    file_sent datetime comment 'When the file was sent to the SFTP.',
+    file_filing_attempted datetime comment 'When the filing was attempted at the receiving end.',
+    file_filing_success boolean comment 'Whether the filing was a success at the receiving end.',
     
     primary key (queued_message_uuid)
 );
