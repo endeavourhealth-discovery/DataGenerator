@@ -2,6 +2,7 @@ package org.endeavourhealth.filer;
 
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
+import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.SftpUtil;
@@ -30,16 +31,22 @@ public class MainAdhoc {
         try {
             properties = FilerUtil.initialize();
         } catch (Exception e) {
-            LOG.info("");
             LOG.error("Error in reading config.properties " + e.getMessage());
-            LOG.info("");
             System.exit(-1);
         }
+
+        SlackHelper.setupConfig(properties.getProperty(FilerConstants.NET_PROXY),
+                properties.getProperty(FilerConstants.NET_PORT),
+                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
+                "https://hooks.slack.com/services/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");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Starting Subscriber Server Adhoc updater");
 
         try {
 
             File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
-            FilerUtil.setupStagingDir(stagingDir);
+            File successDir = new File(properties.getProperty(FilerConstants.SUCCESS));
+            File failureDir = new File(properties.getProperty(FilerConstants.FAILURE));
+            FilerUtil.setupDirectories(stagingDir, successDir, failureDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
             File adhocFile = null;
@@ -47,46 +54,52 @@ public class MainAdhoc {
             try {
                 sftp.open();
                 LOG.info("Downloading file: " + ADHOC_FILENAME);
-                InputStream inputStream = sftp.getFile(properties.getProperty(FilerConstants.LOCATION), ADHOC_FILENAME);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Downloading file: " + ADHOC_FILENAME);
+                InputStream inputStream = sftp.getFile(properties.getProperty(FilerConstants.INCOMING), ADHOC_FILENAME);
                 adhocFile = new File(stagingDir.getAbsolutePath() + File.separator + ADHOC_FILENAME);
                 Files.copy(inputStream, adhocFile.toPath());
                 inputStream.close();
                 LOG.info("Deleting file: " + ADHOC_FILENAME + " from SFTP server.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting file: " + ADHOC_FILENAME + " from SFTP server.");
                 sftp.deleteFile(ADHOC_FILENAME);
                 sftp.close();
             } catch (Exception e) {
-                LOG.info("");
                 LOG.error("Error in downloading/deleting files from SFTP server " + e.getMessage());
-                LOG.info("");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error in downloading/deleting files from SFTP server ", e);
                 System.exit(-1);
             }
 
             File files[] = new File[] { adhocFile };
             FilerUtil.decryptFiles(files, properties);
             LOG.info("Deflating zip file: " + adhocFile.getName());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deflating zip file: " + adhocFile.getName());
             ZipFile zipFile = new ZipFile(adhocFile);
             String destPath = stagingDir.getAbsolutePath() + File.separator + ADHOC_FILENAME.substring(0, ADHOC_FILENAME.length() - 4);
-            File dir = new File(destPath);
-            dir.mkdirs();
+            File adhocDir = new File(destPath);
+            adhocDir.mkdirs();
             zipFile.extractAll(destPath);
 
             Connection connection = FilerUtil.getConnection(properties);
             connection.setAutoCommit(false);
             LOG.info("Database connection established.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Database connection established.");
 
             boolean success = true;
             files = FilerUtil.getFilesFromDirectory(destPath, ".sql");
             for (File file : files) {
                 LOG.info("Running statements form file: " + file.getName());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Running statements form file: " + file.getName());
                 try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
                     String statement;
                     while ((statement = br.readLine()) != null) {
                         try {
                             connection.createStatement().execute(statement);
                             LOG.info("Successfully executed: " + statement);
+                            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Successfully executed: " + statement);
                         } catch (SQLException e) {
                             LOG.error("Failed in executing: " + statement);
                             LOG.error("Reason: " + e.getMessage());
+                            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Failed in executing: " + statement, e);
                             success = false;
                             break;
                         }
@@ -97,28 +110,34 @@ public class MainAdhoc {
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
             if (success) {
                 LOG.info("Committing all transactions.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Committing all transactions.");
                 connection.commit();
-                File dest = new File(properties.getProperty(FilerConstants.SUCCESS) +
+                File dest = new File(successDir.getAbsolutePath() +
                         File.separator + format.format(new Date()) + "_" + ADHOC_FILENAME);
                 LOG.info("Moving " + ADHOC_FILENAME + " to success directory.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Moving " + ADHOC_FILENAME + " to success directory.");
                 FileUtils.copyFile(adhocFile, dest);
             } else {
                 LOG.info("Rolling back all transactions.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Rolling back all transactions.");
                 connection.rollback();
-                File dest = new File(properties.getProperty(FilerConstants.FAILURE) +
+                File dest = new File(failureDir.getAbsolutePath() +
                         File.separator + format.format(new Date()) + "_" + ADHOC_FILENAME);
                 LOG.info("Moving " + ADHOC_FILENAME + " to failure directory.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Moving " + ADHOC_FILENAME + " to failure directory.");
                 FileUtils.copyFile(adhocFile, dest);
             }
-            FilerUtil.setupStagingDir(stagingDir);
+            FileUtils.deleteDirectory(adhocDir);
+            FileUtils.forceDelete(adhocFile);
 
         } catch (Exception e) {
-            LOG.info("");
             LOG.error("Unhandled exception occurred. " + e.getMessage());
-            LOG.info("");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. ", e);
             System.exit(-1);
         }
 
-        LOG.info("Ending Subscriber Server uploader");
+        LOG.info("Ending Subscriber Server Adhoc uploader");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server Adhoc uploader");
+        System.exit(0);
     }
 }

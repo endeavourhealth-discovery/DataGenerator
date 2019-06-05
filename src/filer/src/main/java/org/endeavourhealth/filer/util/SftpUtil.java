@@ -135,4 +135,8 @@ public class SftpUtil {
         if (session != null && session.isConnected())
             session.disconnect();
     }
+
+    public void put(String localPath, String destinationPath) throws SftpException {
+        channel.put(localPath, destinationPath);
+    }
 }

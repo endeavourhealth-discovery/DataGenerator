@@ -1,5 +1,8 @@
 package org.endeavourhealth.filer.util;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSException;
@@ -19,6 +22,7 @@ import java.security.Security;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -34,13 +38,14 @@ public class FilerUtil {
         return properties;
     }
 
-    public static void setupStagingDir(File dir) throws Exception {
-        FileUtils.deleteDirectory(dir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        } else {
-            FileUtils.deleteDirectory(dir);
-            dir.mkdirs();
+    public static void setupDirectories(File staging, File success, File failure) throws Exception {
+        FileUtils.deleteDirectory(staging);
+        staging.mkdirs();
+        if (!success.exists()) {
+            success.mkdirs();
+        }
+        if (!failure.exists()) {
+            failure.mkdirs();
         }
     }
 
@@ -164,6 +169,27 @@ public class FilerUtil {
             }
         };
         return new File(directory).listFiles(fileFilter);
+    }
+
+    public static File createSummaryFiles(File source, ArrayList<String> lSuccess, ArrayList<String> lFailures) throws Exception {
+        FileUtils.forceDelete(source);
+        ZipFile zipFile = new ZipFile(source);
+        ZipParameters parameters = new ZipParameters();
+        parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        if (lSuccess.size() > 0) {
+            File success = new File(source.getParent() + File.separator + "success.txt");
+            FileUtils.writeLines(success, lSuccess);
+            zipFile.addFile(success, parameters);
+            FileUtils.forceDelete(success);
+        }
+        if (lFailures.size() > 0) {
+            File failure = new File(source.getParent() + File.separator + "failure.txt");
+            FileUtils.writeLines(failure, lFailures);
+            zipFile.addFile(failure, parameters);
+            FileUtils.forceDelete(failure);
+        }
+        return source;
     }
 }
 

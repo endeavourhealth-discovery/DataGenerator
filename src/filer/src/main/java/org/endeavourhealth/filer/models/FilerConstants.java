@@ -9,7 +9,8 @@ public class FilerConstants {
     public static final String HOSTNAME = "sftp.hostname";
     public static final String PORT = "sftp.port";
     public static final String USERNAME = "sftp.username";
-    public static final String LOCATION = "sftp.location";
+    public static final String INCOMING = "sftp.incoming";
+    public static final String RESULTS = "sftp.result";
     public static final String KEY = "sftp.key";
 
     public static final String P12 = "encrypt.p12";
@@ -21,5 +22,7 @@ public class FilerConstants {
     public static final String DB_PASSWORD = "db.password";
     public static final String JDBC = "db.jdbc";
 
+    public static final String NET_PROXY = "net.proxy";
+    public static final String NET_PORT = "net.port";
 
 }

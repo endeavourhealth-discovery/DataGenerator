@@ -3,7 +3,7 @@ package org.endeavourhealth.filer;
 import com.amazonaws.util.IOUtils;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
-import org.endeavourhealth.core.database.rdbms.ConnectionManager;
+import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.RemoteFile;
@@ -30,24 +30,32 @@ public class Main {
         try {
             properties = FilerUtil.initialize();
         } catch (Exception e) {
-            LOG.info("");
             LOG.error("Error in reading config.properties " + e.getMessage());
-            LOG.info("");
             System.exit(-1);
         }
+
+        SlackHelper.setupConfig(properties.getProperty(FilerConstants.NET_PROXY),
+                properties.getProperty(FilerConstants.NET_PORT),
+                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
+                "https://hooks.slack.com/services/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");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Starting Subscriber Server uploader");
 
         try {
 
             File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
-            FilerUtil.setupStagingDir(stagingDir);
+            File successDir = new File(properties.getProperty(FilerConstants.SUCCESS));
+            File failureDir = new File(properties.getProperty(FilerConstants.FAILURE));
+            FilerUtil.setupDirectories(stagingDir, successDir, failureDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
             try {
                 sftp.open();
-                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.LOCATION));
+                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.INCOMING));
                 if (list.size() == 0) {
                     LOG.info("SFTP server location is empty.");
                     LOG.info("Ending Subscriber Server uploader");
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "SFTP server location is empty.");
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
                     System.exit(0);
                 }
 
@@ -62,6 +70,8 @@ public class Main {
                 if (!zipFound) {
                     LOG.info("SFTP server location contains no valid zip file.");
                     LOG.info("Ending Subscriber Server Server uploader");
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "SFTP server location contains no valid zip file.");
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
                     System.exit(0);
                 }
 
@@ -70,19 +80,20 @@ public class Main {
                             !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
                         String remoteFilePath = file.getFullPath();
                         LOG.info("Downloading file: " + file.getFilename());
+                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Downloading file: " + file.getFilename());
                         InputStream inputStream = sftp.getFile(remoteFilePath);
                         File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
                         Files.copy(inputStream, dest.toPath());
                         inputStream.close();
                         LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
+                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting file: " + file.getFilename() + " from SFTP server.");
                         sftp.deleteFile(remoteFilePath);
                     }
                 }
                 sftp.close();
             } catch (Exception e) {
-                LOG.info("");
                 LOG.error("Error in downloading/deleting files from SFTP server " + e.getMessage());
-                LOG.info("");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error in downloading/deleting files from SFTP server ", e);
                 System.exit(-1);
             }
 
@@ -93,6 +104,7 @@ public class Main {
             ArrayList<String> locations = new ArrayList<>();
             for (File file : files) {
                 LOG.info("Deflating zip file: " + file.getName());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deflating zip file: " + file.getName());
                 ZipFile zipFile = new ZipFile(file);
                 String destPath = stagingDir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
                 if (!locations.contains(destPath)) {
@@ -106,23 +118,33 @@ public class Main {
             for (String sourceDir : locations) {
                 files = FilerUtil.getFilesFromDirectory(sourceDir, ".zip");
                 LOG.info("Files in source directory: " + files.length);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Files in source directory: " + files.length);
 
                 Connection con = FilerUtil.getConnection(properties);
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Database connection established.");
 
                 boolean success = true;
+                int nSuccess = 0;
+                int nFailures = 0;
+                ArrayList<String> lSuccess = new ArrayList();
+                ArrayList<String> lFailures = new ArrayList();
                 FileInputStream stream = null;
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
                     con = FilerUtil.getConnection(properties);
                     con.setAutoCommit(false);
-                    LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into SQL Server");
+                    LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into DB Server");
                     try {
                         RemoteServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                        nSuccess++;
+                        lSuccess.add(file.getName().substring(24,60));
                     } catch (Exception e) {
+                        nFailures++;
                         success = false;
+                        lFailures.add(file.getName().substring(24,60));
                     }
                     stream.close();
                     file.delete();
@@ -131,27 +153,41 @@ public class Main {
                 File source = new File(sourceDir);
                 File sourceFile = new File(source.getAbsolutePath() + ".zip");
                 String filename = sourceFile.getName();
+                LOG.info("Completed processing: " + filename);
+                LOG.info("Successfully filed: " + nSuccess);
+                LOG.info("Unsuccessfully filed: " + nFailures);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Completed processing: " + filename);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Successfully filed: " + nSuccess);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unsuccessfully filed: " + nFailures);
                 if (success) {
-                    File dest = new File(properties.getProperty(FilerConstants.SUCCESS) +
+                    File dest = new File(successDir.getAbsolutePath() +
                             File.separator + format.format(new Date()) + "_" + filename);
                     LOG.info("Moving " + filename + " to success directory.");
                     FileUtils.copyFile(sourceFile, dest);
                 } else {
-                    File dest = new File(properties.getProperty(FilerConstants.FAILURE) +
+                    File dest = new File(failureDir.getAbsolutePath() +
                             File.separator + format.format(new Date()) + "_" + filename);
                     LOG.info("Moving " + filename + " to failure directory.");
                     FileUtils.copyFile(sourceFile, dest);
                 }
+                LOG.info("Generating summary file: " + sourceFile.getName());
+                File summary = FilerUtil.createSummaryFiles(sourceFile, lSuccess, lFailures);
+                sftp.open();
+                LOG.info("Uploading summary file: " + sourceFile.getName());
+                sftp.put(summary.getAbsolutePath(), properties.getProperty(FilerConstants.RESULTS));
+                sftp.close();
                 FileUtils.deleteDirectory(source);
                 FileUtils.forceDelete(sourceFile);
             }
         } catch (Exception e) {
-            LOG.info("");
+            e.printStackTrace();
             LOG.error("Unhandled exception occurred. " + e.getMessage());
-            LOG.info("");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. " , e);
             System.exit(-1);
         }
 
         LOG.info("Ending Subscriber Server uploader");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
+        System.exit(0);
     }
 }
