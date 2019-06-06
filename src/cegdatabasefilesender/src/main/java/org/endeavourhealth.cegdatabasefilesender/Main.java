@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.persistence.EntityManager;
 import java.io.File;
+import java.io.FileInputStream;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -85,9 +86,8 @@ public class Main {
             File archiveDir = new File(archiveDirString);
             makeDirectory(archiveDir);
 
-            String pgpDirString  = addFileSeparatorToEndOfDirString(
-                    config.getSubscriberFileLocationDetails().getPgpCertDir());
-            File pgpCertDir = new File(pgpDirString);
+            String pgpFile  = config.getSubscriberFileLocationDetails().getPgpCertFile();
+            File pgpCertFile = new File(pgpFile);
 
             // Can set the directories without using the database, and amend
             // the pathnames below, if needed, when working on this locally
@@ -190,7 +190,7 @@ public class Main {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
                         sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
-                if (!encryptFile(zipFile)) {
+                if (!encryptFile(zipFile, pgpCertFile)) {
                     LOG.info("**********");
                     LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
                     System.exit(-1);
@@ -520,7 +520,7 @@ public class Main {
         // LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
     }
 
-    private static boolean encryptFile(File file) throws Exception {
+    private static boolean encryptFile(File file, File cert) throws Exception {
 
         X509Certificate certificate = null;
 
@@ -528,8 +528,7 @@ public class Main {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
             certificate =
-                    (X509Certificate) certFactory.generateCertificate(
-                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
+                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(cert));
 
         } catch (CertificateException ex) {
             LOG.info("**********");

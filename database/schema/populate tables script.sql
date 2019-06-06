@@ -16,7 +16,7 @@ select 1, '{
           "stagingDir": "C:/Subscriber/Staging/",
           "destinationDir": "/endeavour/ftp/Test/",
           "archiveDir": "C:/Subscriber/Archive/",
-          "pgpCertDir": "C:/Subscriber/PGPCert/"
+          "pgpCertFile": "C:/Subscriber/PGPCert/discovery.cer"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",

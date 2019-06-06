@@ -6,7 +6,7 @@ public class SubscriberFileLocationDetails {
     private String stagingDir = null;
     private String destinationDir = null;
     private String archiveDir = null;
-    private String pgpCertDir = null;
+    private String pgpCertFile = null;
 
     /* private SubcriberFileLocationDetails() {}
 
@@ -50,12 +50,12 @@ public class SubscriberFileLocationDetails {
         this.archiveDir = archiveDir;
     }
 
-    public String getPgpCertDir() {
-        return pgpCertDir;
+    public String getPgpCertFile() {
+        return pgpCertFile;
     }
 
-    public void setPgpCertDir(String pgpCertDir) {
-        this.pgpCertDir = pgpCertDir;
+    public void setPgpCertFile(String pgpCertFile) {
+        this.pgpCertFile = pgpCertFile;
     }
 
 }

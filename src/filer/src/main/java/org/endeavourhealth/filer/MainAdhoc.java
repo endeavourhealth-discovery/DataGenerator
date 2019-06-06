@@ -95,11 +95,11 @@ public class MainAdhoc {
                         try {
                             connection.createStatement().execute(statement);
                             LOG.info("Successfully executed: " + statement);
-                            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Successfully executed: " + statement);
+                            //SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Successfully executed: " + statement);
                         } catch (SQLException e) {
                             LOG.error("Failed in executing: " + statement);
                             LOG.error("Reason: " + e.getMessage());
-                            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Failed in executing: " + statement, e);
+                            //SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Failed in executing: " + statement, e);
                             success = false;
                             break;
                         }
