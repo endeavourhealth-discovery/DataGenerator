@@ -32,9 +32,21 @@ public class FilerUtil {
 
     public static Properties initialize() throws Exception {
         Properties properties = new Properties();
-        String path = "config.properties";
-        InputStream stream = FilerUtil.class.getClassLoader().getResourceAsStream(path);
-        properties.load(stream);
+        File jarPath = new File(FilerUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        String propertiesPath = jarPath.getParentFile().getAbsolutePath();
+        try {
+            //load config.properties where the jar is located
+            FileInputStream stream = new FileInputStream(propertiesPath + File.separator + "config.properties");
+            properties.load(stream);
+        } catch (Exception ex) {
+            //load config.properties from classes
+            try {
+                InputStream stream = FilerUtil.class.getClassLoader().getResourceAsStream("config.properties");
+                properties.load(stream);
+            } catch (Exception e) {
+                throw e;
+            }
+        }
         return properties;
     }
 
@@ -49,7 +61,7 @@ public class FilerUtil {
         }
     }
 
-    public static SftpUtil setupSftp(Properties properties) {
+    public static SftpUtil setupSftp(Properties properties) throws Exception {
 
         ConnectionDetails sftpCon = new ConnectionDetails();
         sftpCon.setHostname(properties.getProperty(FilerConstants.HOSTNAME));
@@ -59,30 +71,24 @@ public class FilerUtil {
             sftpCon.setClientPrivateKey(FileUtils.readFileToString(new File(properties.getProperty(FilerConstants.KEY))));
             sftpCon.setClientPrivateKeyPassword("");
         } catch (IOException e) {
-            LOG.info("");
             LOG.error("Unable to read client private key file." + e.getMessage());
-            LOG.info("");
-            System.exit(-1);
+            throw e;
         }
 
         SftpUtil sftp = new SftpUtil(sftpCon);
         try {
             sftp.open();
-            LOG.info("");
             LOG.info("SFTP connection established");
-            LOG.info("");
             sftp.close();
         } catch (Exception e) {
-            LOG.info("");
             LOG.error("Unable to connect to the SFTP server." + e.getMessage());
-            LOG.info("");
-            System.exit(-1);
+            throw e;
         }
 
         return sftp;
     }
 
-    public static void decryptFiles(File[] files, Properties properties) {
+    public static void decryptFiles(File[] files, Properties properties) throws Exception {
         try {
             Security.addProvider(new BouncyCastleProvider());
 
@@ -104,10 +110,8 @@ public class FilerUtil {
                 }
             }
         } catch (Exception e) {
-            LOG.info("");
             LOG.error("Unable to decrypt file/s " + e.getMessage());
-            LOG.info("");
-            System.exit(-1);
+            throw e;
         }
     }
 

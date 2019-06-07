@@ -31,6 +31,7 @@ public class Main {
             properties = FilerUtil.initialize();
         } catch (Exception e) {
             LOG.error("Error in reading config.properties " + e.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
             System.exit(-1);
         }
 
@@ -180,9 +181,9 @@ public class Main {
                 FileUtils.forceDelete(sourceFile);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.error("Unhandled exception occurred. " + e.getMessage());
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. " , e);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
             System.exit(-1);
         }
 

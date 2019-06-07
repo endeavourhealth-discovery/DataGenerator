@@ -90,7 +90,7 @@
                     <descriptorRefs><descriptorRef>jar-with-dependencies</descriptorRef></descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.endeavourhealth.uploader.Main</mainClass>
+                            <mainClass>org.endeavourhealth.filer.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -32,6 +32,7 @@ public class MainAdhoc {
             properties = FilerUtil.initialize();
         } catch (Exception e) {
             LOG.error("Error in reading config.properties " + e.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server Adhoc uploader");
             System.exit(-1);
         }
 
@@ -66,6 +67,7 @@ public class MainAdhoc {
             } catch (Exception e) {
                 LOG.error("Error in downloading/deleting files from SFTP server " + e.getMessage());
                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error in downloading/deleting files from SFTP server ", e);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server Adhoc uploader");
                 System.exit(-1);
             }
 
@@ -133,6 +135,7 @@ public class MainAdhoc {
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. ", e);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server Adhoc uploader");
             System.exit(-1);
         }
 
