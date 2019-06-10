@@ -30,31 +30,26 @@ public class FeedbackSlurper implements AutoCloseable {
 
         FeedbackHolder feedbackHolder = sftpFeedback.getFeedback();
 
-        List<Result> resultsMarkedForDeletion = processFiles( feedbackHolder );
+        processFiles( feedbackHolder );
 
-        deleteFiles( resultsMarkedForDeletion );
+        cleanUp( feedbackHolder );
 
     }
 
-    private List<Result> processFiles(FeedbackHolder feedbackHolder) throws Exception {
+    private void cleanUp(FeedbackHolder feedbackHolder) {
+    }
 
-        List<Result> resultsMarkedForDeletion = new ArrayList<>();
+    private void processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
         for (FailureResult failureResult : feedbackHolder.getFailureResults()) {
-            feedbackRepository.process( failureResult, feedbackHolder );
+            feedbackRepository.process( failureResult );
             resultsMarkedForDeletion.add( failureResult );
         }
 
         for (SuccessResult successResult : feedbackHolder.getSuccessResults()) {
-            feedbackRepository.process( successResult, feedbackHolder );
+            feedbackRepository.process( successResult );
             resultsMarkedForDeletion.add( successResult );
         }
-
-        return resultsMarkedForDeletion;
-    }
-
-    private void deleteFiles(List<Result> resultsMarkedForDeletion) {
-
     }
 
     @Override

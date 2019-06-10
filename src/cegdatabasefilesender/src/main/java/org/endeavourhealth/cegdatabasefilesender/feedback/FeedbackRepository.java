@@ -30,7 +30,7 @@ public class FeedbackRepository {
         entityManager.close();
     }
 
-    public void process(SuccessResult successResult, FeedbackHolder feedbackHolder) throws Exception {
+    public void process(SuccessResult successResult) throws Exception {
 
         logger.info("Processing {}", successResult);
 
@@ -61,7 +61,8 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            feedbackHolder.addError( successResult );
+            logger.error("Cannot update uuid", ex);
+            successResult.addError( ex.getMessage() );
 
         } finally {
             if (ps != null) {
@@ -72,7 +73,7 @@ public class FeedbackRepository {
 
     }
 
-    public void process(FailureResult failureResult, FeedbackHolder feedbackHolder) throws Exception{
+    public void process(FailureResult failureResult) throws Exception{
 
         logger.info("Processing {}", failureResult);
 
@@ -105,7 +106,8 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            feedbackHolder.addError( failureResult );
+            logger.error("Cannot update uuid", ex);
+            failureResult.addError( ex.getMessage() );
 
         } finally {
             if (ps != null) {
