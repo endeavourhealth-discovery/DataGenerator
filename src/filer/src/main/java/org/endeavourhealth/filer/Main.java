@@ -145,7 +145,7 @@ public class Main {
                     } catch (Exception e) {
                         nFailures++;
                         success = false;
-                        lFailures.add(file.getName().substring(24,60));
+                        lFailures.add(file.getName().substring(24,60) + "," + e.getMessage());
                     }
                     stream.close();
                     file.delete();
@@ -171,14 +171,14 @@ public class Main {
                     LOG.info("Moving " + filename + " to failure directory.");
                     FileUtils.copyFile(sourceFile, dest);
                 }
-                LOG.info("Generating summary file: " + sourceFile.getName());
+                LOG.info("Generating summary file: " + sourceFile.getName().replace("Data","Results"));
                 File summary = FilerUtil.createSummaryFiles(sourceFile, lSuccess, lFailures);
                 sftp.open();
-                LOG.info("Uploading summary file: " + sourceFile.getName());
+                LOG.info("Uploading summary file: " + summary.getName());
                 sftp.put(summary.getAbsolutePath(), properties.getProperty(FilerConstants.RESULTS));
                 sftp.close();
                 FileUtils.deleteDirectory(source);
-                FileUtils.forceDelete(sourceFile);
+                FileUtils.forceDelete(summary);
             }
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());

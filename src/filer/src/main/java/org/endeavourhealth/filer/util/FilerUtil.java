@@ -177,23 +177,26 @@ public class FilerUtil {
 
     public static File createSummaryFiles(File source, ArrayList<String> lSuccess, ArrayList<String> lFailures) throws Exception {
         FileUtils.forceDelete(source);
-        ZipFile zipFile = new ZipFile(source);
+        String name = source.getAbsolutePath();
+        name = name.replace("Data","Results");
+        File results = new File(name);
+        ZipFile zipFile = new ZipFile(results);
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
         if (lSuccess.size() > 0) {
-            File success = new File(source.getParent() + File.separator + "success.txt");
+            File success = new File(results.getParent() + File.separator + "success.txt");
             FileUtils.writeLines(success, lSuccess);
             zipFile.addFile(success, parameters);
             FileUtils.forceDelete(success);
         }
         if (lFailures.size() > 0) {
-            File failure = new File(source.getParent() + File.separator + "failure.txt");
+            File failure = new File(results.getParent() + File.separator + "failure.txt");
             FileUtils.writeLines(failure, lFailures);
             zipFile.addFile(failure, parameters);
             FileUtils.forceDelete(failure);
         }
-        return source;
+        return results;
     }
 }
 
