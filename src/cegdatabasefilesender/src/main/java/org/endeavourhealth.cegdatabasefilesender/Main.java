@@ -54,17 +54,17 @@ public class Main {
 
         SubscriberFileSenderConfig config = getConfig(subscriberId);
 
-        /* try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
+        try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
             feedbackSlurper.slurp();
         } catch (Exception e) {
             LOG.error("Cannot slurp feedback", e);
-        } */
+        }
 
-        try {
+        /* try {
             sendFiles(config);
         } catch (Exception e) {
             LOG.error("Cannot send files", e);
-        }
+        } */
 
     }
 
