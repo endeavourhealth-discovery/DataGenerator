@@ -1,5 +1,9 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 
 import java.nio.file.Path;
@@ -26,28 +30,33 @@ public class FeedbackSlurper implements AutoCloseable {
 
     public void slurp() throws Exception {
 
-        List<Path> paths = sftpFeedback.getPaths();
+        FeedbackHolder feedbackHolder = sftpFeedback.getFeedback();
 
-        List<Path> filesMarkedForDeletion = processFiles(paths);
+        List<Result> resultsMarkedForDeletion = processFiles( feedbackHolder );
 
-        deleteFiles(filesMarkedForDeletion);
+        deleteFiles( resultsMarkedForDeletion );
     }
 
 
-    private List<Path> processFiles(List<Path> files) throws Exception {
+    private List<Result> processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
-        List<Path> filesMarkedForDeletion = new ArrayList<>();
+        List<Result> resultsMarkedForDeletion = new ArrayList<>();
 
-        for (Path file : files) {
-            feedbackRepository.process(file);
-            filesMarkedForDeletion.add(file);
+        for (FailureResult failureResult : feedbackHolder.getFailureResults()) {
+            feedbackRepository.process( failureResult );
+            resultsMarkedForDeletion.add( failureResult );
         }
 
-        return filesMarkedForDeletion;
+        for (SuccessResult successResult : feedbackHolder.getSuccessResults()) {
+            feedbackRepository.process( successResult );
+            resultsMarkedForDeletion.add( successResult );
+        }
+
+        return resultsMarkedForDeletion;
     }
 
 
-    private void deleteFiles(List<Path> filesMarkedForDeletion) {
+    private void deleteFiles(List<Result> resultsMarkedForDeletion) {
 
     }
 
