@@ -5,6 +5,9 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -12,14 +15,11 @@ import org.endeavourhealth.scheduler.util.SftpConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,15 +41,68 @@ public class SftpFeedback {
     }
 
 
-    List<Path> getPaths() throws SftpConnectionException, JSchException, IOException, SftpException, ZipException {
+    FeedbackHolder getFeedback() throws SftpConnectionException, JSchException, IOException, SftpException, ZipException {
+
+        List<Path> paths = getPaths();
+
+        FeedbackHolder holder = getFeedbackHolder(paths);
+
+        return holder;
+    }
+
+    private FeedbackHolder getFeedbackHolder(List<Path> paths) throws ZipException {
+        FeedbackHolder holder = null;
+
+        List<String> successList = new ArrayList<>();
+        List<String> failureList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+
+        for (Path path : paths) {
+
+            File file = path.toFile();
+
+            logger.info("Deflating zip file {}", file.getName());
+
+            ZipFile zipFile = new ZipFile(file);
+
+            String filepath = file.getName().substring(0, file.getName().length() - 4);
+            String destPath = "/tmp/" + filepath;
+
+            zipFile.extractAll(destPath);
+
+            try {
+                String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
+                successList.addAll( Arrays.asList( success.split("\r\n") ) );
+            } catch(Exception e) {
+                logger.error("Cannot read success.txt", e);
+                errors.add("Cannot read success.txt for " + destPath);
+            }
+
+            try {
+                String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
+                failureList.addAll( Arrays.asList( failure.split("\r\n") ) );
+            } catch(Exception e) {
+                logger.info("Cannot read failure.txt");
+                errors.add("Cannot read failure.txt for " + destPath);
+            }
+
+            List<FailureResult> failureResults = failureList.stream().map(str -> new FailureResult( str )).collect(Collectors.toList());
+            List<SuccessResult> successResults = successList.stream().map(str -> new SuccessResult( str )).collect(Collectors.toList());
+
+            holder = new FeedbackHolder( failureResults, successResults, errors);
+
+        }
+        return holder;
+    }
+
+    private List<Path> getPaths() throws JSchException, IOException, SftpConnectionException, SftpException {
+        List<Path> paths = new ArrayList<>();
 
         sftp.open();
 
         ChannelSftp channelSftp = sftp.getChannel();
 
-        List<Path> paths = new ArrayList<>();
-
-        Vector<ChannelSftp.LsEntry>  fileList = channelSftp.ls("/endeavour/ftp/Remote_Server/result");
+        Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls("/endeavour/ftp/Remote_Server/result");
 
         List<ChannelSftp.LsEntry> filteredFiles = fileList
                 .stream()
@@ -66,20 +119,6 @@ public class SftpFeedback {
             paths.add( path );
 
         }
-
-        for (Path path : paths) {
-
-            File file = path.toFile();
-
-            logger.info("Deflating zip file {}", file.getName());
-
-            ZipFile zipFile = new ZipFile(file);
-
-            String destPath = "/tmp/" + file.getName().substring(0, file.getName().length() - 4);
-
-            zipFile.extractAll(destPath);
-        }
-
         return paths;
     }
 
@@ -97,14 +136,6 @@ public class SftpFeedback {
 
         // String hostPublicKey = "";
         String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
-
-//        clientPrivateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\n" +
-//                "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW\n" +
-//                "QyNTUxOQAAACB17ndfb6+3i48UN05YRB3YCrOT28riNLvaYdr3pHhjSwAAAJB9TWKofU1i\n" +
-//                "qAAAAAtzc2gtZWQyNTUxOQAAACB17ndfb6+3i48UN05YRB3YCrOT28riNLvaYdr3pHhjSw\n" +
-//                "AAAEB0Vzsrewf5swYj0Kjl7u5RyZe1N6f/yFkrNIyzzKAp1nXud19vr7eLjxQ3TlhEHdgK\n" +
-//                "s5PbyuI0u9ph2vekeGNLAAAAB2hhbEBoYWwBAgMEBQY=\n" +
-//                "-----END OPENSSH PRIVATE KEY-----";
 
         ConnectionDetails sftpConnectionDetails = new ConnectionDetails();
 

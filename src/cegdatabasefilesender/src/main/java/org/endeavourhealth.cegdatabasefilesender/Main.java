@@ -65,6 +65,8 @@ public class Main {
 
         try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper( config )) {
             feedbackSlurper.slurp();
+        } catch(Exception e) {
+            LOG.error("Cannot slurp feedback", e);
         }
     }
 
