@@ -39,7 +39,7 @@ public class SftpFeedback {
     }
 
 
-    FeedbackHolder getFeedback() throws SftpConnectionException, JSchException, IOException, SftpException, ZipException {
+    FeedbackHolder getFeedbackHolder() throws SftpConnectionException, JSchException, IOException, SftpException, ZipException {
 
         List<Path> paths = getPaths();
 
@@ -49,11 +49,8 @@ public class SftpFeedback {
     }
 
     private FeedbackHolder getFeedbackHolder(List<Path> paths) throws ZipException {
-        FeedbackHolder holder = null;
 
-        List<String> successList = new ArrayList<>();
-        List<String> failureList = new ArrayList<>();
-        List<Result> errors = new ArrayList<>();
+        FeedbackHolder feedbackHolder = new FeedbackHolder();
 
         for (Path path : paths) {
 
@@ -61,29 +58,28 @@ public class SftpFeedback {
 
             String destPath = unzip(file);
 
+            FileResult fileResult = new FileResult(destPath);
+
             try {
                 String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
-                successList.addAll( Arrays.asList( success.split("\r\n") ) );
+                fileResult.addSuccess( success );
             } catch(Exception e) {
                 logger.error("Cannot read success.txt", e);
-                errors.add( new ErrorResult("Cannot read success.txt for " + destPath)) ;
+                fileResult.addError("Cannot read success.txt for " + destPath);
             }
 
             try {
                 String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
-                failureList.addAll( Arrays.asList( failure.split("\r\n") ) );
+                fileResult.addFailure( failure );
             } catch(Exception e) {
                 logger.info("Cannot read failure.txt");
-                errors.add( new ErrorResult("Cannot read failure.txt for " + destPath) );
+                fileResult.addError("Cannot read failure.txt for " + destPath);
             }
 
-            List<FailureResult> failureResults = failureList.stream().map(str -> new FailureResult( str )).collect(Collectors.toList());
-            List<SuccessResult> successResults = successList.stream().map(str -> new SuccessResult( str )).collect(Collectors.toList());
-
-            holder = new FeedbackHolder( failureResults, successResults, errors);
-
+            feedbackHolder.addFileResult( fileResult );
         }
-        return holder;
+
+        return feedbackHolder;
     }
 
     private String unzip(File file) throws ZipException {

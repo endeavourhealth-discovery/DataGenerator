@@ -1,13 +1,9 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FileResult;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FeedbackSlurper implements AutoCloseable {
 
@@ -28,7 +24,7 @@ public class FeedbackSlurper implements AutoCloseable {
 
     public void slurp() throws Exception {
 
-        FeedbackHolder feedbackHolder = sftpFeedback.getFeedback();
+        FeedbackHolder feedbackHolder = sftpFeedback.getFeedbackHolder();
 
         processFiles( feedbackHolder );
 
@@ -41,14 +37,18 @@ public class FeedbackSlurper implements AutoCloseable {
 
     private void processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
-        for (FailureResult failureResult : feedbackHolder.getFailureResults()) {
-            feedbackRepository.process( failureResult );
-            resultsMarkedForDeletion.add( failureResult );
-        }
+        for (FileResult fileResult : feedbackHolder.getFileResults()) {
 
-        for (SuccessResult successResult : feedbackHolder.getSuccessResults()) {
-            feedbackRepository.process( successResult );
-            resultsMarkedForDeletion.add( successResult );
+            for(Result result : fileResult.getResults()) {
+                switch (result.getType()) {
+                    case FAILURE:
+                        feedbackRepository.processFailure(result);
+                        break;
+                    case SUCCESS:
+                        feedbackRepository.processSuccess(result);
+                        break;
+                }
+            }
         }
     }
 

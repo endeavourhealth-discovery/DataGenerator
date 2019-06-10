@@ -1,41 +1,22 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FeedbackHolder {
 
-    private final List<FailureResult> failureResults;
 
-    private final List<SuccessResult> successResults;
-
-    private final List<Result> errors;
+    private List<FileResult> fileResults = new ArrayList<>();
 
 
-    public FeedbackHolder(List<FailureResult> failureResults, List<SuccessResult> successResults,  List<Result> errors) {
-        this.failureResults = failureResults;
-        this.successResults = successResults;
-        this.errors = errors;
+    public FeedbackHolder() {
     }
 
-
-    public List<FailureResult> getFailureResults() {
-        return failureResults;
+    public void addFileResult(FileResult fileResult) {
+        fileResults.add( fileResult );
     }
 
-    public List<SuccessResult> getSuccessResults() {
-        return successResults;
-    }
-
-    public List<Result> getErrors() {
-        return errors;
-    }
-
-    public void addError(Result result) {
-
-        errors.add( result );
-    }
-
-    public boolean hasErrors() {
-        return !errors.isEmpty();
+    public List<FileResult> getFileResults() {
+        return fileResults;
     }
 }

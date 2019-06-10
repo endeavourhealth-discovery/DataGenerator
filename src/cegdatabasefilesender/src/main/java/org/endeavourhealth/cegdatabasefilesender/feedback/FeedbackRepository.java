@@ -1,8 +1,6 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.hibernate.internal.SessionImpl;
@@ -30,7 +28,7 @@ public class FeedbackRepository {
         entityManager.close();
     }
 
-    public void process(SuccessResult successResult) throws Exception {
+    public void processSuccess(Result successResult) throws Exception {
 
         logger.info("Processing {}", successResult);
 
@@ -73,12 +71,12 @@ public class FeedbackRepository {
 
     }
 
-    public void process(FailureResult failureResult) throws Exception{
+    public void processFailure(Result failureResult) throws Exception{
 
         logger.info("Processing {}", failureResult);
 
         String failureResultUuid = failureResult.getUuid();
-        String failureResultMessage = failureResult.getMessage();
+        String failureResultMessage = failureResult.getErrorMessage();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
