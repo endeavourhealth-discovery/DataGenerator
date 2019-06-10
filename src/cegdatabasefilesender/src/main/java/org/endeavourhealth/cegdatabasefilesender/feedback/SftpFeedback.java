@@ -107,8 +107,9 @@ public class SftpFeedback {
         sftp.open();
 
         ChannelSftp channelSftp = sftp.getChannel();
+        String resultsDir = config.getSubscriberFileLocationDetails().getResultsDir();
 
-        Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls("/endeavour/ftp/Remote_Server/result");
+        Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls(resultsDir);
 
         List<ChannelSftp.LsEntry> filteredFiles = fileList
                 .stream()
@@ -118,7 +119,7 @@ public class SftpFeedback {
         for(ChannelSftp.LsEntry entry : filteredFiles) {
             logger.debug("Retrieving file {}", entry.getFilename());
 
-            channelSftp.get("/endeavour/ftp/Remote_Server/result/" + entry.getFilename(), destinationPath + entry.getFilename());
+            channelSftp.get(resultsDir + entry.getFilename(), destinationPath + entry.getFilename());
 
             Path path = Paths.get("/tmp/" + entry.getFilename() );
 
@@ -129,20 +130,13 @@ public class SftpFeedback {
     }
 
     private ConnectionDetails getConnectionDetails() {
+
         String hostname = config.getSftpConnectionDetails().getHostname();
-
         int port = config.getSftpConnectionDetails().getPort();
-
         String username = config.getSftpConnectionDetails().getUsername();
-
-
         String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
-
         String clientPrivateKeyPassword = config.getSftpConnectionDetails().getClientPrivateKeyPassword();
-
-        // String hostPublicKey = "";
         String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
-
         ConnectionDetails sftpConnectionDetails = new ConnectionDetails();
 
         sftpConnectionDetails.setHostname(hostname);
