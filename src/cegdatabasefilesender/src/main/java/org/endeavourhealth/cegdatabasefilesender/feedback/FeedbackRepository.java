@@ -4,11 +4,13 @@ import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
+import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 
 public class FeedbackRepository {
 
@@ -23,32 +25,94 @@ public class FeedbackRepository {
         entityManager = PersistenceManager.getEntityManager();
     }
 
-
     public void close() {
         entityManager.close();
     }
 
-    public void process(SuccessResult successResult) {
+    public void process(SuccessResult successResult) throws Exception {
 
         logger.info("Processing {}", successResult);
 
-//        Query query = entityManager.createQuery("update blah set blah = :1 where id = :2");
-//
-//        query.setParameter(1, "blah");
-//        query.setParameter(2, "blah");
-//
-//        query.executeUpdate();
+        String successResultUuid = successResult.getUuid();
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+
+        try {
+            entityManager.getTransaction().begin();
+            SessionImpl session = (SessionImpl) entityManager.getDelegate();
+            Connection connection = session.connection();
+
+            java.util.Date date = new java.util.Date();
+            Timestamp timestamp = new java.sql.Timestamp(date.getTime());
+
+            String sql = "update data_generator.subscriber_zip_file_uuids"
+                    + " set file_filing_attempted = ?"
+                    + ", file_filing_success = true"
+                    + ", queued_message_body = null"
+                    + " where queued_message_uuid = ?";
+
+            ps = connection.prepareStatement(sql);
+            ps.setTimestamp(1, timestamp);
+            ps.setString(2, successResultUuid);
+            ps.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
+        }
+
     }
 
-    public void process(FailureResult failureResult) {
+    public void process(FailureResult failureResult) throws Exception{
 
         logger.info("Processing {}", failureResult);
 
-//        Query query = entityManager.createQuery("update blah set blah = :1 where id = :2");
-//
-//        query.setParameter(1, "blah");
-//        query.setParameter(2, "blah");
-//
-//        query.executeUpdate();
+        String failureResultUuid = failureResult.getUuid();
+        String failureResultMessage = failureResult.getMessage();
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+
+        try {
+            entityManager.getTransaction().begin();
+            SessionImpl session = (SessionImpl) entityManager.getDelegate();
+            Connection connection = session.connection();
+
+            java.util.Date date = new java.util.Date();
+            Timestamp timestamp = new java.sql.Timestamp(date.getTime());
+
+            String sql = "update data_generator.subscriber_zip_file_uuids"
+                    + " set file_filing_attempted = ?"
+                    + ", file_filing_success = false"
+                    + ", filing_failure_message = ?"
+                    + " where queued_message_uuid = ?";
+
+            ps = connection.prepareStatement(sql);
+            ps.setTimestamp(1, timestamp);
+            ps.setString(2, failureResultMessage);
+            ps.setString(3, failureResultUuid);
+            ps.executeUpdate();
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
+        }
+
     }
+
 }

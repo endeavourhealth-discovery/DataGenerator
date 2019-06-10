@@ -21,6 +21,7 @@ public class SubscriberZipFileUUIDsEntity {
     private Date fileSent;
     private Date fileFilingAttempted;
     private Boolean fileFilingSuccess;
+    private String filingFailureMessage;
 
     @Basic
     @Column(name = "subscriber_id")
@@ -92,6 +93,16 @@ public class SubscriberZipFileUUIDsEntity {
         this.fileFilingSuccess = fileFilingSuccess;
     }
 
+    @Basic
+    @Column(name = "filing_failure_message")
+    public String getFilingFailureMessage() {
+        return filingFailureMessage;
+    }
+
+    public void setFilingFailureMessage(String filingFailureMessage) {
+        this.filingFailureMessage = filingFailureMessage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,13 +114,14 @@ public class SubscriberZipFileUUIDsEntity {
                 filingOrder == that.filingOrder &&
                 Objects.equals(fileSent, that.fileSent) &&
                 Objects.equals(fileFilingAttempted, that.fileFilingAttempted) &&
-                Objects.equals(fileFilingSuccess, that.fileFilingSuccess);
+                Objects.equals(fileFilingSuccess, that.fileFilingSuccess) &&
+                Objects.equals(filingFailureMessage, that.filingFailureMessage);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(subscriberId, queuedMessageUUID, queuedMessageBody,
-                filingOrder, fileSent, fileFilingAttempted, fileFilingSuccess);
+                filingOrder, fileSent, fileFilingAttempted, fileFilingSuccess, filingFailureMessage);
     }
 
     public static SubscriberZipFileUUIDsEntity getSubscriberZipFileUUIDsEntity(String queuedMessageUUID) throws Exception {

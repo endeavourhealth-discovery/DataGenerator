@@ -29,6 +29,7 @@ create table data_generator.subscriber_zip_file_uuids (
     file_sent datetime comment 'When the file was sent to the SFTP.',
     file_filing_attempted datetime comment 'When the filing was attempted at the receiving end.',
     file_filing_success boolean comment 'Whether the filing was a success at the receiving end.',
+    filing_failure_message text comment 'The error message generated at the receiving end.',
     
     primary key (queued_message_uuid)
 );

@@ -139,9 +139,10 @@ public class Main {
                     con.setAutoCommit(false);
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into DB Server");
                     try {
-                        RemoteServerFiler.file(con, keywordEscapeChar, batchSize, bytes);
+                        RemoteServerFiler.file(file.getName().substring(24, 60), failureDir.getAbsolutePath(),
+                                con, keywordEscapeChar, batchSize, bytes);
                         nSuccess++;
-                        lSuccess.add(file.getName().substring(24,60));
+                        lSuccess.add(file.getName().substring(24, 60));
                     } catch (Exception e) {
                         nFailures++;
                         success = false;
@@ -182,7 +183,7 @@ public class Main {
             }
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. " , e);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. ", e);
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
             System.exit(-1);
         }

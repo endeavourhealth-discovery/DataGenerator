@@ -6,23 +6,21 @@ import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FeedbackSlurper implements AutoCloseable {
 
     private final SubscriberFileSenderConfig config;
-
     private final SftpFeedback sftpFeedback;
-
     private final FeedbackRepository feedbackRepository;
 
     public FeedbackSlurper(SubscriberFileSenderConfig config) throws Exception {
         this(config, new SftpFeedback(config), new FeedbackRepository(config));
     }
 
-    public FeedbackSlurper(SubscriberFileSenderConfig config, SftpFeedback sftpFeedback, FeedbackRepository feedbackRepository) {
+    public FeedbackSlurper(SubscriberFileSenderConfig config, SftpFeedback sftpFeedback,
+                           FeedbackRepository feedbackRepository) {
         this.config = config;
         this.sftpFeedback = sftpFeedback;
         this.feedbackRepository = feedbackRepository;
@@ -35,8 +33,8 @@ public class FeedbackSlurper implements AutoCloseable {
         List<Result> resultsMarkedForDeletion = processFiles( feedbackHolder );
 
         deleteFiles( resultsMarkedForDeletion );
-    }
 
+    }
 
     private List<Result> processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
@@ -55,7 +53,6 @@ public class FeedbackSlurper implements AutoCloseable {
         return resultsMarkedForDeletion;
     }
 
-
     private void deleteFiles(List<Result> resultsMarkedForDeletion) {
 
     }
@@ -65,4 +62,5 @@ public class FeedbackSlurper implements AutoCloseable {
         sftpFeedback.close();
         feedbackRepository.close();
     }
+
 }

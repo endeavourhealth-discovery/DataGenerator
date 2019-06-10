@@ -35,11 +35,11 @@ public class RemoteServerFiler {
 
     private static final int UPSERT_ATTEMPTS = 10;
 
-    public static void file(Connection connection, String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
+    public static void file(String name, String failureDir, Connection connection,
+                            String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
-
         try {
 
             //the zip contains a JSON file giving type descriptors for all the columns of each file
@@ -75,7 +75,7 @@ public class RemoteServerFiler {
 
         } catch (Exception ex) {
             //if we get an exception, write out the zip file, so we can investigate what was being filed
-            writeZipFile(bytes);
+            writeZipFile(name, failureDir, bytes);
 
             throw new Exception(ex.getMessage(), ex);
         } finally {
@@ -86,8 +86,8 @@ public class RemoteServerFiler {
         }
     }
 
-    private static void writeZipFile(byte[] bytes) {
-        File f = new File("D:\\Temp\\SubscriberFileError.zip");
+    private static void writeZipFile(String uuid, String failureDir, byte[] bytes) {
+        File f = new File(failureDir + File.separator + uuid + ".zip");
         try {
             FileUtils.writeByteArrayToFile(f, bytes);
             LOG.error("Written ZIP file to " + f);

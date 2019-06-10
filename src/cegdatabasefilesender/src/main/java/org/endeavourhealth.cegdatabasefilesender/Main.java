@@ -1,13 +1,8 @@
 package org.endeavourhealth.cegdatabasefilesender;
 
-// import org.endeavourhealth.common.config.ConfigManager;
 import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.FeedbackSlurper;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
-import org.endeavourhealth.core.database.dal.DalProvider;
-import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
-import org.endeavourhealth.core.database.rdbms.ConnectionManager;
-import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.models.database.SubscriberFileSenderEntity;
@@ -17,6 +12,7 @@ import org.endeavourhealth.scheduler.util.SftpConnection;
 import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,10 +22,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.*;
-import java.util.Date;
+import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.Date;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
@@ -39,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+
     // private static Main instance = null;
 
     /* private Main() {
@@ -55,19 +52,20 @@ public class Main {
 
         int subscriberId = 1;
 
-        SubscriberFileSenderConfig config = getConfig( subscriberId );
+        SubscriberFileSenderConfig config = getConfig(subscriberId);
 
-//        try {
-//            sendFiles( config );
-//        } catch (Exception e) {
-//            LOG.error("Cannot send files", e);
-//        }
-
-        try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper( config )) {
+        try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
             feedbackSlurper.slurp();
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error("Cannot slurp feedback", e);
         }
+
+        /* try {
+            sendFiles(config);
+        } catch (Exception e) {
+            LOG.error("Cannot send files", e);
+        } */
+
     }
 
     private static SubscriberFileSenderConfig getConfig(int subscriberId) throws Exception {
@@ -89,6 +87,7 @@ public class Main {
         // ConfigManager.Initialize("ceg-database-file-sender");
         // Main main = Main.getInstance();
 
+        List<UUID> resultSetUuidsList = new ArrayList<>();
         int subscriberId = 1;
 
         try {
@@ -111,7 +110,7 @@ public class Main {
             File archiveDir = new File(archiveDirString);
             makeDirectory(archiveDir);
 
-            String pgpFile  = config.getSubscriberFileLocationDetails().getPgpCertFile();
+            String pgpFile = config.getSubscriberFileLocationDetails().getPgpCertFile();
             File pgpCertFile = new File(pgpFile);
 
             // Can set the directories without using the database, and amend
@@ -130,51 +129,57 @@ public class Main {
             LOG.info("Getting stored zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
 
             try {
+                // below method call commented out as the payload has already been written
+                // to the data_generator.subscriber_zip_file_uuids table by SubscriberFiler
                 // ResultSet results = checkAuditQueuedMessageTableForUUIDs();
 
-                LOG.info("**********");
-                LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
+                // LOG.info("**********");
+                // LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
 
                 ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
 
-                    while (resultSet.next()) {
+                while (resultSet.next()) {
 
-                        long filenameCounter = resultSet.getLong("filing_order");
-                        UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
+                    long filenameCounter = resultSet.getLong("filing_order");
+                    UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
+                    resultSetUuidsList.add(queuedMessageId);
+
+                    try {
+                        // below method call commented out as the payload has already been written
+                        // to the data_generator.subscriber_zip_file_uuids table by SubscriberFiler
+                        // byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+
+                        byte[] bytes = Base64.getDecoder().decode(resultSet.getString("queued_message_body"));
 
                         try {
-                            // byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
-                            byte[] bytes = Base64.getDecoder().decode(resultSet.getString("queued_message_body"));
+                            writeZipFileToDataDirectory(bytes, filenameCounter, queuedMessageId, dataDir);
 
-                            try {
-                                writeZipFileToDataDirectory(bytes, filenameCounter, queuedMessageId, dataDir);
-
-                                try {
-                                    // TODO Uncomment out the line of code below when sure that this all works
-                                    //  Once the file has been taken from audit.queued_message it can be deleted
-                                    // deleteEntryFromQueuedMessageTable(queuedMessageId);
+                            // below no longer needed as the payload has already been written to the
+                            // data_generator.subscriber_zip_file_uuids table by SubscriberFiler, and deleted by it
+                                /* try {
+                                       deleteEntryFromQueuedMessageTable(queuedMessageId);
 
                                 } catch (Exception ex) {
                                     LOG.info("**********");
                                     LOG.error("Error encountered in deleting zip file from audit.queued_message table: " + ex.getMessage());
                                     LOG.error("For UUID: " + queuedMessageId);
                                     System.exit(-1);
-                                }
-
-                            } catch (Exception ex) {
-                                LOG.info("**********");
-                                LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
-                                LOG.error("For UUID: " + queuedMessageId);
-                                System.exit(-1);
-                            }
+                                } */
 
                         } catch (Exception ex) {
                             LOG.info("**********");
-                            LOG.error("Error encountered in getting zip file from data_generator.subscriber_zip_file_uuids table: " + ex.getMessage());
+                            LOG.error("Error encountered in writing zip file to data directory: " + ex.getMessage());
                             LOG.error("For UUID: " + queuedMessageId);
                             System.exit(-1);
                         }
+
+                    } catch (Exception ex) {
+                        LOG.info("**********");
+                        LOG.error("Error encountered in getting zip file from data_generator.subscriber_zip_file_uuids table: " + ex.getMessage());
+                        LOG.error("For UUID: " + queuedMessageId);
+                        System.exit(-1);
                     }
+                }
 
             } catch (Exception ex) {
                 LOG.info("**********");
@@ -195,8 +200,8 @@ public class Main {
                 System.exit(-1);
             }
 
-            // LOG.info("**********");
-            // LOG.info("Deleting contents of data directory.");
+            LOG.info("**********");
+            LOG.info("Deleting contents of data directory.");
 
             try {
                 // TODO Uncomment out the line of code below as necessary
@@ -294,39 +299,32 @@ public class Main {
         LOG.info("**********");
         LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
 
-        // TODO Does doing this separately potentially mean that more UUIDs could have been written to the table by the
-        // SubscriberFiler in EDS in the meantime, so that they are marked as sent, when in fact they have not been?
+        for (UUID uuid : resultSetUuidsList) {
 
-        try {
-            ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
-            while (resultSet.next()) {
-                String queuedMessageId = resultSet.getString("queued_message_uuid");
+            String uuidString = uuid.toString();
 
-                try {
-                    updateFileSentDateTimeInUUIDsTable(queuedMessageId);
+            try {
+                updateFileSentDateTimeInUUIDsTable(uuidString);
 
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                    System.exit(-1);
-                }
-
-                try {
-                    // TODO Uncomment out the line of code below as necessary
-                    // deleteQueuedMessageBodyFromUUIDsTable(queuedMessageId);
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                    System.exit(-1);
-                }
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                System.exit(-1);
             }
 
-        } catch (Exception ex) {
-            LOG.info("**********");
-            LOG.error("Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-            System.exit(-1);
+            // below commented out as this is now done by the feedback slurper
+            /* try {
+                 deleteQueuedMessageBodyFromUUIDsTable(uuidString);
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                System.exit(-1);
+            } */
+
         }
+
+        resultSetUuidsList.clear();
 
         LOG.info("**********");
         LOG.info("Process Completed.");
@@ -392,7 +390,7 @@ public class Main {
         }
     } */
 
-    private static void deleteEntryFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
+    /* private static void deleteEntryFromQueuedMessageTable(UUID queuedMessageId) throws Exception {
         QueuedMessageDalI queuedMessageDal = DalProvider.factoryQueuedMessageDal();
 
         try {
@@ -401,7 +399,7 @@ public class Main {
         } catch (Exception ex) {
             throw ex;
         }
-    }
+    } */
 
     private static ResultSet getUUIDsFromDataGenTable(int subscriberId) throws Exception {
 
@@ -470,7 +468,7 @@ public class Main {
         }
     }
 
-    private static void deleteQueuedMessageBodyFromUUIDsTable(String queuedMessageId) throws Exception {
+    /* private static void deleteQueuedMessageBodyFromUUIDsTable(String queuedMessageId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
 
@@ -499,7 +497,7 @@ public class Main {
             entityManager.close();
         }
 
-    }
+    } */
 
     private static void writeZipFileToDataDirectory(byte[] bytes, long filenameCounter,
                                                     UUID queuedMessageId, File dataDir) throws Exception {

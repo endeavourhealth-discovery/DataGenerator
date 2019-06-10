@@ -8,6 +8,7 @@ delete from data_generator.dataset where dataset_id <= 5;
 delete from data_generator.cohort where id <= 5;
 
 -- insert into the subscriber_file_sender table
+delete from data_generator.subscriber_file_sender where subscriber_id = 1;
 insert into data_generator.subscriber_file_sender
 select 1, '{
  "subscriberFileLocationDetails": {
@@ -15,7 +16,8 @@ select 1, '{
           "stagingDir": "C:/Subscriber/Staging/",
           "destinationDir": "/endeavour/ftp/Test/",
           "archiveDir": "C:/Subscriber/Archive/",
-          "pgpCertFile": "C:/Subscriber/PGPCert/discovery.cer"
+          "pgpCertFile": "C:/Subscriber/PGPCert/discovery.cer",
+          "resultsDir": "/endeavour/ftp/Remote_Server/result/"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
