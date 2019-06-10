@@ -2,6 +2,7 @@ package org.endeavourhealth.cegdatabasefilesender;
 
 // import org.endeavourhealth.common.config.ConfigManager;
 import org.apache.commons.lang3.StringUtils;
+import org.endeavourhealth.cegdatabasefilesender.feedback.FeedbackSlurper;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.core.database.dal.DalProvider;
 import org.endeavourhealth.core.database.dal.audit.QueuedMessageDalI;
@@ -52,21 +53,43 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        int subscriberId = 1;
+
+        SubscriberFileSenderConfig config = getConfig( subscriberId );
+
+//        try {
+//            sendFiles( config );
+//        } catch (Exception e) {
+//            LOG.error("Cannot send files", e);
+//        }
+
+        try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper( config )) {
+            feedbackSlurper.slurp();
+        }
+    }
+
+    private static SubscriberFileSenderConfig getConfig(int subscriberId) throws Exception {
+
+        SubscriberFileSenderEntity sfse = SubscriberFileSenderEntity.getSubscriberFileSenderEntity(subscriberId);
+        String definition = sfse.getDefinition();
+
+        SubscriberFileSenderConfig config = null;
+        if (!StringUtils.isEmpty(definition)) {
+            config = ObjectMapperPool.getInstance().
+                    readValue(definition, SubscriberFileSenderConfig.class);
+        }
+
+        return config;
+    }
+
+    private static void sendFiles(SubscriberFileSenderConfig config) throws Exception {
+
         // ConfigManager.Initialize("ceg-database-file-sender");
         // Main main = Main.getInstance();
 
         int subscriberId = 1;
 
         try {
-            SubscriberFileSenderEntity sfse = SubscriberFileSenderEntity.
-                    getSubscriberFileSenderEntity(subscriberId);
-            String definition = sfse.getDefinition();
-
-            SubscriberFileSenderConfig config = null;
-            if (!StringUtils.isEmpty(definition)) {
-                config = ObjectMapperPool.getInstance().
-                        readValue(definition, SubscriberFileSenderConfig.class);
-            }
 
             String dataDirString = addFileSeparatorToEndOfDirString(
                     config.getSubscriberFileLocationDetails().getDataDir());
@@ -260,7 +283,7 @@ public class Main {
                 System.exit(-1);
             }
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             LOG.info("**********");
             LOG.error("Error encountered with accessing data_generator.subscriber_file_sender table: " + ex.getMessage());
             System.exit(-1);
