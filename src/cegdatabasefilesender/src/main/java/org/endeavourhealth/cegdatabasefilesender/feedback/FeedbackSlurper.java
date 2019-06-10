@@ -1,12 +1,7 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
-import net.lingala.zip4j.exception.ZipException;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
-import org.endeavourhealth.scheduler.util.SftpConnectionException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;

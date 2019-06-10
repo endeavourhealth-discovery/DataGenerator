@@ -7,7 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.nio.file.Path;
 
-public class FeedbackRepository { //implements AutoCloseable {
+public class FeedbackRepository {
 
     private final SubscriberFileSenderConfig config;
 
