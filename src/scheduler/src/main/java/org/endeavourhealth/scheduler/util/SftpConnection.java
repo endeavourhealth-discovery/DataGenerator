@@ -36,6 +36,12 @@ public class SftpConnection extends Connection {
         Validate.isTrue(connectionDetails.getPort() > 0, "port must be positive");
     }
 
+    public ChannelSftp getChannel() {
+        return this.channel;
+    }
+
+
+
     public void open() throws JSchException, IOException, SftpConnectionException {
 
         //JSch.setLogger(new Logger());   //uncomment to enable JSch verbose SSH logging

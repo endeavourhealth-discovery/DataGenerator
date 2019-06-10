@@ -8,7 +8,7 @@ delete from data_generator.dataset where dataset_id <= 5;
 delete from data_generator.cohort where id <= 5;
 
 -- insert into the subscriber_file_sender table
--- delete from data_generator.subscriber_file_sender where subscriber_id = 1;
+delete from data_generator.subscriber_file_sender where subscriber_id = 1;
 insert into data_generator.subscriber_file_sender
 select 1, '{
  "subscriberFileLocationDetails": {
@@ -18,12 +18,12 @@ select 1, '{
           "archiveDir": "C:/Subscriber/Archive/"
 },
  "sftpConnectionDetails": {
-          "hostname": "10.0.101.239",
+          "hostname": "localhost",
           "hostPublicKey": "",
           "port": "22",
-          "username": "endeavour",
-          "clientPrivateKeyPassword": "",
-          "clientPrivateKey": "",
+          "username": "foo",
+          "clientPrivateKeyPassword": "pass",
+          "clientPrivateKey": ""
 }
 }';
 
