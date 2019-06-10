@@ -1,6 +1,7 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
@@ -29,7 +30,7 @@ public class FeedbackRepository {
         entityManager.close();
     }
 
-    public void process(SuccessResult successResult) throws Exception {
+    public void process(SuccessResult successResult, FeedbackHolder feedbackHolder) throws Exception {
 
         logger.info("Processing {}", successResult);
 
@@ -60,7 +61,7 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            throw ex;
+            feedbackHolder.addError( successResult );
 
         } finally {
             if (ps != null) {
@@ -71,7 +72,7 @@ public class FeedbackRepository {
 
     }
 
-    public void process(FailureResult failureResult) throws Exception{
+    public void process(FailureResult failureResult, FeedbackHolder feedbackHolder) throws Exception{
 
         logger.info("Processing {}", failureResult);
 
@@ -104,7 +105,7 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            throw ex;
+            feedbackHolder.addError( failureResult );
 
         } finally {
             if (ps != null) {

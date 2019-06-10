@@ -5,9 +5,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FailureResult;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
-import org.endeavourhealth.cegdatabasefilesender.feedback.bean.SuccessResult;
+import org.endeavourhealth.cegdatabasefilesender.feedback.bean.*;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -55,7 +53,7 @@ public class SftpFeedback {
 
         List<String> successList = new ArrayList<>();
         List<String> failureList = new ArrayList<>();
-        List<String> errors = new ArrayList<>();
+        List<Result> errors = new ArrayList<>();
 
         for (Path path : paths) {
 
@@ -68,7 +66,7 @@ public class SftpFeedback {
                 successList.addAll( Arrays.asList( success.split("\r\n") ) );
             } catch(Exception e) {
                 logger.error("Cannot read success.txt", e);
-                errors.add("Cannot read success.txt for " + destPath);
+                errors.add( new ErrorResult("Cannot read success.txt for " + destPath)) ;
             }
 
             try {
@@ -76,7 +74,7 @@ public class SftpFeedback {
                 failureList.addAll( Arrays.asList( failure.split("\r\n") ) );
             } catch(Exception e) {
                 logger.info("Cannot read failure.txt");
-                errors.add("Cannot read failure.txt for " + destPath);
+                errors.add( new ErrorResult("Cannot read failure.txt for " + destPath) );
             }
 
             List<FailureResult> failureResults = failureList.stream().map(str -> new FailureResult( str )).collect(Collectors.toList());

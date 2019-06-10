@@ -41,12 +41,12 @@ public class FeedbackSlurper implements AutoCloseable {
         List<Result> resultsMarkedForDeletion = new ArrayList<>();
 
         for (FailureResult failureResult : feedbackHolder.getFailureResults()) {
-            feedbackRepository.process( failureResult );
+            feedbackRepository.process( failureResult, feedbackHolder );
             resultsMarkedForDeletion.add( failureResult );
         }
 
         for (SuccessResult successResult : feedbackHolder.getSuccessResults()) {
-            feedbackRepository.process( successResult );
+            feedbackRepository.process( successResult, feedbackHolder );
             resultsMarkedForDeletion.add( successResult );
         }
 
