@@ -61,14 +61,7 @@ public class SftpFeedback {
 
             File file = path.toFile();
 
-            logger.info("Deflating zip file {}", file.getName());
-
-            ZipFile zipFile = new ZipFile(file);
-
-            String filepath = file.getName().substring(0, file.getName().length() - 4);
-            String destPath = "/tmp/" + filepath;
-
-            zipFile.extractAll(destPath);
+            String destPath = unzip(file);
 
             try {
                 String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
@@ -93,6 +86,19 @@ public class SftpFeedback {
 
         }
         return holder;
+    }
+
+    private String unzip(File file) throws ZipException {
+        logger.info("Deflating zip file {}", file.getName());
+
+        ZipFile zipFile = new ZipFile(file);
+
+        String filepath = file.getName().substring(0, file.getName().length() - 4);
+        String destPath = "/tmp/" + filepath;
+
+        zipFile.extractAll(destPath);
+
+        return destPath;
     }
 
     private List<Path> getPaths() throws JSchException, IOException, SftpConnectionException, SftpException {
