@@ -1,9 +1,12 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
+import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FeedbackHolder;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.FileResult;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
+
+import java.io.File;
 
 public class FeedbackSlurper implements AutoCloseable {
 
@@ -32,7 +35,13 @@ public class FeedbackSlurper implements AutoCloseable {
 
     }
 
-    private void cleanUp(FeedbackHolder feedbackHolder) {
+    private void cleanUp(FeedbackHolder feedbackHolder) throws Exception {
+
+        String resultsStagingDirString = config.getSubscriberFileLocationDetails().getResultsStagingDir();
+        File resultsStagingDir = new File(resultsStagingDirString);
+        FileUtils.cleanDirectory(resultsStagingDir);
+        // TODO need to add clean up of SFTP as well
+
     }
 
     private void processFiles(FeedbackHolder feedbackHolder) throws Exception {

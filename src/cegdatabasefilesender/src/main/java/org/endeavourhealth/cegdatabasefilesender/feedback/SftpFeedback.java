@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.*;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
@@ -26,16 +27,23 @@ public class SftpFeedback {
 
     private final SubscriberFileSenderConfig config;
     private SftpConnection sftp;
-    private String destinationPath = "/tmp/";
+    private String destinationPath = null;
 
     private static final Logger logger = LoggerFactory.getLogger(SftpFeedback.class);
 
     public SftpFeedback(SubscriberFileSenderConfig config) {
+
         this.config = config;
-
         ConnectionDetails con = getConnectionDetails();
+        this.sftp = new SftpConnection(con);
 
-        sftp = new SftpConnection(con);
+        String resultsStagingDirString = this.config.getSubscriberFileLocationDetails().getResultsStagingDir();
+        if (!(resultsStagingDirString.endsWith(File.separator))) {
+            resultsStagingDirString += File.separator;
+        }
+
+        this.destinationPath = resultsStagingDirString;
+
     }
 
 
@@ -48,7 +56,7 @@ public class SftpFeedback {
         return holder;
     }
 
-    private FeedbackHolder getFeedbackHolder(List<Path> paths) throws ZipException {
+    private FeedbackHolder getFeedbackHolder(List<Path> paths) throws ZipException, IOException {
 
         FeedbackHolder feedbackHolder = new FeedbackHolder();
 
@@ -82,7 +90,7 @@ public class SftpFeedback {
         return feedbackHolder;
     }
 
-    private String unzip(File file) throws ZipException {
+    private String unzip(File file) throws ZipException, IOException {
         logger.info("Deflating zip file {}", file.getName());
 
         ZipFile zipFile = new ZipFile(file);
@@ -91,6 +99,14 @@ public class SftpFeedback {
         String destPath = destinationPath + filepath;
 
         zipFile.extractAll(destPath);
+
+        String archiveDirString = config.getSubscriberFileLocationDetails().getArchiveDir();
+        if (!(archiveDirString.endsWith(File.separator))) {
+            archiveDirString += File.separator;
+        }
+        File archiveDir = new File(archiveDirString);
+        FileUtils.copyFileToDirectory(file, archiveDir);
+        FileUtils.forceDelete(file);
 
         return destPath;
     }
