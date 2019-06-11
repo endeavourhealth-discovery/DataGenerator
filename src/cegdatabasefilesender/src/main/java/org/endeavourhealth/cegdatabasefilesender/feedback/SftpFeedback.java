@@ -117,7 +117,7 @@ public class SftpFeedback {
         sftp.open();
 
         ChannelSftp channelSftp = sftp.getChannel();
-        String resultsDir = config.getSubscriberFileLocationDetails().getResultsDir();
+        String resultsDir = config.getSubscriberFileLocationDetails().getResultsSourceDir();
 
         Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls(resultsDir);
 

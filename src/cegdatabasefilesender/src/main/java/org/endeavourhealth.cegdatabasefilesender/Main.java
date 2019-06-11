@@ -599,14 +599,14 @@ public class Main {
             // String username = "endeavour";
             String username = config.getSftpConnectionDetails().getUsername();
 
-        /* String clientPrivateKey = null;
-        try {
-            clientPrivateKey = FileUtils.readFileToString(
+            /* String clientPrivateKey = null;
+            try {
+                clientPrivateKey = FileUtils.readFileToString(
                     new File("C:/Subscriber/SFTPKey/sftp02endeavour.ppk"), (String) null);
 
-        } catch (Exception ex) {
-            throw ex;
-        } */
+            } catch (Exception ex) {
+                throw ex;
+            } */
 
             String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
 

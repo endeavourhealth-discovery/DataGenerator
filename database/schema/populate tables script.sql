@@ -17,7 +17,7 @@ select 1, '{
           "destinationDir": "/endeavour/ftp/Remote_Server/incoming",
           "archiveDir": "C:/Subscriber/Sub1_Archive/",
           "pgpCertFile": "C:/Subscriber/PGPCert/discovery.cer",
-          "resultsDir": "/endeavour/ftp/Remote_Server/result/",
+          "resultsSourceDir": "/endeavour/ftp/Remote_Server/result/",
           "resultsStagingDir": "C:/Subscriber/Sub1_Results_Staging/"
 },
  "sftpConnectionDetails": {
