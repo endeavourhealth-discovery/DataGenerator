@@ -88,7 +88,7 @@ public class SftpFeedback {
         ZipFile zipFile = new ZipFile(file);
 
         String filepath = file.getName().substring(0, file.getName().length() - 4);
-        String destPath = "/tmp/" + filepath;
+        String destPath = destinationPath + filepath;
 
         zipFile.extractAll(destPath);
 
@@ -115,7 +115,7 @@ public class SftpFeedback {
 
             channelSftp.get(resultsDir + entry.getFilename(), destinationPath + entry.getFilename());
 
-            Path path = Paths.get("/tmp/" + entry.getFilename() );
+            Path path = Paths.get(destinationPath + entry.getFilename() );
 
             paths.add( path );
 
