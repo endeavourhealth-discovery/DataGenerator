@@ -54,18 +54,27 @@ public class Main {
 
         SubscriberFileSenderConfig config = getConfig(subscriberId);
 
-        try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
-            feedbackSlurper.slurp();
-        } catch (Exception e) {
-            LOG.error("Cannot slurp feedback", e);
+        if (args.length != 1) {
+            LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
         }
 
-        /* try {
-            sendFiles(config);
-        } catch (Exception e) {
-            LOG.error("Cannot send files", e);
-        } */
+        if (args[0].equalsIgnoreCase("feedback")) {
+            try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
+                feedbackSlurper.slurp();
+            } catch (Exception e) {
+                LOG.error("Cannot slurp feedback", e);
+            }
+        }
 
+        if (args[0].equalsIgnoreCase("sending")) {
+            try {
+                sendFiles(config);
+            } catch (Exception e) {
+                LOG.error("Cannot send files", e);
+            }
+        }
+
+        System.exit(0);
     }
 
     private static SubscriberFileSenderConfig getConfig(int subscriberId) throws Exception {
