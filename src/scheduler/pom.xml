@@ -98,12 +98,11 @@
             <version>${cron.utils.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.endeavourhealth.dataSharingManager</groupId>
-            <artifactId>Models</artifactId>
-            <version>${data-sharing-manager-models.version}</version>
+            <groupId>org.endeavourhealth.common</groupId>
+            <artifactId>security</artifactId>
+            <version>1.18-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

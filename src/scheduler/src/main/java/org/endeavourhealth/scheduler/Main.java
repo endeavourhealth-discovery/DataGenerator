@@ -1,7 +1,7 @@
 package org.endeavourhealth.scheduler;
 
 import org.endeavourhealth.common.config.ConfigManager;
-import org.endeavourhealth.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
@@ -68,14 +68,17 @@ public class Main {
             LOG.info("Checking project status for extract : " + extract.getExtractId()
                     + ", projectId : " + config.getProjectId());
 
-            List<DataProcessingAgreementEntity> results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+            //List<DataProcessingAgreementEntity> results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
             //results.add(new DataProcessingAgreementEntity());
+            List<DataProcessingAgreementEntity> results = new ArrayList<DataProcessingAgreementEntity>();
+            /*
             if (results != null && results.size() > 0) {
                 LOG.info("Project exists and is active, adding...");
                 extractsToProcess.add(extract);
             } else {
                 LOG.info("No active project exists, rejecting...");
-            }
+            }*/
+            extractsToProcess.add(extract);
         }
 
         if (extractsToProcess.size() == 0) {
