@@ -65,15 +65,14 @@ public class MainScheduledExtract {
                 LOG.info("Checking project status for extract: " + extract.getExtractId() +
                         ", projectId : " + config.getProjectId());
 
-                /*results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+                results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
                 //results.add(new DataProcessingAgreementEntity());
                 if (results != null && results.size() > 0) {
                     LOG.info("Project exists and is active, adding...");
                     validExtracts.add(extract);
                 } else {
                     LOG.info("No active project exists, rejecting...");
-                }*/
-                validExtracts.add(extract);
+                }
             }
 
             if (validExtracts.size() == 0) {
