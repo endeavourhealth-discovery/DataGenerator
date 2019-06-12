@@ -12,6 +12,8 @@ import org.endeavourhealth.scheduler.util.SftpConnection;
 import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.persistence.EntityManager;
 import java.io.File;
@@ -29,8 +31,6 @@ import java.util.Date;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.apache.commons.io.FileUtils;
 
 public class Main {
 
@@ -121,6 +121,9 @@ public class Main {
 
             String pgpFile = config.getSubscriberFileLocationDetails().getPgpCertFile();
             File pgpCertFile = new File(pgpFile);
+
+            // String privateFile = config.getSubscriberFileLocationDetails().getPrivateKeyFile();
+            // File privateKeyFile = new File(privateFile);
 
             // Can set the directories without using the database, and amend
             // the pathnames below, if needed, when working on this locally
@@ -608,7 +611,9 @@ public class Main {
                 throw ex;
             } */
 
-            String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
+            // String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
+            File privateKeyFile = new File(config.getSubscriberFileLocationDetails().getPrivateKeyFile());
+            String clientPrivateKey = FileUtils.readFileToString(privateKeyFile, (String) null);
 
             // String clientPrivateKeyPassword = "";
             String clientPrivateKeyPassword = config.getSftpConnectionDetails().getClientPrivateKeyPassword();

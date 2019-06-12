@@ -31,7 +31,7 @@ public class SftpFeedback {
 
     private static final Logger logger = LoggerFactory.getLogger(SftpFeedback.class);
 
-    public SftpFeedback(SubscriberFileSenderConfig config) {
+    public SftpFeedback(SubscriberFileSenderConfig config) throws Exception {
 
         this.config = config;
         ConnectionDetails con = getConnectionDetails();
@@ -139,12 +139,16 @@ public class SftpFeedback {
         return paths;
     }
 
-    private ConnectionDetails getConnectionDetails() {
+    private ConnectionDetails getConnectionDetails() throws Exception {
 
         String hostname = config.getSftpConnectionDetails().getHostname();
         int port = config.getSftpConnectionDetails().getPort();
         String username = config.getSftpConnectionDetails().getUsername();
-        String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
+
+        // String clientPrivateKey = config.getSftpConnectionDetails().getClientPrivateKey();
+        File privateKeyFile = new File(config.getSubscriberFileLocationDetails().getPrivateKeyFile());
+        String clientPrivateKey = FileUtils.readFileToString(privateKeyFile, (String) null);
+
         String clientPrivateKeyPassword = config.getSftpConnectionDetails().getClientPrivateKeyPassword();
         String hostPublicKey = config.getSftpConnectionDetails().getHostPublicKey();
         ConnectionDetails sftpConnectionDetails = new ConnectionDetails();

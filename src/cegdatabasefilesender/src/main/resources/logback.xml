@@ -11,7 +11,7 @@
   </appender>
 
   <appender name="fileout" class="ch.qos.logback.core.FileAppender">
-    <file>/var/log/data-generator/data-generator-filer-${bySecond}.txt</file>
+    <file>/home/ubuntu/log/cegdatabasefilesender-${bySecond}.txt</file>
     <encoder>
       <pattern>%d{dd MMM HH:mm:ss.SSS} [%thread] %-5level %logger{10}:%-3line - %msg%n
       </pattern>

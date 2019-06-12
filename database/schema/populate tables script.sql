@@ -12,13 +12,14 @@ delete from data_generator.subscriber_file_sender where subscriber_id = 1;
 insert into data_generator.subscriber_file_sender
 select 1, '{
  "subscriberFileLocationDetails": {
-          "dataDir": "C:/Subscriber/Sub1_Data/",
-          "stagingDir": "C:/Subscriber/Sub1_Staging/",
-          "destinationDir": "/endeavour/ftp/Remote_Server/incoming",
-          "archiveDir": "C:/Subscriber/Sub1_Archive/",
+          "dataDir": "C:/Subscriber/Data/Sub1/",
+          "stagingDir": "C:/Subscriber/Staging/Sub1/",
+          "destinationDir": "/endeavour/ftp/Remote_Server/incoming/",
+          "archiveDir": "C:/Subscriber/Archive/Sub1/",
           "pgpCertFile": "C:/Subscriber/PGPCert/discovery.cer",
           "resultsSourceDir": "/endeavour/ftp/Remote_Server/result/",
-          "resultsStagingDir": "C:/Subscriber/Sub1_Results_Staging/"
+          "resultsStagingDir": "C:/Subscriber/ResultsStaging/Sub1/",
+          "privateKeyFile": "C:/Subscriber/PrivateKey/sftp02endeavour.ppk"
 },
  "sftpConnectionDetails": {
           "hostname": "10.0.101.239",
@@ -26,7 +27,8 @@ select 1, '{
           "port": "22",
           "username": "endeavour",
           "clientPrivateKeyPassword": "",
-          "clientPrivateKey": ""}
+          "clientPrivateKey": ""
+}
 }';
 
 -- insert into the dataset table

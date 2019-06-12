@@ -9,6 +9,7 @@ public class SubscriberFileLocationDetails {
     private String pgpCertFile = null;
     private String resultsSourceDir = null;
     private String resultsStagingDir = null;
+    private String privateKeyFile = null;
 
     /* private SubcriberFileLocationDetails() {}
 
@@ -75,4 +76,13 @@ public class SubscriberFileLocationDetails {
     public void setResultsStagingDir(String resultsStagingDir) {
         this.resultsStagingDir = resultsStagingDir;
     }
+
+    public String getPrivateKeyFile() {
+        return privateKeyFile;
+    }
+
+    public void setPrivateKeyFile(String privateKeyFile) {
+        this.privateKeyFile = privateKeyFile;
+    }
+
 }
