@@ -1,12 +1,13 @@
 package org.endeavourhealth.scheduler;
 
 import org.endeavourhealth.common.config.ConfigManager;
-import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.DAL.SecurityDataProcessingAgreementDAL;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.cache.PlainJobExecutionContext;
 import org.endeavourhealth.scheduler.job.*;
 import org.endeavourhealth.scheduler.json.ExtractDefinition.ExtractConfig;
 import org.endeavourhealth.scheduler.models.database.ExtractEntity;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -68,7 +69,9 @@ public class Main {
             LOG.info("Checking project status for extract : " + extract.getExtractId()
                     + ", projectId : " + config.getProjectId());
 
-            List<DataProcessingAgreementEntity> results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+            List<DataProcessingAgreementEntity> results =
+                    new SecurityDataProcessingAgreementDAL().getDataProcessingAgreementsForOrganisation(config.getProjectId());
+
             //results.add(new DataProcessingAgreementEntity());
             if (results != null && results.size() > 0) {
                 LOG.info("Project exists and is active, adding...");

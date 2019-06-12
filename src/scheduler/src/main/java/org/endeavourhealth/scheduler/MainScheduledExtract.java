@@ -7,6 +7,7 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import org.apache.commons.lang3.time.DateUtils;
 import org.endeavourhealth.common.config.ConfigManager;
+import org.endeavourhealth.common.security.datasharingmanagermodel.models.DAL.SecurityDataProcessingAgreementDAL;
 import org.endeavourhealth.common.security.datasharingmanagermodel.models.database.DataProcessingAgreementEntity;
 import org.endeavourhealth.scheduler.cache.ExtractCache;
 import org.endeavourhealth.scheduler.job.*;
@@ -65,7 +66,7 @@ public class MainScheduledExtract {
                 LOG.info("Checking project status for extract: " + extract.getExtractId() +
                         ", projectId : " + config.getProjectId());
 
-                results = DataProcessingAgreementEntity.getDataProcessingAgreementsForOrganisation(config.getProjectId());
+                results = new SecurityDataProcessingAgreementDAL().getDataProcessingAgreementsForOrganisation(config.getProjectId());
                 //results.add(new DataProcessingAgreementEntity());
                 if (results != null && results.size() > 0) {
                     LOG.info("Project exists and is active, adding...");
