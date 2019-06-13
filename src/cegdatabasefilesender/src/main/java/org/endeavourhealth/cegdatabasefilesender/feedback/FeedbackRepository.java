@@ -34,6 +34,8 @@ public class FeedbackRepository {
 
         String successResultUuid = successResult.getUuid();
 
+        logger.info("Processing {}", successResultUuid);
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
 
@@ -54,6 +56,9 @@ public class FeedbackRepository {
             ps = connection.prepareStatement(sql);
             ps.setTimestamp(1, timestamp);
             ps.setString(2, successResultUuid);
+
+            logger.info(ps.toString());
+
             ps.executeUpdate();
             entityManager.getTransaction().commit();
 
@@ -78,6 +83,8 @@ public class FeedbackRepository {
         String failureResultUuid = failureResult.getUuid();
         String failureResultMessage = failureResult.getErrorMessage();
 
+        logger.info("Processing {}", failureResultUuid);
+
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
 
@@ -99,6 +106,9 @@ public class FeedbackRepository {
             ps.setTimestamp(1, timestamp);
             ps.setString(2, failureResultMessage);
             ps.setString(3, failureResultUuid);
+
+            logger.info(ps.toString());
+
             ps.executeUpdate();
             entityManager.getTransaction().commit();
 
