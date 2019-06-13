@@ -534,7 +534,7 @@ public class Main {
         File file = new File(dataDir.getAbsolutePath() +
                 File.separator +
                 sdf.format(new Date()) + "_" +
-                String.format("%016d", filenameCounter) + "_" +
+                String.format("%014d", filenameCounter) + "_" +
                 queuedMessageId.toString() +
                 ".zip");
 
