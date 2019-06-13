@@ -446,6 +446,7 @@ public class Main {
                     + " order by filing_order";
 
             ps = connection.prepareStatement(sql);
+            ps.clearParameters();
             ps.setInt(1, subscriberId);
             ps.executeQuery();
             ResultSet resultSet = ps.getResultSet();
@@ -479,6 +480,7 @@ public class Main {
                     + " where queued_message_uuid = ?";
 
             ps = connection.prepareStatement(sql);
+            ps.clearParameters();
             ps.setTimestamp(1, timestamp);
             ps.setString(2, queuedMessageId);
             ps.executeUpdate();

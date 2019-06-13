@@ -54,6 +54,7 @@ public class FeedbackRepository {
                     + " where queued_message_uuid = ?";
 
             ps = connection.prepareStatement(sql);
+            ps.clearParameters();
             ps.setTimestamp(1, timestamp);
             ps.setString(2, successResultUuid);
 
@@ -103,6 +104,7 @@ public class FeedbackRepository {
                     + " where queued_message_uuid = ?";
 
             ps = connection.prepareStatement(sql);
+            ps.clearParameters();
             ps.setTimestamp(1, timestamp);
             ps.setString(2, failureResultMessage);
             ps.setString(3, failureResultUuid);
