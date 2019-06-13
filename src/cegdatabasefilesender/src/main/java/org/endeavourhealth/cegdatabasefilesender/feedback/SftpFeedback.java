@@ -80,7 +80,7 @@ public class SftpFeedback {
                 String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
                 fileResult.addFailure( failure );
             } catch(Exception e) {
-                logger.info("Cannot read failure.txt");
+                logger.error("Cannot read failure.txt", e);
                 fileResult.addError("Cannot read failure.txt for " + destPath);
             }
 
@@ -91,7 +91,7 @@ public class SftpFeedback {
     }
 
     private String unzip(File file) throws ZipException, IOException {
-        logger.info("Deflating zip file {}", file.getName());
+        logger.info("Unzipping the file, {}", file.getName());
 
         ZipFile zipFile = new ZipFile(file);
 
@@ -104,6 +104,8 @@ public class SftpFeedback {
         if (!(archiveDirString.endsWith(File.separator))) {
             archiveDirString += File.separator;
         }
+
+        logger.info("Archiving the file, {}", file.getName());
         File archiveDir = new File(archiveDirString);
         FileUtils.copyFileToDirectory(file, archiveDir);
         FileUtils.forceDelete(file);
@@ -117,24 +119,34 @@ public class SftpFeedback {
         sftp.open();
 
         ChannelSftp channelSftp = sftp.getChannel();
-        String resultsDir = config.getSubscriberFileLocationDetails().getResultsSourceDir();
+        String resultsSourceDir = config.getSubscriberFileLocationDetails().getResultsSourceDir();
 
-        Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls(resultsDir);
+        Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls(resultsSourceDir);
 
         List<ChannelSftp.LsEntry> filteredFiles = fileList
                 .stream()
                 .filter(t -> !t.getAttrs().isDir())
                 .collect(Collectors.toList());
 
-        for(ChannelSftp.LsEntry entry : filteredFiles) {
-            logger.debug("Retrieving file {}", entry.getFilename());
+        if (filteredFiles.size() == 0) {
+            logger.info("SFTP location is empty.");
+            logger.info("Ending Feedback Slurper.");
+            System.exit(0);
+        }
 
-            channelSftp.get(resultsDir + entry.getFilename(), destinationPath + entry.getFilename());
+        for(ChannelSftp.LsEntry entry : filteredFiles) {
+            logger.info("Retrieving from SFTP, the file {}", entry.getFilename());
+
+            String sourcePath = resultsSourceDir + entry.getFilename();
+
+            channelSftp.get(sourcePath, destinationPath + entry.getFilename());
 
             Path path = Paths.get(destinationPath + entry.getFilename() );
 
             paths.add( path );
 
+            logger.info("Removing from SFTP, the file {}", entry.getFilename());
+            channelSftp.rm(sourcePath);
         }
         return paths;
     }

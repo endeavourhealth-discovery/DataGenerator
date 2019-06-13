@@ -96,8 +96,14 @@ public class Main {
         // ConfigManager.Initialize("ceg-database-file-sender");
         // Main main = Main.getInstance();
 
-        List<UUID> resultSetUuidsList = new ArrayList<>();
+        LOG.info("**********");
+        LOG.info("Starting Overall Process.");
+
         int subscriberId = 1;
+
+        List<UUID> resultSetUuidsList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        String fileDate = sdf.format(new Date());
 
         try {
 
@@ -135,7 +141,7 @@ public class Main {
             // File pgpCertDir = new File("C:/Subscriber/PGPCert/");
 
             LOG.info("**********");
-            LOG.info("Starting Process.");
+            LOG.info("Starting send for subscriber id {}.", subscriberId);
 
             LOG.info("**********");
             LOG.info("Getting stored zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
@@ -203,104 +209,147 @@ public class Main {
             LOG.info("**********");
             LOG.info("Checking contents of data directory for zipped CSV files, to put into a multi-part zip in staging directory.");
 
-            try {
-                zipAllContentsOfDataDirectoryToStaging(dataDir, stagingDir);
+            if ((dataDir.listFiles().length == 0)) {
 
-            } catch (Exception ex) {
                 LOG.info("**********");
-                LOG.error("Error encountered in zipping contents of data directory to staging directory: " + ex.getMessage());
-                System.exit(-1);
-            }
+                LOG.info("No zip files to send for subscriber_id {}.", subscriberId);
 
-            LOG.info("**********");
-            LOG.info("Deleting contents of data directory.");
+            } else {
 
-            try {
-                // TODO Uncomment out the line of code below as necessary
-                // FileUtils.cleanDirectory(dataDir);
+                try {
+                    zipAllContentsOfDataDirectoryToStaging(fileDate, dataDir, stagingDir);
 
-            } catch (Exception ex) {
-                LOG.info("**********");
-                LOG.error("Error encountered in deleting contents of data directory: " + ex.getMessage());
-                System.exit(-1);
-            }
-
-            LOG.info("**********");
-            LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
-
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
-                        sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
-                if (!encryptFile(zipFile, pgpCertFile)) {
+                } catch (Exception ex) {
                     LOG.info("**********");
-                    LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
+                    LOG.error("Error encountered in zipping contents of data directory to staging directory: " + ex.getMessage());
                     System.exit(-1);
                 }
 
-            } catch (Exception ex) {
+
                 LOG.info("**********");
-                LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory: " + ex.getMessage());
-                System.exit(-1);
-            }
-
-            LOG.info("**********");
-            LOG.info("Checking staging directory to send contents to CEG SFTP location.");
-
-            try {
-                ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
-                SftpConnection sftp = new SftpConnection(con);
+                LOG.info("Deleting contents of data directory.");
 
                 try {
-                    sftp.open();
-                    // LOG.info("**********");
-                    // LOG.info("SFTP connection opened.");
+                    // TODO Comment out and uncomment the line below as necessary
+                    FileUtils.cleanDirectory(dataDir);
 
-                    try {
-                        File[] files = stagingDir.listFiles();
-                        // LOG.info("**********");
-                        // LOG.info("Starting file/s upload.");
-                        for (File file : files) {
-                            LOG.info("**********");
-                            LOG.info("Uploading file: " + file.getName());
-                            sftp.put(file.getAbsolutePath(), destinationDir);
-                        }
-                        sftp.close();
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in deleting contents of data directory: " + ex.getMessage());
+                    System.exit(-1);
+                }
 
-                    } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
+
+                try {
+                    File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
+                            fileDate + "_" + "Subscriber_Data" + ".zip");
+                    if (!encryptFile(zipFile, pgpCertFile)) {
                         LOG.info("**********");
-                        LOG.error("Error encountered while uploading to the SFTP: " + ex.getMessage());
+                        LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
                         System.exit(-1);
                     }
 
                 } catch (Exception ex) {
                     LOG.info("**********");
-                    LOG.error("Error encountered while connecting to the SFTP: " + ex.getMessage());
+                    LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory: " + ex.getMessage());
                     System.exit(-1);
-
-                } finally {
-                    if (sftp != null)
-                        sftp.close();
                 }
 
-            } catch (Exception ex) {
                 LOG.info("**********");
-                LOG.error("Error encountered while setting SFTP connection details: " + ex.getMessage());
-                System.exit(-1);
+                LOG.info("Checking staging directory to send contents to CEG SFTP location.");
+
+                try {
+                    ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
+                    SftpConnection sftp = new SftpConnection(con);
+
+                    try {
+                        sftp.open();
+                        // LOG.info("**********");
+                        // LOG.info("SFTP connection opened.");
+
+                        try {
+                            File[] files = stagingDir.listFiles();
+                            // LOG.info("**********");
+                            // LOG.info("Starting file/s upload.");
+                            for (File file : files) {
+                                LOG.info("**********");
+                                LOG.info("Uploading file: " + file.getName());
+                                sftp.put(file.getAbsolutePath(), destinationDir);
+                            }
+                            sftp.close();
+
+                        } catch (Exception ex) {
+                            LOG.info("**********");
+                            LOG.error("Error encountered while uploading to the SFTP: " + ex.getMessage());
+                            System.exit(-1);
+                        }
+
+                    } catch (Exception ex) {
+                        LOG.info("**********");
+                        LOG.error("Error encountered while connecting to the SFTP: " + ex.getMessage());
+                        System.exit(-1);
+
+                    } finally {
+                        if (sftp != null)
+                            sftp.close();
+                    }
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered while setting SFTP connection details: " + ex.getMessage());
+                    System.exit(-1);
+                }
+
+                LOG.info("**********");
+                LOG.info("Archiving contents of staging directory.");
+
+                try {
+                    FileUtils.copyDirectory(stagingDir, archiveDir);
+                    FileUtils.cleanDirectory(stagingDir);
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in archiving contents of staging directory: " + ex.getMessage());
+                    System.exit(-1);
+                }
+            }
+
+            if ((dataDir.listFiles().length == 0)) {
+            } else {
+
+                LOG.info("**********");
+                LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
+
+                for (UUID uuid : resultSetUuidsList) {
+
+                    String uuidString = uuid.toString();
+
+                    try {
+                        updateFileSentDateTimeInUUIDsTable(uuidString);
+
+                    } catch (Exception ex) {
+                        LOG.info("**********");
+                        LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                        System.exit(-1);
+                    }
+
+                    // below commented out as this is now done by the feedback slurper
+                    /* try {
+                    deleteQueuedMessageBodyFromUUIDsTable(uuidString);
+
+                    } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    System.exit(-1);
+                    } */
+                }
+                resultSetUuidsList.clear();
             }
 
             LOG.info("**********");
-            LOG.info("Archiving contents of staging directory.");
-
-            try {
-                FileUtils.copyDirectory(stagingDir, archiveDir);
-                FileUtils.cleanDirectory(stagingDir);
-
-            } catch (Exception ex) {
-                LOG.info("**********");
-                LOG.error("Error encountered in archiving contents of staging directory: " + ex.getMessage());
-                System.exit(-1);
-            }
+            LOG.info("Ending send for subscriber_id {}.", subscriberId);
 
         } catch (Exception ex) {
             LOG.info("**********");
@@ -309,37 +358,7 @@ public class Main {
         }
 
         LOG.info("**********");
-        LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
-
-        for (UUID uuid : resultSetUuidsList) {
-
-            String uuidString = uuid.toString();
-
-            try {
-                updateFileSentDateTimeInUUIDsTable(uuidString);
-
-            } catch (Exception ex) {
-                LOG.info("**********");
-                LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                System.exit(-1);
-            }
-
-            // below commented out as this is now done by the feedback slurper
-            /* try {
-                 deleteQueuedMessageBodyFromUUIDsTable(uuidString);
-
-            } catch (Exception ex) {
-                LOG.info("**********");
-                LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                System.exit(-1);
-            } */
-
-        }
-
-        resultSetUuidsList.clear();
-
-        LOG.info("**********");
-        LOG.info("Process Completed.");
+        LOG.info("Overall Process Completed.");
 
         System.exit(0);
 
@@ -518,7 +537,7 @@ public class Main {
         File file = new File(dataDir.getAbsolutePath() +
                 File.separator +
                 sdf.format(new Date()) + "_" +
-                String.format("%014d", filenameCounter) + "_" +
+                String.format("%016d", filenameCounter) + "_" +
                 queuedMessageId.toString() +
                 ".zip");
 
@@ -531,13 +550,12 @@ public class Main {
         }
     }
 
-    private static void zipAllContentsOfDataDirectoryToStaging(File dataDir, File stagingDir) throws Exception {
+    private static void zipAllContentsOfDataDirectoryToStaging(String fileDate, File dataDir, File stagingDir) throws Exception {
 
         // LOG.info("**********");
         // LOG.info("Compressing contents of: " + dataDir.getAbsolutePath());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         ZipFile zipFile = new ZipFile(stagingDir + File.separator +
-                sdf.format(new Date()) + "_" + "Subscriber_Data" + ".zip");
+                fileDate + "_" + "Subscriber_Data" + ".zip");
         // LOG.info("**********");
         // LOG.info("Creating file: " + zipFile.getFile().getAbsolutePath());
 

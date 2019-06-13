@@ -30,7 +30,7 @@ public class FeedbackRepository {
 
     public void processSuccess(Result successResult) throws Exception {
 
-        logger.info("Processing {}", successResult);
+        // logger.info("Processing {}", successResult);
 
         String successResultUuid = successResult.getUuid();
 
@@ -59,7 +59,7 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            logger.error("Cannot update uuid", ex);
+            logger.error("Cannot update uuid {}", successResultUuid, ex);
             successResult.addError( ex.getMessage() );
 
         } finally {
@@ -73,7 +73,7 @@ public class FeedbackRepository {
 
     public void processFailure(Result failureResult) throws Exception{
 
-        logger.info("Processing {}", failureResult);
+        // logger.info("Processing {}", failureResult);
 
         String failureResultUuid = failureResult.getUuid();
         String failureResultMessage = failureResult.getErrorMessage();
@@ -104,7 +104,7 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            logger.error("Cannot update uuid", ex);
+            logger.error("Cannot update uuid {}", failureResultUuid, ex);
             failureResult.addError( ex.getMessage() );
 
         } finally {
