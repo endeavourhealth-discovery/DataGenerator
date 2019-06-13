@@ -141,7 +141,7 @@ public class Main {
             // File pgpCertDir = new File("C:/Subscriber/PGPCert/");
 
             LOG.info("**********");
-            LOG.info("Starting send for subscriber id {}.", subscriberId);
+            LOG.info("Starting send for subscriber_id {}.", subscriberId);
 
             LOG.info("**********");
             LOG.info("Getting stored zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
@@ -316,26 +316,23 @@ public class Main {
                 }
             }
 
-            if ((dataDir.listFiles().length == 0)) {
-            } else {
+            LOG.info("**********");
+            LOG.info("Updating data_generator.subscriber_zip_file_uuids table, as necessary.");
 
-                LOG.info("**********");
-                LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
+            for (UUID uuid : resultSetUuidsList) {
 
-                for (UUID uuid : resultSetUuidsList) {
+                String uuidString = uuid.toString();
 
-                    String uuidString = uuid.toString();
+                try {
+                    updateFileSentDateTimeInUUIDsTable(uuidString);
 
-                    try {
-                        updateFileSentDateTimeInUUIDsTable(uuidString);
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    System.exit(-1);
+                }
 
-                    } catch (Exception ex) {
-                        LOG.info("**********");
-                        LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                        System.exit(-1);
-                    }
-
-                    // below commented out as this is now done by the feedback slurper
+                // below commented out as this is now done by the feedback slurper
                     /* try {
                     deleteQueuedMessageBodyFromUUIDsTable(uuidString);
 
@@ -344,9 +341,9 @@ public class Main {
                     LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
                     System.exit(-1);
                     } */
-                }
-                resultSetUuidsList.clear();
             }
+
+            resultSetUuidsList.clear();
 
             LOG.info("**********");
             LOG.info("Ending send for subscriber_id {}.", subscriberId);
