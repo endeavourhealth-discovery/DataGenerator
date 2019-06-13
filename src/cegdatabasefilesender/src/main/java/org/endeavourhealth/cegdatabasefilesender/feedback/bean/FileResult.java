@@ -40,7 +40,7 @@ public class FileResult {
 
     public void addSuccess(String success) {
 
-        List<Result> successList = Arrays.stream( success.split("\r\n") )
+        List<Result> successList = Arrays.stream( success.split(System.getProperty("line.separator")) )
                 .map( s -> new Result( ResultType.SUCCESS, s, null) )
                 .collect(Collectors.toList());
 
