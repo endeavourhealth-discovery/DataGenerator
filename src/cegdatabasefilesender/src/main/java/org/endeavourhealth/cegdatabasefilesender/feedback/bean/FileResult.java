@@ -31,9 +31,12 @@ public class FileResult {
 
     public void addFailure(String failure) {
         //String[] fields = failure.split(",");
-        String uuid = failure.substring(0, 36);
-        String reason = failure.substring(37, failure.length());
-        results.add( new Result(ResultType.FAILURE, uuid, reason) );
+        String[] values = failure.split(System.getProperty("line.separator"));
+        for (String value : values) {
+            String uuid = value.substring(0, 36);
+            String reason = value.substring(37);
+            results.add( new Result(ResultType.FAILURE, uuid, reason) );
+        }
     }
 
     public boolean hasErrors() {
