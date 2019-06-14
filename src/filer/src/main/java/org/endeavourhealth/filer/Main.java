@@ -132,6 +132,7 @@ public class Main {
                 ArrayList<String> lSuccess = new ArrayList();
                 ArrayList<String> lFailures = new ArrayList();
                 FileInputStream stream = null;
+                Arrays.sort(files);
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);

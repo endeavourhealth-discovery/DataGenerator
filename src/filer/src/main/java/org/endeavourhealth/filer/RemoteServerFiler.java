@@ -35,7 +35,7 @@ public class RemoteServerFiler {
 
     private static final int UPSERT_ATTEMPTS = 10;
 
-    public static void file(String name, String failureDir, Connection connection,
+    public static synchronized void  file(String name, String failureDir, Connection connection,
                             String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
