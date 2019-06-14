@@ -58,7 +58,7 @@ public class FeedbackRepository {
             ps.setTimestamp(1, timestamp);
             ps.setString(2, successResultUuid);
 
-            logger.info(ps.toString());
+            //logger.info(ps.toString());
 
             ps.executeUpdate();
             entityManager.getTransaction().commit();

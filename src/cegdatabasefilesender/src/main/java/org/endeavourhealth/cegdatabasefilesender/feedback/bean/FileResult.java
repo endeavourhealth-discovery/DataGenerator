@@ -30,8 +30,10 @@ public class FileResult {
 
 
     public void addFailure(String failure) {
-        String[] fields = failure.split(",");
-        results.add( new Result(ResultType.FAILURE, fields[0], fields[1]) );
+        //String[] fields = failure.split(",");
+        String uuid = failure.substring(0, 36);
+        String reason = failure.substring(37, failure.length());
+        results.add( new Result(ResultType.FAILURE, uuid, reason) );
     }
 
     public boolean hasErrors() {
