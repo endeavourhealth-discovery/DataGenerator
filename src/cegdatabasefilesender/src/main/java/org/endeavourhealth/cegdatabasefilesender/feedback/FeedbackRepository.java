@@ -34,7 +34,7 @@ public class FeedbackRepository {
 
         String successResultUuid = successResult.getUuid();
 
-        logger.info("Processing {}", successResultUuid);
+        //logger.info("Processing {}", successResultUuid);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -84,7 +84,7 @@ public class FeedbackRepository {
         String failureResultUuid = failureResult.getUuid();
         String failureResultMessage = failureResult.getErrorMessage();
 
-        logger.info("Processing {}", failureResultUuid);
+        //logger.info("Processing {}", failureResultUuid);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
