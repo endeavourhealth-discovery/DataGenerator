@@ -4,7 +4,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.*;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
@@ -41,22 +40,29 @@ public class SftpFeedback {
         if (!(resultsStagingDirString.endsWith(File.separator))) {
             resultsStagingDirString += File.separator;
         }
-
         this.destinationPath = resultsStagingDirString;
+
+        File resultsstagingDir = new File(resultsStagingDirString);
+        if (!(resultsstagingDir.exists())) {
+            resultsstagingDir.mkdirs();
+        }
 
     }
 
-
-    FeedbackHolder getFeedbackHolder() throws SftpConnectionException, JSchException, IOException, SftpException, ZipException {
+    FeedbackHolder getFeedbackHolder() throws Exception {
 
         List<Path> paths = getPaths();
+        FeedbackHolder holder = new FeedbackHolder();
 
-        FeedbackHolder holder = getFeedbackHolder(paths);
+            if (!(paths.isEmpty())) {
+                holder = getFeedbackHolder(paths);
+                return holder;
+            }
 
         return holder;
     }
 
-    private FeedbackHolder getFeedbackHolder(List<Path> paths) throws ZipException, IOException {
+    private FeedbackHolder getFeedbackHolder(List<Path> paths) throws Exception {
 
         FeedbackHolder feedbackHolder = new FeedbackHolder();
 
@@ -68,30 +74,38 @@ public class SftpFeedback {
 
             FileResult fileResult = new FileResult(destPath);
 
-            try {
-                String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
-                fileResult.addSuccess( success );
-            } catch(Exception e) {
-                logger.error("Cannot read success.txt", e);
-                fileResult.addError("Cannot read success.txt for " + destPath);
+            File successFile = new File(destPath + "/success.txt");
+            if (successFile.exists()) {
+
+                try {
+                    String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
+                    fileResult.addSuccess(success);
+                } catch (Exception e) {
+                    logger.error("Cannot read success.txt", e);
+                    fileResult.addError("Cannot read success.txt for " + destPath);
+                }
             }
 
-            try {
-                String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
-                fileResult.addFailure( failure );
-            } catch(Exception e) {
-                logger.error("Cannot read failure.txt", e);
-                fileResult.addError("Cannot read failure.txt for " + destPath);
+            File failureFile = new File(destPath + "/failure.txt");
+            if (failureFile.exists()) {
+
+                try {
+                    String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
+                    fileResult.addFailure(failure);
+                } catch (Exception e) {
+                    logger.error("Cannot read failure.txt", e);
+                    fileResult.addError("Cannot read failure.txt for " + destPath);
+                }
             }
 
-            feedbackHolder.addFileResult( fileResult );
+            feedbackHolder.addFileResult(fileResult);
         }
 
         return feedbackHolder;
     }
 
-    private String unzip(File file) throws ZipException, IOException {
-        logger.info("Unzipping the file, {}", file.getName());
+    private String unzip(File file) throws Exception {
+        logger.info("Unzipping the file {}", file.getName());
 
         ZipFile zipFile = new ZipFile(file);
 
@@ -105,15 +119,24 @@ public class SftpFeedback {
             archiveDirString += File.separator;
         }
 
-        logger.info("Archiving the file, {}", file.getName());
+        logger.info("Archiving the file {}", file.getName());
         File archiveDir = new File(archiveDirString);
+        if (!(archiveDir.exists())) {
+            archiveDir.mkdirs();
+        }
+
         FileUtils.copyFileToDirectory(file, archiveDir);
-        FileUtils.forceDelete(file);
+        System.gc();
+        Thread.sleep(1000);
+        Path path = file.toPath();
+        Files.delete(path);
+        // FileUtils.forceDelete(file);
 
         return destPath;
     }
 
     private List<Path> getPaths() throws JSchException, IOException, SftpConnectionException, SftpException {
+
         List<Path> paths = new ArrayList<>();
 
         sftp.open();
@@ -130,25 +153,26 @@ public class SftpFeedback {
 
         if (filteredFiles.size() == 0) {
             logger.info("SFTP location is empty.");
-            logger.info("Ending Feedback Slurper.");
-            System.exit(0);
-        }
 
-        for(ChannelSftp.LsEntry entry : filteredFiles) {
-            logger.info("Retrieving from SFTP, the file {}", entry.getFilename());
+        } else {
+            for (ChannelSftp.LsEntry entry : filteredFiles) {
 
-            String sourcePath = resultsSourceDir + entry.getFilename();
+                logger.info("Retrieving from SFTP the file {}", entry.getFilename());
 
-            channelSftp.get(sourcePath, destinationPath + entry.getFilename());
+                String sourcePath = resultsSourceDir + entry.getFilename();
+                channelSftp.get(sourcePath, destinationPath + entry.getFilename());
+                Path path = Paths.get(destinationPath + entry.getFilename());
+                paths.add(path);
 
-            Path path = Paths.get(destinationPath + entry.getFilename() );
+                logger.info("Removing from SFTP the file {}", entry.getFilename());
 
-            paths.add( path );
+                channelSftp.rm(sourcePath);
 
-            logger.info("Removing from SFTP, the file {}", entry.getFilename());
-            channelSftp.rm(sourcePath);
+            }
+            return paths;
         }
         return paths;
+
     }
 
     private ConnectionDetails getConnectionDetails() throws Exception {
@@ -178,4 +202,5 @@ public class SftpFeedback {
     public void close() {
         sftp.close();
     }
+
 }

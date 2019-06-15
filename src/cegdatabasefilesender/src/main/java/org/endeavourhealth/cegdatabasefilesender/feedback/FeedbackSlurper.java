@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+// import java.nio.file.Files;
+// import java.nio.file.Path;
 
 public class FeedbackSlurper implements AutoCloseable {
 
@@ -28,28 +30,36 @@ public class FeedbackSlurper implements AutoCloseable {
         this.feedbackRepository = feedbackRepository;
     }
 
-    public void slurp() throws Exception {
+    public void slurp(int subscriberId) throws Exception {
 
         logger.info("**********");
-        logger.info("Starting Process.");
+        logger.info("Start of feedback process for subscriber_id {}.", subscriberId);
 
         logger.info("**********");
         logger.info("Getting zip file(s) from SFTP.");
         FeedbackHolder feedbackHolder = sftpFeedback.getFeedbackHolder();
 
-        logger.info("**********");
-        logger.info("Processing success and failure results files.");
-        processFiles( feedbackHolder );
+        if (feedbackHolder.getFileResults().isEmpty()) {
+            logger.info("**********");
+            logger.info("No feedback results to process.");
+
+        } else {
+
+            logger.info("**********");
+            logger.info("Processing success and failure results files.");
+            processFiles(feedbackHolder);
+
+            logger.info("**********");
+            logger.info("Updating data_generator.subscriber_zip_file_uuids table.");
+
+            logger.info("**********");
+            logger.info("Cleaning up results staging directory.");
+            cleanUp(feedbackHolder);
+
+        }
 
         logger.info("**********");
-        logger.info("Updating data_generator.subscriber_zip_file_uuids table.");
-
-        logger.info("**********");
-        logger.info("Cleaning up results staging directory.");
-        cleanUp( feedbackHolder );
-
-        logger.info("**********");
-        logger.info("Process Completed.");
+        logger.info("End of feedback process for subscriber_id {}.", subscriberId);
 
     }
 
@@ -58,6 +68,17 @@ public class FeedbackSlurper implements AutoCloseable {
         String resultsStagingDirString = config.getSubscriberFileLocationDetails().getResultsStagingDir();
         File resultsStagingDir = new File(resultsStagingDirString);
         FileUtils.cleanDirectory(resultsStagingDir);
+
+        /* File[] files = resultsStagingDir.listFiles();
+
+        for (File file : files) {
+
+            System.gc();
+            Thread.sleep(1000);
+            Path filepath = file.toPath();
+            Files.delete(filepath);
+            // FileUtils.forceDelete(file);
+        } */
 
     }
 
@@ -81,7 +102,7 @@ public class FeedbackSlurper implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         sftpFeedback.close();
         feedbackRepository.close();
     }

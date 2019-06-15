@@ -1,6 +1,5 @@
 package org.endeavourhealth.cegdatabasefilesender;
 
-import org.apache.commons.lang3.StringUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.FeedbackSlurper;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
@@ -13,11 +12,14 @@ import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -50,28 +52,47 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        int subscriberId = 1;
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        PreparedStatement ps = null;
+        entityManager.getTransaction().begin();
+        SessionImpl session = (SessionImpl) entityManager.getDelegate();
+        Connection connection = session.connection();
 
-        SubscriberFileSenderConfig config = getConfig(subscriberId);
+        String sql = "select subscriber_id"
+                + " from data_generator.subscriber_file_sender"
+                + " where subscriber_live is true";
 
-        if (args.length != 1) {
-            LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
-        }
+        ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
 
-        if (args[0].equalsIgnoreCase("feedback")) {
-            try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
-                feedbackSlurper.slurp();
-            } catch (Exception e) {
-                LOG.error("Cannot slurp feedback", e);
+        while (resultSet.next()) {
+
+            int subscriberId = (resultSet.getInt("subscriber_id"));
+
+            SubscriberFileSenderConfig config = getConfig(subscriberId);
+
+            if (args.length != 1) {
+                LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
             }
-        }
 
-        if (args[0].equalsIgnoreCase("sending")) {
-            try {
-                sendFiles(config);
-            } catch (Exception e) {
-                LOG.error("Cannot send files", e);
+            if (args[0].equalsIgnoreCase("feedback")) {
+                try (FeedbackSlurper feedbackSlurper = new FeedbackSlurper(config)) {
+                    feedbackSlurper.slurp(subscriberId);
+                } catch (Exception ex) {
+                    LOG.error("Cannot process feedback results.", ex);
+                }
             }
+
+            if (args[0].equalsIgnoreCase("sending")) {
+                try {
+                    sendFiles(config, subscriberId);
+
+                } catch (Exception ex) {
+                    LOG.error("Cannot send files.", ex);
+                }
+            }
+
         }
 
         System.exit(0);
@@ -91,19 +112,19 @@ public class Main {
         return config;
     }
 
-    private static void sendFiles(SubscriberFileSenderConfig config) throws Exception {
+    private static void sendFiles(SubscriberFileSenderConfig config, int subscriberId) throws Exception {
 
         // ConfigManager.Initialize("ceg-database-file-sender");
         // Main main = Main.getInstance();
 
-        LOG.info("**********");
-        LOG.info("Starting Overall Process.");
-
-        int subscriberId = 1;
+        // int subscriberId = 1;
 
         List<UUID> resultSetUuidsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         String fileDate = sdf.format(new Date());
+
+        LOG.info("**********");
+        LOG.info("Start of sending process for subscriber_id {}.", subscriberId);
 
         try {
 
@@ -139,9 +160,6 @@ public class Main {
             // String destinationDir = "/endeavour/ftp/Test/";
             // File archiveDir = new File("C:/Subscriber/Archive/");
             // File pgpCertDir = new File("C:/Subscriber/PGPCert/");
-
-            LOG.info("**********");
-            LOG.info("Starting send for subscriber_id {}.", subscriberId);
 
             LOG.info("**********");
             LOG.info("Getting stored zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
@@ -306,12 +324,25 @@ public class Main {
                 LOG.info("Archiving contents of staging directory.");
 
                 try {
-                    FileUtils.copyDirectory(stagingDir, archiveDir);
-                    FileUtils.cleanDirectory(stagingDir);
+                    File[] files = stagingDir.listFiles();
+
+                    for (File file : files) {
+
+                        FileUtils.copyFileToDirectory(file, archiveDir);
+                        System.gc();
+                        Thread.sleep(1000);
+                        Path filepath = file.toPath();
+                        Files.delete(filepath);
+                        // FileUtils.forceDelete(file);
+                    }
+
+                    // FileUtils.copyDirectory(stagingDir, archiveDir);
+                    // FileUtils.cleanDirectory(stagingDir);
 
                 } catch (Exception ex) {
                     LOG.info("**********");
                     LOG.error("Error encountered in archiving contents of staging directory: " + ex.getMessage());
+                    // ex.printStackTrace();
                     System.exit(-1);
                 }
             }
@@ -346,18 +377,13 @@ public class Main {
             resultSetUuidsList.clear();
 
             LOG.info("**********");
-            LOG.info("Ending send for subscriber_id {}.", subscriberId);
+            LOG.info("End of sending process for subscriber_id {}.", subscriberId);
 
         } catch (Exception ex) {
             LOG.info("**********");
             LOG.error("Error encountered with accessing data_generator.subscriber_file_sender table: " + ex.getMessage());
             System.exit(-1);
         }
-
-        LOG.info("**********");
-        LOG.info("Overall Process Completed.");
-
-        System.exit(0);
 
     }
 
@@ -568,8 +594,9 @@ public class Main {
         // specified folder, using the zip file parameters
         zipFile.createZipFileFromFolder(dataDir, parameters, true, 10485760);
 
-        // LOG.info("**********");
-        // LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
+
+        LOG.info("**********");
+        LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
     }
 
     private static boolean encryptFile(File file, File cert) throws Exception {
