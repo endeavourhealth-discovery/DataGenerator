@@ -15,6 +15,7 @@ import java.util.Objects;
 public class SubscriberZipFileUUIDsEntity {
 
     private int subscriberId;
+    private String batchUUID;
     private String queuedMessageUUID;
     private String queuedMessageBody;
     private long filingOrder;
@@ -31,6 +32,16 @@ public class SubscriberZipFileUUIDsEntity {
 
     public void setSubscriberId(int subscriberId) {
         this.subscriberId = subscriberId;
+    }
+
+    @Basic
+    @Column(name = "batch_uuid")
+    public String getBatchUUID() {
+        return batchUUID;
+    }
+
+    public void setBatchUUID(String batchUUID) {
+        this.batchUUID = batchUUID;
     }
 
     @Id
@@ -109,6 +120,7 @@ public class SubscriberZipFileUUIDsEntity {
         if (o == null || getClass() != o.getClass()) return false;
         SubscriberZipFileUUIDsEntity that = (SubscriberZipFileUUIDsEntity) o;
         return subscriberId == that.subscriberId &&
+                Objects.equals(batchUUID, that.batchUUID) &&
                 Objects.equals(queuedMessageUUID, that.queuedMessageUUID) &&
                 Objects.equals(queuedMessageBody, that.queuedMessageBody) &&
                 filingOrder == that.filingOrder &&
@@ -120,7 +132,7 @@ public class SubscriberZipFileUUIDsEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(subscriberId, queuedMessageUUID, queuedMessageBody,
+        return Objects.hash(subscriberId, batchUUID, queuedMessageUUID, queuedMessageBody,
                 filingOrder, fileSent, fileFilingAttempted, fileFilingSuccess, filingFailureMessage);
     }
 

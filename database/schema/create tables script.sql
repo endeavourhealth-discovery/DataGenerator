@@ -21,7 +21,7 @@ create table data_generator.subscriber_file_sender (
 
 create table data_generator.subscriber_zip_file_uuids (
 	subscriber_id int not null comment 'The id of the subscriber file send.',
-    -- batch_uuid varchar(36) not null comment 'The uuid identifying the batch of which the zip file data is a part.',
+    batch_uuid varchar(36) not null comment 'The uuid identifying the batch of which the zip file data is a part.',
     queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
 													  in the audit.queued_message table.',
 	queued_message_body mediumtext comment 'The zip file (of the set of csv files) data that has come from that table.',
