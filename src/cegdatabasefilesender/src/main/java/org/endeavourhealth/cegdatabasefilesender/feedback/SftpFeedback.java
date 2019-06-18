@@ -6,6 +6,7 @@ import com.jcraft.jsch.SftpException;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.*;
+import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -35,6 +36,10 @@ public class SftpFeedback {
         this.config = config;
         ConnectionDetails con = getConnectionDetails();
         this.sftp = new SftpConnection(con);
+
+        SlackHelper.setupConfig("", "",
+                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
+                "https://hooks.slack.com/services/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");
 
         String resultsStagingDirString = this.config.getSubscriberFileLocationDetails().getResultsStagingDir();
         if (!(resultsStagingDirString.endsWith(File.separator))) {
@@ -81,8 +86,9 @@ public class SftpFeedback {
                     String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
                     fileResult.addSuccess(success);
                 } catch (Exception e) {
-                    logger.error("Cannot read success.txt", e);
+                    logger.error("Cannot read success.txt for " + destPath, e);
                     fileResult.addError("Cannot read success.txt for " + destPath);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot read success.txt for " + destPath, e);
                 }
             }
 
@@ -93,8 +99,9 @@ public class SftpFeedback {
                     String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
                     fileResult.addFailure(failure);
                 } catch (Exception e) {
-                    logger.error("Cannot read failure.txt", e);
+                    logger.error("Cannot read failure.txt for " + destPath, e);
                     fileResult.addError("Cannot read failure.txt for " + destPath);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot read failure.txt for " + destPath, e);
                 }
             }
 
@@ -105,7 +112,9 @@ public class SftpFeedback {
     }
 
     private String unzip(File file) throws Exception {
+
         logger.info("Unzipping the file {}", file.getName());
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unzipping the file " + file.getName());
 
         ZipFile zipFile = new ZipFile(file);
 
@@ -120,6 +129,8 @@ public class SftpFeedback {
         }
 
         logger.info("Archiving the file {}", file.getName());
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving the file " + file.getName());
+
         File archiveDir = new File(archiveDirString);
         if (!(archiveDir.exists())) {
             archiveDir.mkdirs();
@@ -153,11 +164,13 @@ public class SftpFeedback {
 
         if (filteredFiles.size() == 0) {
             logger.info("SFTP location is empty.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"SFTP location is empty.");
 
         } else {
             for (ChannelSftp.LsEntry entry : filteredFiles) {
 
                 logger.info("Retrieving from SFTP the file {}", entry.getFilename());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Retrieving from SFTP the file " + entry.getFilename());
 
                 String sourcePath = resultsSourceDir + entry.getFilename();
                 channelSftp.get(sourcePath, destinationPath + entry.getFilename());
@@ -165,6 +178,7 @@ public class SftpFeedback {
                 paths.add(path);
 
                 logger.info("Removing from SFTP the file {}", entry.getFilename());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Removing from SFTP the file " + entry.getFilename());
 
                 channelSftp.rm(sourcePath);
 

@@ -1,6 +1,7 @@
 package org.endeavourhealth.cegdatabasefilesender.feedback;
 
 import org.endeavourhealth.cegdatabasefilesender.feedback.bean.Result;
+import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition.SubscriberFileSenderConfig;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.hibernate.internal.SessionImpl;
@@ -22,6 +23,11 @@ public class FeedbackRepository {
     public FeedbackRepository(SubscriberFileSenderConfig config) throws Exception {
         this.config = config;
         entityManager = PersistenceManager.getEntityManager();
+
+        SlackHelper.setupConfig("", "",
+                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
+                "https://hooks.slack.com/services/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");
+
     }
 
     public void close() {
@@ -65,8 +71,9 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            logger.error("Cannot update uuid {}", successResultUuid, ex);
-            successResult.addError( ex.getMessage() );
+            logger.error("Cannot update success uuid {}", successResultUuid, ex);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Cannot update success uuid " + successResultUuid, ex);
+            successResult.addError(ex.getMessage());
 
         } finally {
             if (ps != null) {
@@ -116,7 +123,8 @@ public class FeedbackRepository {
 
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
-            logger.error("Cannot update uuid {}", failureResultUuid, ex);
+            logger.error("Cannot update failure uuid {}", failureResultUuid, ex);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Cannot update success uuid " + failureResultUuid, ex);
             failureResult.addError( ex.getMessage() );
 
         } finally {

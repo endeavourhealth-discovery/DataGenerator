@@ -84,6 +84,7 @@ public class Main {
 
             if (args.length != 1) {
                 LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Need to indicate run mode parameter. [sending] or [feedback]");
             }
 
             if (args[0].equalsIgnoreCase("feedback")) {
@@ -181,6 +182,7 @@ public class Main {
             LOG.info("**********");
             LOG.info("Getting stored (sets of) zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory.");
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting stored (sets of) zipped CSV files from data_generator.subscriber_zip_file_uuids table.");
+
             try {
                 // below method call commented out as the payload has already been written
                 // to the data_generator.subscriber_zip_file_uuids table by SubscriberFiler
