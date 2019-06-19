@@ -61,9 +61,11 @@ public class Main {
                 }
 
                 boolean zipFound = false;
+                String name = "";
                 for (RemoteFile file : list) {
                     if (file.getFilename().endsWith(".zip") &&
                             !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
+                        name = file.getFilename().substring(0, (file.getFilename().length() - 4));
                         zipFound = true;
                         break;
                     }
@@ -77,7 +79,7 @@ public class Main {
                 }
 
                 for (RemoteFile file : list) {
-                    if (file.getFilename().endsWith(".zip") &&
+                    if (file.getFilename().startsWith(name) &&
                             !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
                         String remoteFilePath = file.getFullPath();
                         LOG.info("Downloading file: " + file.getFilename());
