@@ -29,7 +29,7 @@
 
         <commons-lang3.version>3.5</commons-lang3.version>
         <google-guava.version>19.0</google-guava.version>
-        <jsch.version>0.1.54</jsch.version>
+        <jsch.version>0.1.55</jsch.version>
         <logback.version>1.1.3</logback.version>
 		<quartz.version>2.2.3</quartz.version>
         <bouncycastle.version>1.60</bouncycastle.version>
