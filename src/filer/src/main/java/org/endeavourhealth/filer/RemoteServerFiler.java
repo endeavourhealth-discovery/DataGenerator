@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.common.cache.ObjectMapperPool;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.filer.models.DeleteWrapper;
+import org.endeavourhealth.filer.util.FilerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +36,13 @@ public class RemoteServerFiler {
 
     private static final int UPSERT_ATTEMPTS = 10;
 
-    public static synchronized void  file(String name, String failureDir, Connection connection,
+    public static void  file(String name, String failureDir, Properties properties,
                             String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
+        Connection connection = FilerUtil.getConnection(properties);
+        connection.setAutoCommit(false);
         try {
 
             //the zip contains a JSON file giving type descriptors for all the columns of each file

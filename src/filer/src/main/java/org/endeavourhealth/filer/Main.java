@@ -127,6 +127,7 @@ public class Main {
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Database connection established.");
+                con.close();
 
                 boolean success = true;
                 int nSuccess = 0;
@@ -138,12 +139,10 @@ public class Main {
                 for (File file : files) {
                     stream = new FileInputStream(file);
                     byte[] bytes = IOUtils.toByteArray(stream);
-                    con = FilerUtil.getConnection(properties);
-                    con.setAutoCommit(false);
                     LOG.trace("Filing " + bytes.length + "b from file " + file.getName() + " into DB Server");
                     try {
                         RemoteServerFiler.file(file.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                con, keywordEscapeChar, batchSize, bytes);
+                                properties, keywordEscapeChar, batchSize, bytes);
                         nSuccess++;
                         lSuccess.add(file.getName().substring(24, 60));
                     } catch (Exception e) {
