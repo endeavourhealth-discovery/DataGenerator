@@ -40,7 +40,7 @@ public class FeedbackSlurper implements AutoCloseable {
 
         logger.info("**********");
         logger.info("Start of feedback process for subscriber_id {}.", subscriberId);
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Start of feedback process for subscriber_id " + subscriberId);
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "*** Start of feedback process for subscriber_id " + subscriberId);
 
         logger.info("**********");
         logger.info("Getting zip file(s) from SFTP.");
@@ -56,8 +56,8 @@ public class FeedbackSlurper implements AutoCloseable {
         } else {
 
             logger.info("**********");
-            logger.info("Processing success and failure results files.");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing success and failure results files.");
+            logger.info("Processing success and failure of filing results files.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing success and failure of filing results files.");
             processFiles(feedbackHolder);
 
             logger.info("**********");
@@ -73,7 +73,7 @@ public class FeedbackSlurper implements AutoCloseable {
 
         logger.info("**********");
         logger.info("End of feedback process for subscriber_id {}.", subscriberId);
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"End of feedback process for subscriber_id " + subscriberId);
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"*** End of feedback process for subscriber_id " + subscriberId);
 
     }
 
@@ -98,6 +98,9 @@ public class FeedbackSlurper implements AutoCloseable {
 
     private void processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
+        int successResults = 0;
+        int failureResults = 0;
+
         for (FileResult fileResult : feedbackHolder.getFileResults()) {
 
             // logger.info("Processing the file {}");
@@ -106,13 +109,21 @@ public class FeedbackSlurper implements AutoCloseable {
                 switch (result.getType()) {
                     case FAILURE:
                         feedbackRepository.processFailure(result);
+                        failureResults++;
                         break;
                     case SUCCESS:
                         feedbackRepository.processSuccess(result);
+                        successResults++;
                         break;
                 }
             }
         }
+
+        logger.info("Successfully filed: " + successResults);
+        logger.info("Unsuccessfully filed: " + failureResults);
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Successfully filed: " + successResults);
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Unsuccessfully filed: " + failureResults);
+
     }
 
     @Override
