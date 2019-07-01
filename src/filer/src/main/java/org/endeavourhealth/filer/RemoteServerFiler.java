@@ -78,7 +78,7 @@ public class RemoteServerFiler {
 
         } catch (Exception ex) {
             //if we get an exception, write out the zip file, so we can investigate what was being filed
-            writeZipFile(name, failureDir, bytes);
+            //writeZipFile(name, failureDir, bytes);
 
             throw new Exception(ex.getMessage(), ex);
         } finally {

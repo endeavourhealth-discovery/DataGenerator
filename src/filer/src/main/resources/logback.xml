@@ -11,7 +11,7 @@
   </appender>
 
   <appender name="fileout" class="ch.qos.logback.core.FileAppender">
-    <file>/home/ubuntu/filer/log/filer-${bySecond}.txt</file>
+    <file>/data/filer_xyz/log/filer-${bySecond}.txt</file>
     <encoder>
       <pattern>%d{dd MMM HH:mm:ss.SSS} [%thread] %-5level %logger{10}:%-3line - %msg%n
       </pattern>

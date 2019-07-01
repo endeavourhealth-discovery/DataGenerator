@@ -183,6 +183,8 @@ public class Main {
                 FileUtils.deleteDirectory(source);
                 FileUtils.forceDelete(summary);
             }
+            FileUtils.deleteDirectory(stagingDir);
+            stagingDir.mkdirs();
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. ", e);
