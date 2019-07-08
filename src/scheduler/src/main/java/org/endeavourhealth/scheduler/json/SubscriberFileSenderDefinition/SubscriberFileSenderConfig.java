@@ -5,7 +5,7 @@ public class SubscriberFileSenderConfig {
     private Integer id = null;
     private SubscriberFileLocationDetails subscriberFileLocationDetails;
     private SftpConnectionDetails sftpConnectionDetails;
-    private String slackWebhook;
+    //private String slackWebhook;
 
     private SubscriberFileSenderConfig() {}
 
@@ -41,12 +41,12 @@ public class SubscriberFileSenderConfig {
         this.sftpConnectionDetails = sftpConnectionDetails;
     }
 
-    public String getSlackWebhook() {
+    /*public String getSlackWebhook() {
         return slackWebhook;
     }
 
     public void setSlackWebhook(String slackWebhook) {
         this.slackWebhook = slackWebhook;
-    }
+    }*/
 
 }

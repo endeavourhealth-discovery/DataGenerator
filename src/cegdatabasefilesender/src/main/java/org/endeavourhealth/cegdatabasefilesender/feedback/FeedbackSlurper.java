@@ -30,11 +30,10 @@ public class FeedbackSlurper implements AutoCloseable {
         this.sftpFeedback = sftpFeedback;
         this.feedbackRepository = feedbackRepository;
 
-        String slackWebhook = config.getSlackWebhook();
-
-        SlackHelper.setupConfig("", "",
+        /*String slackWebhook = config.getSlackWebhook();
+          SlackHelper.setupConfig("", "",
                 SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
-                slackWebhook);
+                slackWebhook);*/
 
     }
 

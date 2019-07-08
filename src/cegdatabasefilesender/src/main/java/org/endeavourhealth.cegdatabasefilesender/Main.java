@@ -55,6 +55,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Starting Subscriber Sender App.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Starting Subscriber Sender App.");
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -76,11 +77,10 @@ public class Main {
 
             SubscriberFileSenderConfig config = getConfig(subscriberId);
 
-            String slackWebhook = config.getSlackWebhook();
-
-            SlackHelper.setupConfig("", "",
+            /*String slackWebhook = config.getSlackWebhook();
+              SlackHelper.setupConfig("", "",
                     SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
-                    slackWebhook);
+                    slackWebhook);*/
 
             if (args.length != 1) {
                 LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
@@ -110,6 +110,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Ending Subscriber Sender App.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Sender App.");
 
         System.exit(0);
     }

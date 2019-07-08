@@ -29,8 +29,7 @@ select 1, true, '{
           "username": "endeavour",
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
-},
- "slackWebhook": ""
+}
 }';
 
 delete from data_generator.subscriber_file_sender where subscriber_id = 2;
@@ -53,8 +52,7 @@ select 2, true, '{
           "username": "endeavour",
           "clientPrivateKeyPassword": "",
           "clientPrivateKey": ""
-},
- "slackWebhook": ""
+}
 }';
 
 
