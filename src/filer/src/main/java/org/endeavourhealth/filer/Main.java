@@ -3,7 +3,6 @@ package org.endeavourhealth.filer;
 import com.amazonaws.util.IOUtils;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
-import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.RemoteFile;
@@ -31,15 +30,8 @@ public class Main {
             properties = FilerUtil.initialize();
         } catch (Exception e) {
             LOG.error("Error in reading config.properties " + e.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
             System.exit(-1);
         }
-
-        SlackHelper.setupConfig(properties.getProperty(FilerConstants.NET_PROXY),
-                properties.getProperty(FilerConstants.NET_PORT),
-                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
-                "https://hooks.slack.com/services/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");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Starting Subscriber Server uploader");
 
         try {
 
@@ -55,8 +47,6 @@ public class Main {
                 if (list.size() == 0) {
                     LOG.info("SFTP server location is empty.");
                     LOG.info("Ending Subscriber Server uploader");
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "SFTP server location is empty.");
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
                     System.exit(0);
                 }
 
@@ -73,8 +63,6 @@ public class Main {
                 if (!zipFound) {
                     LOG.info("SFTP server location contains no valid zip file.");
                     LOG.info("Ending Subscriber Server Server uploader");
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "SFTP server location contains no valid zip file.");
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
                     System.exit(0);
                 }
 
@@ -83,20 +71,17 @@ public class Main {
                             !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
                         String remoteFilePath = file.getFullPath();
                         LOG.info("Downloading file: " + file.getFilename());
-                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Downloading file: " + file.getFilename());
                         InputStream inputStream = sftp.getFile(remoteFilePath);
                         File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
                         Files.copy(inputStream, dest.toPath());
                         inputStream.close();
                         LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
-                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting file: " + file.getFilename() + " from SFTP server.");
                         sftp.deleteFile(remoteFilePath);
                     }
                 }
                 sftp.close();
             } catch (Exception e) {
                 LOG.error("Error in downloading/deleting files from SFTP server " + e.getMessage());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error in downloading/deleting files from SFTP server ", e);
                 System.exit(-1);
             }
 
@@ -107,7 +92,6 @@ public class Main {
             ArrayList<String> locations = new ArrayList<>();
             for (File file : files) {
                 LOG.info("Deflating zip file: " + file.getName());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deflating zip file: " + file.getName());
                 ZipFile zipFile = new ZipFile(file);
                 String destPath = stagingDir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
                 if (!locations.contains(destPath)) {
@@ -121,12 +105,10 @@ public class Main {
             for (String sourceDir : locations) {
                 files = FilerUtil.getFilesFromDirectory(sourceDir, ".zip");
                 LOG.info("Files in source directory: " + files.length);
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Files in source directory: " + files.length);
 
                 Connection con = FilerUtil.getConnection(properties);
                 String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
                 LOG.info("Database connection established.");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Database connection established.");
                 con.close();
 
                 boolean success = true;
@@ -160,9 +142,6 @@ public class Main {
                 LOG.info("Completed processing: " + filename);
                 LOG.info("Successfully filed: " + nSuccess);
                 LOG.info("Unsuccessfully filed: " + nFailures);
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Completed processing: " + filename);
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Successfully filed: " + nSuccess);
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unsuccessfully filed: " + nFailures);
                 if (success) {
                     File dest = new File(successDir.getAbsolutePath() +
                             File.separator + format.format(new Date()) + "_" + filename);
@@ -187,13 +166,10 @@ public class Main {
             stagingDir.mkdirs();
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unhandled exception occurred. ", e);
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
             System.exit(-1);
         }
 
         LOG.info("Ending Subscriber Server uploader");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Server uploader");
         System.exit(0);
     }
 }
