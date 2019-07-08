@@ -10,6 +10,7 @@ import java.util.Objects;
 public class SubscriberFileSenderEntity {
 
     private int subscriberId;
+    private Boolean subscriberLive;
     private String definition;
 
     @Id
@@ -20,6 +21,16 @@ public class SubscriberFileSenderEntity {
 
     public void setSubscriberId(int subscriberId) {
         this.subscriberId = subscriberId;
+    }
+
+    @Basic
+    @Column(name = "subscriber_live")
+    public Boolean getSubscriberLive() {
+        return subscriberLive;
+    }
+
+    public void setSubscriberLive(Boolean subscriberLive) {
+        this.subscriberLive = subscriberLive;
     }
 
     @Basic
@@ -38,12 +49,13 @@ public class SubscriberFileSenderEntity {
         if (o == null || getClass() != o.getClass()) return false;
         SubscriberFileSenderEntity that = (SubscriberFileSenderEntity) o;
         return subscriberId == that.subscriberId &&
+                Objects.equals(subscriberLive, that.subscriberLive) &&
                 Objects.equals(definition, that.definition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subscriberId, definition);
+        return Objects.hash(subscriberId, subscriberLive, definition);
     }
 
     public static SubscriberFileSenderEntity getSubscriberFileSenderEntity(int subscriberId) throws Exception {

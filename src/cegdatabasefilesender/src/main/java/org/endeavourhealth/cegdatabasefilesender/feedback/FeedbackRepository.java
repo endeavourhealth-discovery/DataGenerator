@@ -24,9 +24,11 @@ public class FeedbackRepository {
         this.config = config;
         entityManager = PersistenceManager.getEntityManager();
 
+        String slackWebhook = config.getSlackWebhook();
+
         SlackHelper.setupConfig("", "",
                 SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
-                "https://hooks.slack.com/services/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");
+                slackWebhook);
 
     }
 

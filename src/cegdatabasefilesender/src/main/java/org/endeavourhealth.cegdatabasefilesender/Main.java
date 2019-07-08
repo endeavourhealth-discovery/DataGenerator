@@ -56,12 +56,6 @@ public class Main {
         LOG.info("**********");
         LOG.info("Starting Subscriber Sender App.");
 
-        SlackHelper.setupConfig("", "",
-                SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
-                "https://hooks.slack.com/services/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");
-
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Starting Subscriber Sender App.");
-
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
         entityManager.getTransaction().begin();
@@ -81,6 +75,12 @@ public class Main {
             int subscriberId = (resultSet.getInt("subscriber_id"));
 
             SubscriberFileSenderConfig config = getConfig(subscriberId);
+
+            String slackWebhook = config.getSlackWebhook();
+
+            SlackHelper.setupConfig("", "",
+                    SlackHelper.Channel.RemoteFilerAlerts.getChannelName(),
+                    slackWebhook);
 
             if (args.length != 1) {
                 LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
@@ -110,7 +110,6 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Ending Subscriber Sender App.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Ending Subscriber Sender App.");
 
         System.exit(0);
     }
@@ -640,7 +639,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
-        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
     }
 
     private static boolean encryptFile(File file, File cert) throws Exception {
