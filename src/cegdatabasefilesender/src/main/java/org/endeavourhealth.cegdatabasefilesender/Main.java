@@ -107,6 +107,8 @@ public class Main {
             }
 
         }
+        resultSet.close();
+        ps.close();
 
         LOG.info("**********");
         LOG.info("Ending Subscriber Sender App.");
@@ -149,11 +151,13 @@ public class Main {
             String dataDirString = addFileSeparatorToEndOfDirString(
                     config.getSubscriberFileLocationDetails().getDataDir());
             File dataDir = new File(dataDirString);
+            FileUtils.deleteDirectory(dataDir);
             makeDirectory(dataDir);
 
             String stagingDirString = addFileSeparatorToEndOfDirString(
                     config.getSubscriberFileLocationDetails().getStagingDir());
             File stagingDir = new File(stagingDirString);
+            FileUtils.deleteDirectory(stagingDir);
             makeDirectory(stagingDir);
 
             String destinationDir = // addFileSeparatorToEndOfDirString(
@@ -239,6 +243,8 @@ public class Main {
                         System.exit(-1);
                     }
                 }
+
+                resultSet.close();
 
             } catch (Exception ex) {
                 LOG.info("**********");
