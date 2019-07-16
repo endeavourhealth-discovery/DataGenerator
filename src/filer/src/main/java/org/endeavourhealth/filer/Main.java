@@ -41,6 +41,7 @@ public class Main {
             FilerUtil.setupDirectories(stagingDir, successDir, failureDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
+            ArrayList<String> zipFiles = new ArrayList<>();
             try {
                 sftp.open();
                 List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.INCOMING));
@@ -50,33 +51,32 @@ public class Main {
                     System.exit(0);
                 }
 
-                boolean zipFound = false;
-                String name = "";
                 for (RemoteFile file : list) {
                     if (file.getFilename().endsWith(".zip") &&
                             !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
-                        name = file.getFilename().substring(0, (file.getFilename().length() - 4));
-                        zipFound = true;
-                        break;
+                        String name = file.getFilename().substring(0, (file.getFilename().length() - 4));
+                        zipFiles.add(name);
                     }
                 }
-                if (!zipFound) {
+                if (zipFiles.size() == 0) {
                     LOG.info("SFTP server location contains no valid zip file.");
                     LOG.info("Ending Subscriber Server Server uploader");
                     System.exit(0);
                 }
-
+                Arrays.sort(zipFiles.toArray());
                 for (RemoteFile file : list) {
-                    if (file.getFilename().startsWith(name) &&
-                            !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
-                        String remoteFilePath = file.getFullPath();
-                        LOG.info("Downloading file: " + file.getFilename());
-                        InputStream inputStream = sftp.getFile(remoteFilePath);
-                        File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
-                        Files.copy(inputStream, dest.toPath());
-                        inputStream.close();
-                        LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
-                        sftp.deleteFile(remoteFilePath);
+                    for (String name : zipFiles) {
+                        if (file.getFilename().startsWith(name) &&
+                                !file.getFilename().equalsIgnoreCase(MainAdhoc.ADHOC_FILENAME)) {
+                            String remoteFilePath = file.getFullPath();
+                            LOG.info("Downloading file: " + file.getFilename());
+                            InputStream inputStream = sftp.getFile(remoteFilePath);
+                            File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
+                            Files.copy(inputStream, dest.toPath());
+                            inputStream.close();
+                            LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
+                            sftp.deleteFile(remoteFilePath);
+                        }
                     }
                 }
                 sftp.close();
