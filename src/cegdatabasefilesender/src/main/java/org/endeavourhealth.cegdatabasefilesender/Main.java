@@ -38,6 +38,7 @@ import net.lingala.zip4j.util.Zip4jConstants;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final int BATCH_SIZE = 20000;
 
     // private static Main instance = null;
 
@@ -83,8 +84,8 @@ public class Main {
                     slackWebhook);*/
 
             if (args.length != 1) {
-                LOG.error("Need to indicate run mode parameter. [sending] or [feedback]");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Need to indicate run mode parameter. [sending] or [feedback]");
+                LOG.error("Need to indicate run mode parameter. [sending] or [feedback].");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Need to indicate run mode parameter. [sending] or [feedback].");
             }
 
             if (args[0].equalsIgnoreCase("feedback")) {
@@ -92,7 +93,7 @@ public class Main {
                     feedbackSlurper.slurp(subscriberId);
                 } catch (Exception ex) {
                     LOG.error("Cannot process feedback results. ", ex);
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot process feedback results.", ex);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot process feedback results. ", ex);
                 }
             }
 
@@ -102,7 +103,7 @@ public class Main {
 
                 } catch (Exception ex) {
                     LOG.error("Cannot send files. ", ex);
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot send files.", ex);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot send files. ", ex);
                 }
             }
 
@@ -139,8 +140,7 @@ public class Main {
         // int subscriberId = 1;
 
         List<UUID> resultSetUuidsList = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileDate = sdf.format(new Date());
+        boolean maxBatchSizeSent = false;
 
         LOG.info("**********");
         LOG.info("Start of sending process for subscriber_id {}.", subscriberId);
@@ -196,9 +196,11 @@ public class Main {
                 // LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
 
                 ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
+                int batchSizeCounter = 0;
 
                 while (resultSet.next()) {
 
+                    batchSizeCounter++;
                     long filenameCounter = resultSet.getLong("filing_order");
                     UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
                     resultSetUuidsList.add(queuedMessageId);
@@ -242,6 +244,12 @@ public class Main {
                         SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "For UUID: " + queuedMessageId);
                         System.exit(-1);
                     }
+
+                    if (batchSizeCounter % BATCH_SIZE == 0) {
+                        processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
+                        maxBatchSizeSent = true;
+                        resultSetUuidsList.clear();
+                    }
                 }
 
                 resultSet.close();
@@ -250,178 +258,21 @@ public class Main {
                 LOG.info("**********");
                 // LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
                 LOG.error("Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table.", ex);
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting UUIDs from data_generator.subscriber_zip_file_uuids table. ", ex);
                 System.exit(-1);
             }
 
-            LOG.info("**********");
-            LOG.info(dataDir.listFiles().length + " (sets of) zipped CSV files in data directory put into a multi-part zip in staging directory.");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,dataDir.listFiles().length + " (sets of) zipped CSV files in data directory put into a multi-part zip in staging directory.");
-
             if ((dataDir.listFiles().length == 0)) {
 
-                LOG.info("**********");
-                LOG.info("No zip files to send for subscriber_id {}.", subscriberId);
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "No zip files to send for subscriber_id " + subscriberId);
+                if (!maxBatchSizeSent) {
+                    LOG.info("**********");
+                    LOG.info("No zip files to send for subscriber_id {}.", subscriberId);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "No zip files to send for subscriber_id " + subscriberId);
+                }
 
             } else {
-
-                try {
-                    zipAllContentsOfDataDirectoryToStaging(fileDate, dataDir, stagingDir);
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in zipping contents of data directory to staging directory. " + ex.getMessage());
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in zipping contents of data directory to staging directory." + ex.getMessage());
-                    System.exit(-1);
-                }
-
-
-                LOG.info("**********");
-                LOG.info("Deleting contents of data directory.");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting contents of data directory.");
-
-                try {
-                    // TODO Comment out and uncomment the line below as necessary
-                    FileUtils.cleanDirectory(dataDir);
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in deleting contents of data directory. " + ex.getMessage());
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in deleting contents of data directory.", ex);
-                    System.exit(-1);
-                }
-
-                LOG.info("**********");
-                LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
-
-                try {
-                    File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
-                            fileDate + "_" + "Subscriber_Data" + ".zip");
-                    if (!encryptFile(zipFile, pgpCertFile)) {
-                        LOG.info("**********");
-                        LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
-                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unable to encrypt the first part of multi-part zip file in staging directory.");
-                        System.exit(-1);
-                    }
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory. " + ex.getMessage());
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in PGP encrypting first part of multi-part zip file in staging directory.", ex);
-                    System.exit(-1);
-                }
-
-                LOG.info("**********");
-                LOG.info("Checking staging directory to send contents to CEG SFTP location.");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory to send contents to CEG SFTP location.");
-
-                try {
-                    ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
-                    SftpConnection sftp = new SftpConnection(con);
-
-                    try {
-                        sftp.open();
-                        // LOG.info("**********");
-                        // LOG.info("SFTP connection opened.");
-
-                        try {
-                            File[] files = stagingDir.listFiles();
-                            // LOG.info("**********");
-                            // LOG.info("Starting file/s upload.");
-                            for (File file : files) {
-                                LOG.info("**********");
-                                LOG.info("Uploading file: " + file.getName());
-                                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Uploading file: " + file.getName());
-                                sftp.put(file.getAbsolutePath(), destinationDir);
-                            }
-                            sftp.close();
-
-                        } catch (Exception ex) {
-                            LOG.info("**********");
-                            LOG.error("Error encountered while uploading to the SFTP. " + ex.getMessage());
-                            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while uploading to the SFTP.", ex);
-                            System.exit(-1);
-                        }
-
-                    } catch (Exception ex) {
-                        LOG.info("**********");
-                        LOG.error("Error encountered while connecting to the SFTP. " + ex.getMessage());
-                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while connecting to the SFTP.", ex);
-                        System.exit(-1);
-
-                    } finally {
-                        if (sftp != null)
-                            sftp.close();
-                    }
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered while setting SFTP connection details. " + ex.getMessage());
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while setting SFTP connection details.", ex);
-                    System.exit(-1);
-                }
-
-                LOG.info("**********");
-                LOG.info("Archiving contents of staging directory.");
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving contents of staging directory.");
-
-                try {
-                    File[] files = stagingDir.listFiles();
-
-                    for (File file : files) {
-
-                        FileUtils.copyFileToDirectory(file, archiveDir);
-                        System.gc();
-                        Thread.sleep(1000);
-                        Path filepath = file.toPath();
-                        Files.delete(filepath);
-                        // FileUtils.forceDelete(file);
-                    }
-
-                    // FileUtils.copyDirectory(stagingDir, archiveDir);
-                    // FileUtils.cleanDirectory(stagingDir);
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in archiving contents of staging directory. " + ex.getMessage());
-                    // ex.printStackTrace();
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in archiving contents of staging directory.", ex);
-                    System.exit(-1);
-                }
+                processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
             }
-
-            LOG.info("**********");
-            LOG.info("Updating data_generator.subscriber_zip_file_uuids table, as necessary.");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Updating data_generator.subscriber_zip_file_uuids table, as necessary.");
-
-            for (UUID uuid : resultSetUuidsList) {
-
-                String uuidString = uuid.toString();
-
-                try {
-                    updateFileSentDateTimeInUUIDsTable(uuidString);
-
-                } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table.", ex);
-                    System.exit(-1);
-                }
-
-                // below commented out as this is now done by the feedback slurper
-                    /* try {
-                    deleteQueuedMessageBodyFromUUIDsTable(uuidString);
-
-                    } catch (Exception ex) {
-                    LOG.info("**********");
-                    LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
-                    System.exit(-1);
-                    } */
-            }
-
-            resultSetUuidsList.clear();
 
             LOG.info("**********");
             LOG.info("End of sending process for subscriber_id {}.", subscriberId);
@@ -430,7 +281,7 @@ public class Main {
         } catch (Exception ex) {
             LOG.info("**********");
             LOG.error("Error encountered with accessing data_generator.subscriber_file_sender table. " + ex.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered with accessing data_generator.subscriber_file_sender table.", ex);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered with accessing data_generator.subscriber_file_sender table. ", ex);
             System.exit(-1);
         }
 
@@ -448,6 +299,174 @@ public class Main {
         if (!(directory.exists())) {
             directory.mkdirs();
         }
+    }
+
+    private static void processZipFilesBatch(File dataDir, File stagingDir, String destinationDir,
+                                     File archiveDir, File pgpCertFile, List<UUID> resultSetUuidsList,
+                                     SubscriberFileSenderConfig config) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        String fileDate = sdf.format(new Date());
+
+        try {
+            zipAllContentsOfDataDirectoryToStaging(fileDate, dataDir, stagingDir);
+
+            LOG.info("**********");
+            LOG.info(dataDir.listFiles().length + " (sets of) zipped CSV files in data directory put into a multi-part zip in staging directory.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, dataDir.listFiles().length + " (sets of) zipped CSV files in data directory put into a multi-part zip in staging directory.");
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered in zipping contents of data directory to staging directory. " + ex.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in zipping contents of data directory to staging directory. " + ex.getMessage());
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Deleting contents of data directory.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting contents of data directory.");
+
+        try {
+            // TODO Comment out and uncomment the line below as necessary
+            FileUtils.cleanDirectory(dataDir);
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered in deleting contents of data directory. " + ex.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in deleting contents of data directory. ", ex);
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
+
+        try {
+            File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
+                    fileDate + "_" + "Subscriber_Data" + ".zip");
+            if (!encryptFile(zipFile, pgpCertFile)) {
+                LOG.info("**********");
+                LOG.error("Unable to encrypt the first part of multi-part zip file in staging directory.");
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unable to encrypt the first part of multi-part zip file in staging directory.");
+                System.exit(-1);
+            }
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered in PGP encrypting first part of multi-part zip file in staging directory. " + ex.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in PGP encrypting first part of multi-part zip file in staging directory. ", ex);
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Checking staging directory to send contents to CEG SFTP location.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory to send contents to CEG SFTP location.");
+
+        try {
+            ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
+            SftpConnection sftp = new SftpConnection(con);
+
+            try {
+                sftp.open();
+                // LOG.info("**********");
+                // LOG.info("SFTP connection opened.");
+
+                try {
+                    File[] files = stagingDir.listFiles();
+                    // LOG.info("**********");
+                    // LOG.info("Starting file/s upload.");
+                    for (File file : files) {
+                        LOG.info("**********");
+                        LOG.info("Uploading file: " + file.getName());
+                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Uploading file: " + file.getName());
+                        sftp.put(file.getAbsolutePath(), destinationDir);
+                    }
+                    sftp.close();
+
+                } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered while uploading to the SFTP. " + ex.getMessage());
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while uploading to the SFTP. ", ex);
+                    System.exit(-1);
+                }
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered while connecting to the SFTP. " + ex.getMessage());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while connecting to the SFTP. ", ex);
+                System.exit(-1);
+
+            } finally {
+                if (sftp != null)
+                    sftp.close();
+            }
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered while setting SFTP connection details. " + ex.getMessage());
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered while setting SFTP connection details. ", ex);
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Archiving contents of staging directory.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving contents of staging directory.");
+
+        try {
+            File[] files = stagingDir.listFiles();
+
+            for (File file : files) {
+
+                FileUtils.copyFileToDirectory(file, archiveDir);
+                System.gc();
+                Thread.sleep(1000);
+                Path filepath = file.toPath();
+                Files.delete(filepath);
+                // FileUtils.forceDelete(file);
+            }
+
+            // FileUtils.copyDirectory(stagingDir, archiveDir);
+            // FileUtils.cleanDirectory(stagingDir);
+
+        } catch (Exception ex) {
+            LOG.info("**********");
+            LOG.error("Error encountered in archiving contents of staging directory. " + ex.getMessage());
+            // ex.printStackTrace();
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in archiving contents of staging directory. ", ex);
+            System.exit(-1);
+        }
+
+        LOG.info("**********");
+        LOG.info("Updating data_generator.subscriber_zip_file_uuids table.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Updating data_generator.subscriber_zip_file_uuids table.");
+
+        for (UUID uuid : resultSetUuidsList) {
+
+            String uuidString = uuid.toString();
+
+            try {
+                updateFileSentDateTimeInUUIDsTable(uuidString);
+
+            } catch (Exception ex) {
+                LOG.info("**********");
+                LOG.error("Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in updating file_sent entries of data_generator.subscriber_zip_file_uuids table. ", ex);
+                System.exit(-1);
+            }
+
+            // below commented out as this is now done by the feedback slurper
+                    /* try {
+                    deleteQueuedMessageBodyFromUUIDsTable(uuidString);
+
+                    } catch (Exception ex) {
+                    LOG.info("**********");
+                    LOG.error("Error encountered in deleting queued_message_body entries of data_generator.subscriber_zip_file_uuids table." + ex.getMessage());
+                    System.exit(-1);
+                    } */
+        }
+
+        resultSetUuidsList.clear();
+
     }
 
     /* private static ResultSet checkAuditQueuedMessageTableForUUIDs() throws Exception {
@@ -645,8 +664,8 @@ public class Main {
 
 
         LOG.info("**********");
-        LOG.info(stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " Multi-part zip file/s successfully created.");
+        LOG.info(stagingDir.listFiles().length + " multi-part zip file/s successfully created.");
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " multi-part zip file/s successfully created.");
     }
 
     private static boolean encryptFile(File file, File cert) throws Exception {
@@ -662,13 +681,13 @@ public class Main {
         } catch (CertificateException ex) {
             LOG.info("**********");
             LOG.error("Error encountered in certificate generation. " + ex.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate generation.", ex);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate generation. ", ex);
             throw ex;
 
         } catch (NoSuchProviderException ex) {
             LOG.info("**********");
             LOG.error("Error encountered in certificate provider. " + ex.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate provider.", ex);
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate provider. ", ex);
             throw ex;
         }
 
