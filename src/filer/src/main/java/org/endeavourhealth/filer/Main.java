@@ -33,11 +33,11 @@ public class Main {
             System.exit(-1);
         }
 
-        try {
+        File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
+        File successDir = new File(properties.getProperty(FilerConstants.SUCCESS));
+        File failureDir = new File(properties.getProperty(FilerConstants.FAILURE));
 
-            File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
-            File successDir = new File(properties.getProperty(FilerConstants.SUCCESS));
-            File failureDir = new File(properties.getProperty(FilerConstants.FAILURE));
+        try {
             FilerUtil.setupDirectories(stagingDir, successDir, failureDir);
 
             SftpUtil sftp = FilerUtil.setupSftp(properties);
@@ -90,6 +90,21 @@ public class Main {
 
             files = FilerUtil.getFilesFromDirectory(stagingDir.getAbsolutePath(), ".zip");
             ArrayList<String> locations = new ArrayList<>();
+
+            Arrays.sort(files);
+            for (int i = 0; i < files.length; i++) {
+                File file = files[i];
+                LOG.info("Merging zip file: " + file.getName());
+                ZipFile zipFile = new ZipFile(file);
+                String name = file.getAbsolutePath().substring(0, (file.getAbsolutePath().length() - 4));
+                File merge = new File(name + "_merge.zip");
+                zipFile.mergeSplitFiles(merge);
+                FileUtils.forceDelete(file);
+                FileUtils.copyFile(merge, file);
+                files[i] = file;
+            }
+
+            Arrays.sort(files);
             for (File file : files) {
                 LOG.info("Deflating zip file: " + file.getName());
                 ZipFile zipFile = new ZipFile(file);
@@ -102,6 +117,7 @@ public class Main {
                 zipFile.extractAll(destPath);
             }
 
+            Arrays.sort(locations.toArray());
             for (String sourceDir : locations) {
                 files = FilerUtil.getFilesFromDirectory(sourceDir, ".zip");
                 LOG.info("Files in source directory: " + files.length);
@@ -133,7 +149,7 @@ public class Main {
                         lFailures.add(file.getName().substring(24,60) + "," + e.getMessage());
                     }
                     stream.close();
-                    file.delete();
+                    FileUtils.forceDelete(file);
                 }
                 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
                 File source = new File(sourceDir);
@@ -166,6 +182,10 @@ public class Main {
             stagingDir.mkdirs();
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());
+            try {
+                FilerUtil.setupDirectories(stagingDir, successDir, failureDir);
+            } catch(Exception ex) {
+            }
             System.exit(-1);
         }
 
