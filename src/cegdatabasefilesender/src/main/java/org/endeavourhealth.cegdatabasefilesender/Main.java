@@ -40,7 +40,6 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static final int BATCH_SIZE = 10000;
 
-
     // private static Main instance = null;
 
     /* private Main() {
