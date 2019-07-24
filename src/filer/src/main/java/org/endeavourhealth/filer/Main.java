@@ -2,6 +2,7 @@ package org.endeavourhealth.filer;
 
 import com.amazonaws.util.IOUtils;
 import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
@@ -98,10 +99,19 @@ public class Main {
                 ZipFile zipFile = new ZipFile(file);
                 String name = file.getAbsolutePath().substring(0, (file.getAbsolutePath().length() - 4));
                 File merge = new File(name + "_merge.zip");
-                zipFile.mergeSplitFiles(merge);
-                FileUtils.forceDelete(file);
-                FileUtils.copyFile(merge, file);
-                files[i] = file;
+                try {
+                    zipFile.mergeSplitFiles(merge);
+                    FileUtils.forceDelete(file);
+                    FileUtils.copyFile(merge, file);
+                    FileUtils.forceDelete(merge);
+                    files[i] = file;
+                } catch (ZipException ex) {
+                    if (ex.getMessage().equalsIgnoreCase("archive not a split zip file")) {
+                        LOG.info("File is not multi-part. " + file.getName());
+                    } else {
+                        throw ex;
+                    }
+                }
             }
 
             Arrays.sort(files);
