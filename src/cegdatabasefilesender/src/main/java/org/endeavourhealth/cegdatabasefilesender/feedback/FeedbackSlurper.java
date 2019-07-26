@@ -57,13 +57,13 @@ public class FeedbackSlurper implements AutoCloseable {
         } else {
 
             logger.info("**********");
-            logger.info("Processing success and failure of filing results files.");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing success and failure of filing results files.");
+            logger.info("Processing success and failure (of filing) results files.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing success and failure (of filing) results files.");
             processFiles(feedbackHolder);
 
             logger.info("**********");
-            logger.info("Updating data_generator.subscriber_zip_file_uuids table.");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Updating data_generator.subscriber_zip_file_uuids table.");
+            logger.info("Updated data_generator.subscriber_zip_file_uuids table.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Updated data_generator.subscriber_zip_file_uuids table.");
 
             logger.info("**********");
             logger.info("Cleaning up results staging directory.");
@@ -104,7 +104,8 @@ public class FeedbackSlurper implements AutoCloseable {
 
         for (FileResult fileResult : feedbackHolder.getFileResults()) {
 
-            // logger.info("Processing the file {}");
+            logger.info("Processing the file {}");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing the file {}");
 
             for(Result result : fileResult.getResults()) {
                 switch (result.getType()) {

@@ -196,9 +196,8 @@ public class Main {
                 // LOG.info("**********");
                 // LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
 
-                ResultSet result = getUnsentUUIDsCountFromDataGenTable(subscriberId);
-                result.first();
-                int unsentUUIDs = result.getInt(1);
+                int unsentUUIDs = 0;
+                unsentUUIDs = getUnsentUUIDsCountFromDataGenTable(subscriberId);
 
                 LOG.info("**********");
                 LOG.info("Unsent UUIDs: ?", unsentUUIDs);
@@ -212,33 +211,32 @@ public class Main {
                 for (int j = 0; j < processingCycles; j++) {
 
                     LOG.info("**********");
-                    LOG.info("Getting sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: ?", UUIDS_LIMIT);
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, up to limit of: " + UUIDS_LIMIT);
+                    LOG.info("Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: ?", UUIDS_LIMIT);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, up to limit of: " + UUIDS_LIMIT);
 
                     try {
 
-                        ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
+                        // ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
+                        List<Payload> payloadList = getPayloadsFromDataGenTable(subscriberId);
+
                         int sendBatchSizeCounter = 0;
 
-                        while (resultSet.next()) {
+                        // while (resultSet.next()) {
+
+                        for (Payload payload : payloadList) {
 
                             sendBatchSizeCounter++;
-                            long filenameCounter = resultSet.getLong("filing_order");
-                            UUID queuedMessageId = UUID.fromString(resultSet.getString("queued_message_uuid"));
+
+                            long filenameCounter = payload.getFilingOrder();
+                            UUID queuedMessageId = payload.getQueuedMessageId();
                             resultSetUuidsList.add(queuedMessageId);
+                            byte[] bytes = payload.getQueuedMessageBody();
 
                             try {
-                                // below method call commented out as the payload has already been written
-                                // to the data_generator.subscriber_zip_file_uuids table by SubscriberFiler
-                                // byte[] bytes = getZipFileByteArrayFromQueuedMessageTable(queuedMessageId);
+                                writeZipFileToDataDirectory(bytes, filenameCounter, queuedMessageId, dataDir);
 
-                                byte[] bytes = Base64.getDecoder().decode(resultSet.getString("queued_message_body"));
-
-                                try {
-                                    writeZipFileToDataDirectory(bytes, filenameCounter, queuedMessageId, dataDir);
-
-                                    // below no longer needed as the payload has already been written to the
-                                    // data_generator.subscriber_zip_file_uuids table by SubscriberFiler, and deleted by it
+                                // below no longer needed as the payload has already been written to the
+                                // data_generator.subscriber_zip_file_uuids table by SubscriberFiler, and deleted by it
                                 /* try {
                                        deleteEntryFromQueuedMessageTable(queuedMessageId);
 
@@ -249,49 +247,40 @@ public class Main {
                                     System.exit(-1);
                                 } */
 
-                                } catch (Exception ex) {
-                                    LOG.info("**********");
-                                    LOG.error("Error encountered in writing zip file to data directory. " + ex.getMessage());
-                                    LOG.error("For UUID: " + queuedMessageId);
-                                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in writing zip file to data directory. ", ex);
-                                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "For UUID: " + queuedMessageId);
-                                    System.exit(-1);
-                                }
-
                             } catch (Exception ex) {
                                 LOG.info("**********");
-                                LOG.error("Error encountered in getting zip file from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
+                                LOG.error("Error encountered in writing zip file to data directory. " + ex.getMessage());
                                 LOG.error("For UUID: " + queuedMessageId);
-                                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting zip file from data_generator.subscriber_zip_file_uuids table. ", ex);
+                                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in writing zip file to data directory. ", ex);
                                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "For UUID: " + queuedMessageId);
                                 System.exit(-1);
                             }
+
 
                             if (sendBatchSizeCounter % SENDING_BATCH_SIZE == 0) {
                                 processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
                                 maxBatchSizeSent = true;
                                 resultSetUuidsList.clear();
                             }
+
                         }
 
-                        resultSet.close();
+                        // resultSet.close();
 
                     } catch (Exception ex) {
                         LOG.info("**********");
                         // LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
-                        LOG.error("Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
-                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. ", ex);
+                        LOG.error("Error encountered in getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
+                        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table. ", ex);
                         System.exit(-1);
-
                     }
 
                 }
 
             } catch (Exception ex) {
                 LOG.info("**********");
-                // LOG.error("Error encountered in getting UUIDs from audit.queued_message table: " + ex.getMessage());
-                LOG.error("Error encountered in getting sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table. ", ex);
+                LOG.error("Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. ", ex);
                 System.exit(-1);
             }
 
@@ -556,7 +545,7 @@ public class Main {
         }
     } */
 
-    private static ResultSet getUnsentUUIDsCountFromDataGenTable(int subscriberId) throws Exception {
+    private static int getUnsentUUIDsCountFromDataGenTable(int subscriberId) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -577,15 +566,25 @@ public class Main {
             ps.setInt(1, subscriberId);
             ps.executeQuery();
             ResultSet resultSet = ps.getResultSet();
-            return resultSet;
+
+            resultSet.first();
+            int unsentUUIDs = resultSet.getInt(1);
+            resultSet.close();
+            return unsentUUIDs;
 
         } catch (Exception ex) {
             throw ex;
+
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+            entityManager.close();
         }
 
     }
 
-    private static ResultSet getUUIDsFromDataGenTable(int subscriberId) throws Exception {
+    private static List<Payload> getPayloadsFromDataGenTable(int subscriberId) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -608,17 +607,32 @@ public class Main {
             ps.setInt(2, UUIDS_LIMIT);
             ps.executeQuery();
             ResultSet resultSet = ps.getResultSet();
-            return resultSet;
+
+            List<Payload> payloadList = new ArrayList<>();
+
+            while (resultSet.next()) {
+
+                Payload payload = new Payload();
+                payload.setQueuedMessageId(UUID.fromString(resultSet.getString("queued_message_uuid")));
+                payload.setFilingOrder(resultSet.getLong("filing_order"));
+                payload.setQueuedMessageBody(Base64.getDecoder().decode(resultSet.getString("queued_message_body")));
+
+                payloadList.add(payload);
+
+            }
+
+            return payloadList;
 
         } catch (Exception ex) {
             throw ex;
 
-        } /* finally {
+        } finally {
             if (ps != null) {
                 ps.close();
             }
             entityManager.close();
-        } */
+        }
+
     }
 
     private static void updateFileSentDateTimeInUUIDsTable(String queuedMessageId) throws Exception {
