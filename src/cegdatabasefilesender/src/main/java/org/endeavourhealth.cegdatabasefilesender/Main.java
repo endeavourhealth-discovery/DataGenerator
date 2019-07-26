@@ -570,6 +570,7 @@ public class Main {
             resultSet.first();
             int unsentUUIDs = resultSet.getInt(1);
             resultSet.close();
+            connection.close();
             return unsentUUIDs;
 
         } catch (Exception ex) {
@@ -620,7 +621,8 @@ public class Main {
                 payloadList.add(payload);
 
             }
-
+            resultSet.close();
+            connection.close();
             return payloadList;
 
         } catch (Exception ex) {
