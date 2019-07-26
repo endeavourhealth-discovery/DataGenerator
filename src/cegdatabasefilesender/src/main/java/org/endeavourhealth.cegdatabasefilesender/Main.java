@@ -39,7 +39,7 @@ public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static final int SENDING_BATCH_SIZE = 5000;
-    private static final int UUIDS_LIMIT = 100000;
+    private static final int UUIDS_LIMIT = 50000;
 
     // private static Main instance = null;
 
@@ -200,7 +200,7 @@ public class Main {
                 unsentUUIDs = getUnsentUUIDsCountFromDataGenTable(subscriberId);
 
                 LOG.info("**********");
-                LOG.info("Unsent UUIDs: ?", unsentUUIDs);
+                LOG.info("Unsent UUIDs: " + unsentUUIDs);
                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unsent UUIDs: " + unsentUUIDs);
 
                 int processingCycles = unsentUUIDs / UUIDS_LIMIT;
@@ -211,7 +211,7 @@ public class Main {
                 for (int j = 0; j < processingCycles; j++) {
 
                     LOG.info("**********");
-                    LOG.info("Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: ?", UUIDS_LIMIT);
+                    LOG.info("Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: " + UUIDS_LIMIT);
                     SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, up to limit of: " + UUIDS_LIMIT);
 
                     try {
