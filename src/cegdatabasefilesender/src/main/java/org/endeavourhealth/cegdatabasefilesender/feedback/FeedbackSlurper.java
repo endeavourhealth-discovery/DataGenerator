@@ -99,13 +99,17 @@ public class FeedbackSlurper implements AutoCloseable {
 
     private void processFiles(FeedbackHolder feedbackHolder) throws Exception {
 
+        int numberOfResultsFiles = feedbackHolder.getFileResults().size();
+        int resultsFilesNumber = 0;
         int successResults = 0;
         int failureResults = 0;
 
         for (FileResult fileResult : feedbackHolder.getFileResults()) {
 
-            logger.info("Processing the file {}");
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing the file {}");
+            resultsFilesNumber++;
+
+            logger.info("Processing file number " + resultsFilesNumber + ", out of " + numberOfResultsFiles + " files.");
+            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing file number " + resultsFilesNumber + ", out of " + numberOfResultsFiles + " files.");
 
             for(Result result : fileResult.getResults()) {
                 switch (result.getType()) {

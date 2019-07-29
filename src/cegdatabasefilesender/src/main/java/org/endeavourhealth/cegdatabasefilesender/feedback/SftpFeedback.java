@@ -115,7 +115,7 @@ public class SftpFeedback {
     private String unzip(File file) throws Exception {
 
         logger.info("Unzipping the file {}", file.getName());
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unzipping the file " + file.getName());
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unzipping the file " + file.getName());
 
         ZipFile zipFile = new ZipFile(file);
 
@@ -179,7 +179,7 @@ public class SftpFeedback {
                 paths.add(path);
 
                 logger.info("Removing from SFTP the file {}", entry.getFilename());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Removing from SFTP the file " + entry.getFilename());
+                // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Removing from SFTP the file " + entry.getFilename());
 
                 channelSftp.rm(sourcePath);
 

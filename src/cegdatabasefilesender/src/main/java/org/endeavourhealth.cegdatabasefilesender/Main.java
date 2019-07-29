@@ -110,6 +110,7 @@ public class Main {
 
         }
         resultSet.close();
+        connection.close();
         ps.close();
 
         LOG.info("**********");
