@@ -35,6 +35,11 @@ create table data_generator.subscriber_zip_file_uuids (
     
     primary key (queued_message_uuid)
 );
+
+use data_generator;
+CREATE INDEX subscriber_zip_file_uuids_filing_order
+  ON subscriber_zip_file_uuids
+  (filing_order DESC);
     
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',

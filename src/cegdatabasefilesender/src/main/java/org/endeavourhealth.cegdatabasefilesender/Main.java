@@ -347,7 +347,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Deleting contents of data directory.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting contents of data directory.");
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Deleting contents of data directory.");
 
         try {
             // TODO Comment out and uncomment the line below as necessary
@@ -362,7 +362,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory for first part of multi-part zip file, to PGP encrypt it.");
 
         try {
             File zipFile = new File(stagingDir.getAbsolutePath() + File.separator +
@@ -383,7 +383,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Checking staging directory to send contents to CEG SFTP location.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory to send contents to CEG SFTP location.");
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Checking staging directory to send contents to CEG SFTP location.");
 
         try {
             ConnectionDetails con = setSubscriberConfigSftpConnectionDetails(config);
@@ -433,7 +433,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info("Archiving contents of staging directory.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving contents of staging directory.");
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving contents of staging directory.");
 
         try {
             File[] files = stagingDir.listFiles();
@@ -746,7 +746,7 @@ public class Main {
 
         LOG.info("**********");
         LOG.info(stagingDir.listFiles().length + " multi-part zip file/s successfully created.");
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " multi-part zip file/s successfully created.");
+        // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, stagingDir.listFiles().length + " multi-part zip file/s successfully created.");
     }
 
     private static boolean encryptFile(File file, File cert) throws Exception {

@@ -130,7 +130,7 @@ public class SftpFeedback {
         }
 
         logger.info("Archiving the file {}", file.getName());
-        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Archiving the file " + file.getName());
+        SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unzipping and archiving the file " + file.getName());
 
         File archiveDir = new File(archiveDirString);
         if (!(archiveDir.exists())) {
@@ -171,7 +171,7 @@ public class SftpFeedback {
             for (ChannelSftp.LsEntry entry : filteredFiles) {
 
                 logger.info("Retrieving from SFTP the file {}", entry.getFilename());
-                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Retrieving from SFTP the file " + entry.getFilename());
+                // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Retrieving from SFTP the file " + entry.getFilename());
 
                 String sourcePath = resultsSourceDir + entry.getFilename();
                 channelSftp.get(sourcePath, destinationPath + entry.getFilename());
@@ -179,7 +179,7 @@ public class SftpFeedback {
                 paths.add(path);
 
                 logger.info("Removing from SFTP the file {}", entry.getFilename());
-                // SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Removing from SFTP the file " + entry.getFilename());
+                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Retrieving and removing from SFTP the file " + entry.getFilename());
 
                 channelSftp.rm(sourcePath);
 
