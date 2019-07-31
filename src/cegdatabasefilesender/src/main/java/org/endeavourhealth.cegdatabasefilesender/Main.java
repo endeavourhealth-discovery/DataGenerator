@@ -38,7 +38,7 @@ import net.lingala.zip4j.util.Zip4jConstants;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    private static final int SENDING_BATCH_SIZE = 5000;
+    private static final int SENDING_BATCH_SIZE = 4000;
     private static final int UUIDS_LIMIT = 50000;
 
     // private static Main instance = null;
@@ -218,7 +218,8 @@ public class Main {
                     try {
 
                         // ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
-                        List<Payload> payloadList = getPayloadsFromDataGenTable(subscriberId);
+
+                        List<Payload> payloadList = getPayloadsFromDataGenTable(subscriberId, UUIDS_LIMIT);
 
                         int sendBatchSizeCounter = 0;
 
@@ -266,6 +267,18 @@ public class Main {
 
                         }
 
+                        if ((dataDir.listFiles().length == 0)) {
+
+                            if (!maxBatchSizeSent) {
+                                LOG.info("**********");
+                                LOG.info("No zip files to send for subscriber_id {}.", subscriberId);
+                                SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "No zip files to send for subscriber_id " + subscriberId);
+                            }
+
+                        } else {
+                            processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
+                        }
+
                         // resultSet.close();
 
                     } catch (Exception ex) {
@@ -283,18 +296,6 @@ public class Main {
                 LOG.error("Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. " + ex.getMessage());
                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in getting unsent UUIDs count from data_generator.subscriber_zip_file_uuids table. ", ex);
                 System.exit(-1);
-            }
-
-            if ((dataDir.listFiles().length == 0)) {
-
-                if (!maxBatchSizeSent) {
-                    LOG.info("**********");
-                    LOG.info("No zip files to send for subscriber_id {}.", subscriberId);
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "No zip files to send for subscriber_id " + subscriberId);
-                }
-
-            } else {
-                processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
             }
 
             LOG.info("**********");
@@ -586,7 +587,7 @@ public class Main {
 
     }
 
-    private static List<Payload> getPayloadsFromDataGenTable(int subscriberId) throws Exception {
+    private static List<Payload> getPayloadsFromDataGenTable(int subscriberId, int uuidsLimit) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -606,7 +607,7 @@ public class Main {
             ps = connection.prepareStatement(sql);
             ps.clearParameters();
             ps.setInt(1, subscriberId);
-            ps.setInt(2, UUIDS_LIMIT);
+            ps.setInt(2, uuidsLimit);
             ps.executeQuery();
             ResultSet resultSet = ps.getResultSet();
 
