@@ -150,10 +150,13 @@ public class Main {
                     LOG.info("Successfully filed: " + nSuccess);
                     LOG.info("Unsuccessfully filed: " + nFailures);
                     if (success) {
+                        //TODO: temporarily removed while doing bulk
+                        /*
                         File dest = new File(successDir.getAbsolutePath() +
                                 File.separator + format.format(new Date()) + "_" + filename);
                         LOG.info("Moving " + filename + " to success directory.");
                         FileUtils.copyFile(sourceFile, dest);
+                        */
                     } else {
                         File dest = new File(failureDir.getAbsolutePath() +
                                 File.separator + format.format(new Date()) + "_" + filename);
