@@ -102,75 +102,6 @@ public class Main {
                     FileUtils.forceDelete(file);
                     FileUtils.copyFile(merge, file);
                     FileUtils.forceDelete(merge);
-
-                    LOG.info("Deflating zip file: " + file.getName());
-                    zipFile = new ZipFile(file);
-                    String destPath = stagingDir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
-                    File dir = new File(destPath);
-                    dir.mkdirs();
-                    zipFile.extractAll(destPath);
-
-                    File[] zips = FilerUtil.getFilesFromDirectory(destPath, ".zip");
-                    LOG.info("Files in source directory: " + zips.length);
-
-                    Connection con = FilerUtil.getConnection(properties);
-                    String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
-                    LOG.info("Database connection established.");
-                    con.close();
-
-                    boolean success = true;
-                    int nSuccess = 0;
-                    int nFailures = 0;
-                    ArrayList<String> lSuccess = new ArrayList();
-                    ArrayList<String> lFailures = new ArrayList();
-                    FileInputStream stream = null;
-                    Arrays.sort(zips);
-                    for (File zip : zips) {
-                        stream = new FileInputStream(zip);
-                        byte[] bytes = IOUtils.toByteArray(stream);
-                        LOG.trace("Filing " + bytes.length + "b from file " + zip.getName() + " into DB Server");
-                        try {
-                            RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                    properties, keywordEscapeChar, batchSize, bytes);
-                            nSuccess++;
-                            lSuccess.add(zip.getName().substring(24, 60));
-                        } catch (Exception e) {
-                            nFailures++;
-                            success = false;
-                            lFailures.add(zip.getName().substring(24,60) + "," + e.getMessage());
-                        }
-                        stream.close();
-                        FileUtils.forceDelete(zip);
-                    }
-                    SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-                    File source = new File(destPath);
-                    File sourceFile = new File(source.getAbsolutePath() + ".zip");
-                    String filename = sourceFile.getName();
-                    LOG.info("Completed processing: " + filename);
-                    LOG.info("Successfully filed: " + nSuccess);
-                    LOG.info("Unsuccessfully filed: " + nFailures);
-                    if (success) {
-                        //TODO: temporarily removed while doing bulk
-                        /*
-                        File dest = new File(successDir.getAbsolutePath() +
-                                File.separator + format.format(new Date()) + "_" + filename);
-                        LOG.info("Moving " + filename + " to success directory.");
-                        FileUtils.copyFile(sourceFile, dest);
-                        */
-                    } else {
-                        File dest = new File(failureDir.getAbsolutePath() +
-                                File.separator + format.format(new Date()) + "_" + filename);
-                        LOG.info("Moving " + filename + " to failure directory.");
-                        FileUtils.copyFile(sourceFile, dest);
-                    }
-                    LOG.info("Generating summary file: " + sourceFile.getName().replace("Data","Results"));
-                    File summary = FilerUtil.createSummaryFiles(sourceFile, lSuccess, lFailures);
-                    sftp.open();
-                    LOG.info("Uploading summary file: " + summary.getName());
-                    sftp.put(summary.getAbsolutePath(), properties.getProperty(FilerConstants.RESULTS));
-                    sftp.close();
-                    FileUtils.deleteDirectory(source);
-                    FileUtils.forceDelete(summary);
                 } catch (ZipException ex) {
                     if (ex.getMessage().equalsIgnoreCase("archive not a split zip file")) {
                         LOG.info("File is not multi-part. " + file.getName());
@@ -178,6 +109,75 @@ public class Main {
                         throw ex;
                     }
                 }
+
+                LOG.info("Deflating zip file: " + file.getName());
+                zipFile = new ZipFile(file);
+                String destPath = stagingDir.getAbsolutePath() + File.separator + file.getName().substring(0, file.getName().length() - 4);
+                File dir = new File(destPath);
+                dir.mkdirs();
+                zipFile.extractAll(destPath);
+
+                File[] zips = FilerUtil.getFilesFromDirectory(destPath, ".zip");
+                LOG.info("Files in source directory: " + zips.length);
+
+                Connection con = FilerUtil.getConnection(properties);
+                String keywordEscapeChar = con.getMetaData().getIdentifierQuoteString();
+                LOG.info("Database connection established.");
+                con.close();
+
+                boolean success = true;
+                int nSuccess = 0;
+                int nFailures = 0;
+                ArrayList<String> lSuccess = new ArrayList();
+                ArrayList<String> lFailures = new ArrayList();
+                FileInputStream stream = null;
+                Arrays.sort(zips);
+                for (File zip : zips) {
+                    stream = new FileInputStream(zip);
+                    byte[] bytes = IOUtils.toByteArray(stream);
+                    LOG.trace("Filing " + bytes.length + "b from file " + zip.getName() + " into DB Server");
+                    try {
+                        RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
+                                properties, keywordEscapeChar, batchSize, bytes);
+                        nSuccess++;
+                        lSuccess.add(zip.getName().substring(24, 60));
+                    } catch (Exception e) {
+                        nFailures++;
+                        success = false;
+                        lFailures.add(zip.getName().substring(24,60) + "," + e.getMessage());
+                    }
+                    stream.close();
+                    FileUtils.forceDelete(zip);
+                }
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+                File source = new File(destPath);
+                File sourceFile = new File(source.getAbsolutePath() + ".zip");
+                String filename = sourceFile.getName();
+                LOG.info("Completed processing: " + filename);
+                LOG.info("Successfully filed: " + nSuccess);
+                LOG.info("Unsuccessfully filed: " + nFailures);
+                if (success) {
+                    //TODO: temporarily removed while doing bulk
+                    /*
+                    File dest = new File(successDir.getAbsolutePath() +
+                            File.separator + format.format(new Date()) + "_" + filename);
+                    LOG.info("Moving " + filename + " to success directory.");
+                    FileUtils.copyFile(sourceFile, dest);
+                    */
+                } else {
+                    File dest = new File(failureDir.getAbsolutePath() +
+                            File.separator + format.format(new Date()) + "_" + filename);
+                    LOG.info("Moving " + filename + " to failure directory.");
+                    FileUtils.copyFile(sourceFile, dest);
+                }
+                LOG.info("Generating summary file: " + sourceFile.getName().replace("Data","Results"));
+                File summary = FilerUtil.createSummaryFiles(sourceFile, lSuccess, lFailures);
+                sftp.open();
+                LOG.info("Uploading summary file: " + summary.getName());
+                sftp.put(summary.getAbsolutePath(), properties.getProperty(FilerConstants.RESULTS));
+                sftp.close();
+                FileUtils.deleteDirectory(source);
+                FileUtils.forceDelete(summary);
             }
 
             FileUtils.deleteDirectory(stagingDir);
