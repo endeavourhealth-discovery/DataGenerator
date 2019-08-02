@@ -38,8 +38,10 @@ import net.lingala.zip4j.util.Zip4jConstants;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    private static final int SENDING_BATCH_SIZE = 4000;
-    private static final int UUIDS_LIMIT = 50000;
+
+    private static final int PER_RUN_SEND_LIMIT_PER_SUB = 300000;
+    private static final int UUIDS_PROC_CYCLE_LIMIT = 30000;
+    private static final int SENDING_BATCH_SIZE = 3000;
 
     // private static Main instance = null;
 
@@ -198,28 +200,28 @@ public class Main {
                 // LOG.info("Getting UUIDs from data_generator.subscriber_zip_file_uuids table.");
 
                 int unsentUUIDs = 0;
-                unsentUUIDs = getUnsentUUIDsCountFromDataGenTable(subscriberId);
+                unsentUUIDs = getUnsentUUIDsCountFromDataGenTable(subscriberId, PER_RUN_SEND_LIMIT_PER_SUB);
 
                 LOG.info("**********");
                 LOG.info("Unsent UUIDs: " + unsentUUIDs);
                 SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Unsent UUIDs: " + unsentUUIDs);
 
-                int processingCycles = unsentUUIDs / UUIDS_LIMIT;
-                if (!(unsentUUIDs % UUIDS_LIMIT == 0)) {
+                int processingCycles = unsentUUIDs / UUIDS_PROC_CYCLE_LIMIT;
+                if (!(unsentUUIDs % UUIDS_PROC_CYCLE_LIMIT == 0)) {
                     processingCycles++;
                 }
 
                 for (int j = 0; j < processingCycles; j++) {
 
                     LOG.info("**********");
-                    LOG.info("Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: " + UUIDS_LIMIT);
-                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, up to limit of: " + UUIDS_LIMIT);
+                    LOG.info("Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, to write to data directory, up to limit of: " + UUIDS_PROC_CYCLE_LIMIT);
+                    SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Getting payload sets of zipped CSV files from data_generator.subscriber_zip_file_uuids table, up to limit of: " + UUIDS_PROC_CYCLE_LIMIT);
 
                     try {
 
                         // ResultSet resultSet = getUUIDsFromDataGenTable(subscriberId);
 
-                        List<Payload> payloadList = getPayloadsFromDataGenTable(subscriberId, UUIDS_LIMIT);
+                        List<Payload> payloadList = getPayloadsFromDataGenTable(subscriberId, UUIDS_PROC_CYCLE_LIMIT);
 
                         int sendBatchSizeCounter = 0;
 
@@ -547,7 +549,7 @@ public class Main {
         }
     } */
 
-    private static int getUnsentUUIDsCountFromDataGenTable(int subscriberId) throws Exception {
+    private static int getUnsentUUIDsCountFromDataGenTable(int subscriberId, int sendLimit) throws Exception {
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -557,7 +559,7 @@ public class Main {
             SessionImpl session = (SessionImpl) entityManager.getDelegate();
             Connection connection = session.connection();
 
-            String sql = "select count(batch_uuid)"
+            String sql = "select if(count(batch_uuid) > ?, ?, count(batch_uuid))"
                     + " from data_generator.subscriber_zip_file_uuids"
                     + " where subscriber_id = ?"
                     + " and file_sent is null"
@@ -565,7 +567,9 @@ public class Main {
 
             ps = connection.prepareStatement(sql);
             ps.clearParameters();
-            ps.setInt(1, subscriberId);
+            ps.setInt(1, sendLimit);
+            ps.setInt(2, sendLimit);
+            ps.setInt(3, subscriberId);
             ps.executeQuery();
             ResultSet resultSet = ps.getResultSet();
 
