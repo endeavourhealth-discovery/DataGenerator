@@ -559,7 +559,7 @@ public class Main {
             SessionImpl session = (SessionImpl) entityManager.getDelegate();
             Connection connection = session.connection();
 
-            String sql = "select if(count(batch_uuid) > ?, ?, count(batch_uuid))"
+            String sql = "select if(count(*) > ?, ?, count(*))"
                     + " from data_generator.subscriber_zip_file_uuids"
                     + " where subscriber_id = ?"
                     + " and file_sent is null"
