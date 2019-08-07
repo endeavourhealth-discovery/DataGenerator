@@ -39,9 +39,9 @@ public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-    private static final int PER_RUN_SEND_LIMIT_PER_SUB = 300000;
-    private static final int UUIDS_PROC_CYCLE_LIMIT = 30000;
-    private static final int SENDING_BATCH_SIZE = 3000;
+    private static final int PER_RUN_SEND_LIMIT_PER_SUB = 250000;
+    private static final int UUIDS_PROC_CYCLE_LIMIT = 25000;
+    private static final int SENDING_BATCH_SIZE = 2500;
 
     // private static Main instance = null;
 
