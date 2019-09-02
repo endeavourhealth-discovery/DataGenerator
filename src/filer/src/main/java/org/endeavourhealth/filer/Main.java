@@ -165,10 +165,13 @@ public class Main {
                     FileUtils.copyFile(sourceFile, dest);
                     */
                 } else {
+                    //TODO: temporarily removed while doing bulk
+                    /*
                     File dest = new File(failureDir.getAbsolutePath() +
                             File.separator + format.format(new Date()) + "_" + filename);
                     LOG.info("Moving " + filename + " to failure directory.");
                     FileUtils.copyFile(sourceFile, dest);
+                    */
                 }
                 LOG.info("Generating summary file: " + sourceFile.getName().replace("Data","Results"));
                 File summary = FilerUtil.createSummaryFiles(sourceFile, lSuccess, lFailures);
