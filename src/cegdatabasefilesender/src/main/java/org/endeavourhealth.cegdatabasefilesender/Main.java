@@ -262,7 +262,7 @@ public class Main {
 
 
                             if (sendBatchSizeCounter % SENDING_BATCH_SIZE == 0) {
-                                processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
+                                processZipFilesSendBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
                                 maxBatchSizeSent = true;
                                 resultSetUuidsList.clear();
                             }
@@ -278,7 +278,7 @@ public class Main {
                             }
 
                         } else {
-                            processZipFilesBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
+                            processZipFilesSendBatch(dataDir, stagingDir, destinationDir, archiveDir, pgpCertFile, resultSetUuidsList, config);
                         }
 
                         // resultSet.close();
@@ -327,9 +327,9 @@ public class Main {
         }
     }
 
-    private static void processZipFilesBatch(File dataDir, File stagingDir, String destinationDir,
-                                             File archiveDir, File pgpCertFile, List<UUID> resultSetUuidsList,
-                                             SubscriberFileSenderConfig config) {
+    private static void processZipFilesSendBatch(File dataDir, File stagingDir, String destinationDir,
+                                                 File archiveDir, File pgpCertFile, List<UUID> resultSetUuidsList,
+                                                 SubscriberFileSenderConfig config) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         String fileDate = sdf.format(new Date());
@@ -471,7 +471,7 @@ public class Main {
             String uuidString = uuid.toString();
 
             try {
-                updateFileSentDateTimeInUUIDsTable(uuidString);
+                updateFileSentDateTimeInDataGenTable(uuidString);
 
             } catch (Exception ex) {
                 LOG.info("**********");
@@ -643,7 +643,7 @@ public class Main {
 
     }
 
-    private static void updateFileSentDateTimeInUUIDsTable(String queuedMessageId) throws Exception {
+    private static void updateFileSentDateTimeInDataGenTable(String queuedMessageId) throws Exception {
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
 
