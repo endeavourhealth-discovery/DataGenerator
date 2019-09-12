@@ -22,7 +22,7 @@ create table data_generator.subscriber_file_sender (
 create table data_generator.subscriber_zip_file_uuids (
 	subscriber_id int not null comment 'The id of the subscriber file send.',
     batch_uuid varchar(36) not null comment 'The uuid identifying the batch of which the zip file data is a part.',
-    queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field 
+    queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field
 													  in the audit.queued_message table.',
 	queued_message_body mediumtext comment 'The zip file (of the set of csv files) data that has come from that table.',
     -- queued_message_timestamp datetime not null comment 'The timestamp field of the entry in the audit.queued_message table.',
@@ -32,14 +32,46 @@ create table data_generator.subscriber_zip_file_uuids (
     file_filing_attempted datetime comment 'When the filing was attempted at the receiving end.',
     file_filing_success boolean comment 'Whether the filing was a success at the receiving end.',
     filing_failure_message text comment 'The error message generated at the receiving end.',
-    
+
     primary key (queued_message_uuid)
 );
 
 use data_generator;
-CREATE INDEX subscriber_zip_file_uuids_filing_order
-  ON subscriber_zip_file_uuids
-  (filing_order DESC);
+create INDEX subscriber_zip_file_uuids_filing_order_asc
+    ON subscriber_zip_file_uuids
+        (filing_order ASC);
+
+use data_generator;
+create INDEX subscriber_zip_file_uuids_filing_order_desc
+    ON subscriber_zip_file_uuids
+        (filing_order DESC);
+
+create table data_generator.subscriber_zip_file_uuids_archive (
+    subscriber_id int not null comment 'The id of the subscriber file send.',
+    batch_uuid varchar(36) not null comment 'The uuid identifying the batch of which the zip file data is a part.',
+    queued_message_uuid varchar(36) not null comment 'The uuid identifying the zip file data in the message_body field
+													  in the audit.queued_message table.',
+    -- queued_message_body mediumtext comment 'The zip file (of the set of csv files) data that has come from that table.',
+    -- queued_message_timestamp datetime not null comment 'The timestamp field of the entry in the audit.queued_message table.',
+    -- queued_message_type_id int(11) not null comment 'The type_id field of the entry in the audit.queued_message table.',
+    filing_order bigint not null comment 'Incrementing field to retain the order of applying the zip files.',
+    file_sent datetime comment 'When the file was sent to the SFTP.',
+    file_filing_attempted datetime comment 'When the filing was attempted at the receiving end.',
+    file_filing_success boolean comment 'Whether the filing was a success at the receiving end.',
+    filing_failure_message text comment 'The error message generated at the receiving end.',
+
+    primary key (queued_message_uuid)
+);
+
+use data_generator;
+create INDEX subscriber_zip_file_uuids_archive_filing_order_asc
+    ON subscriber_zip_file_uuids_archive
+        (filing_order ASC);
+
+use data_generator;
+create INDEX subscriber_zip_file_uuids_archive_filing_order_desc
+    ON subscriber_zip_file_uuids_archive
+        (filing_order DESC);
     
 create table data_generator.dataset (
 	dataset_id int not null comment 'The id of the dataset',
