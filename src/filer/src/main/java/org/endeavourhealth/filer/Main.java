@@ -144,7 +144,19 @@ public class Main {
                     } catch (Exception e) {
                         nFailures++;
                         success = false;
-                        lFailures.add(zip.getName().substring(24,60) + "," + e.getMessage());
+                        if (e.getMessage().contains("SQLServerPreparedStatement")) {
+                            if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getMessage() != null) {
+                                if (e.getCause().getCause().getMessage().length() < 65535) {
+                                    lFailures.add(zip.getName().substring(24,60) + "," + e.getCause().getCause().getMessage());
+                                } else {
+                                    lFailures.add(zip.getName().substring(24,60) + "," + e.getCause().getCause().getMessage().substring(0, 65534));
+                                }
+                            } else {
+                                lFailures.add(zip.getName().substring(24,60) + "," + e.getMessage());
+                            }
+                        } else {
+                            lFailures.add(zip.getName().substring(24,60) + "," + e.getMessage());
+                        }
                     }
                     stream.close();
                     FileUtils.forceDelete(zip);
