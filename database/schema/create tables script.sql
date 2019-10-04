@@ -2,8 +2,6 @@ drop database if exists data_generator;
 
 create database data_generator;
 
-drop table if exists data_generator.subscriber_file_sender;
-drop table if exists data_generator.subscriber_zip_file_uuids;
 drop table if exists data_generator.dataset;
 drop table if exists data_generator.extract;
 drop table if exists data_generator.cohort_results;

@@ -125,7 +125,7 @@ public class FeedbackRepository {
         String failureResultUuid = failureResult.getUuid();
         String failureResultMessage = failureResult.getErrorMessage();
 
-        //logger.info("Processing {}", failureResultUuid);
+        // logger.info("Processing {}", failureResultUuid);
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         PreparedStatement ps = null;
@@ -151,7 +151,7 @@ public class FeedbackRepository {
             ps.setString(2, failureResultMessage);
             ps.setString(3, failureResultUuid);
 
-            //logger.info(ps.toString());
+            // logger.info(ps.toString());
 
             ps.executeUpdate();
             entityManager.getTransaction().commit();
