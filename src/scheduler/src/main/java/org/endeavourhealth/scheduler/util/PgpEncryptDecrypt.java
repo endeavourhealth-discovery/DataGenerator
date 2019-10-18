@@ -40,7 +40,7 @@ public class PgpEncryptDecrypt {
                 cmsEnvelopedDataGenerator.addRecipientInfoGenerator(jceKey);
                 CMSTypedData msg = new CMSProcessableByteArray(data);
                 OutputEncryptor encrypt =
-                        new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(provider).build();
+                        new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(provider).build();
                 CMSEnvelopedData cmsEnvelopedData = cmsEnvelopedDataGenerator.generate(msg, encrypt);
 
                 output = new FileOutputStream(file);

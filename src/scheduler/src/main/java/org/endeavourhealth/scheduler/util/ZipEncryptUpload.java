@@ -9,6 +9,7 @@ import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
@@ -22,7 +23,7 @@ public class ZipEncryptUpload {
 
     public static void main(String[] args) throws IOException {
 
-        if (args == null || args.length != 7) {
+        if (args == null || args.length != 8) {
             LOG.error("Invalid parameters.");
             System.exit(-1);
         }
@@ -36,6 +37,7 @@ public class ZipEncryptUpload {
         LOG.info("Username          : " + args[4]);
         LOG.info("SFTP Location     : " + args[5]);
         LOG.info("Key File          : " + args[6]);
+        LOG.info("Certificate File  : " + args[7]);
         LOG.info("");
 
         File source_dir = new File(args[0]);
@@ -111,7 +113,7 @@ public class ZipEncryptUpload {
                     File.separator +
                     source_dir.getName() +
                     ".zip");
-            if (!ZipEncryptUpload.encryptFile(zipFile)) {
+            if (!ZipEncryptUpload.encryptFile(zipFile, new File(args[7]))) {
                 LOG.info("");
                 LOG.error("Unable to encrypt the zip file/s. ");
                 LOG.info("");
@@ -170,15 +172,14 @@ public class ZipEncryptUpload {
         LOG.info("");
     }
 
-    public static boolean encryptFile(File file) throws Exception {
+    public static boolean encryptFile(File file, File cert) throws Exception {
 
         X509Certificate certificate = null;
         try {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
             certificate =
-                    (X509Certificate) certFactory.generateCertificate(
-                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
+                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(cert));
         } catch (CertificateException e) {
             LOG.error("Error encountered in certificate generation. " + e.getMessage());
             throw e;
