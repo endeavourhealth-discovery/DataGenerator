@@ -38,7 +38,7 @@ public class Main {
 
             char[] keystorePassword = args[2].toCharArray();
             KeyStore keystore = KeyStore.getInstance("PKCS12");
-            keystore.load(Main.class.getClassLoader().getResourceAsStream(args[0]), keystorePassword);
+            keystore.load(new FileInputStream(new File(args[0])), keystorePassword);
 
             char[] keyPassword = args[2].toCharArray();
             PrivateKey key = (PrivateKey) keystore.getKey(args[1], keyPassword);
