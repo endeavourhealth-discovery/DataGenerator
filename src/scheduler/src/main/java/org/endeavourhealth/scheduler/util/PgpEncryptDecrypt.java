@@ -119,8 +119,9 @@ public class PgpEncryptDecrypt {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
             certificate =
-                    (X509Certificate) certFactory.generateCertificate(
-                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
+                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(new File(args[0])));
+        } catch (FileNotFoundException e) {
+            LOG.error("Certificate file not found. " + e.getMessage());
         } catch (CertificateException e) {
             LOG.error("Error encountered in certificate generation. " + e.getMessage());
         } catch (NoSuchProviderException e) {

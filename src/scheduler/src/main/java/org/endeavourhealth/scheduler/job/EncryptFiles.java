@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -50,23 +52,11 @@ public class EncryptFiles implements Job {
             LOG.error("Unknown error encountered in encrypt handling. " + e.getMessage());
         }
 
-        X509Certificate certificate = null;
-        try {
-            Security.addProvider(new BouncyCastleProvider());
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
-            certificate =
-                    (X509Certificate) certFactory.generateCertificate(
-                            EncryptFiles.class.getClassLoader().getResourceAsStream("discovery.cer"));
-        } catch (CertificateException e) {
-            LOG.error("Error encountered in certificate generation. " + e.getMessage());
-        } catch (NoSuchProviderException e) {
-            LOG.error("Error encountered in certificate provider. " + e.getMessage());
-        }
-
         LOG.info("Beginning of encrypting zip files");
 
         List<FileTransactionsEntity> toProcess;
         String location = null;
+        String certFile = null;
         Main main = Main.getInstance();
         for (ExtractEntity entity : extractsToProcess) {
 
@@ -81,6 +71,21 @@ public class EncryptFiles implements Job {
                     location += File.separator;
                 }
                 LOG.debug("Location: " + location);
+
+                X509Certificate certificate = null;
+                certFile = config.getFileLocationDetails().getCertificate();
+                try {
+                    Security.addProvider(new BouncyCastleProvider());
+                    CertificateFactory certFactory = CertificateFactory.getInstance("X.509", PROVIDER);
+                    certificate =
+                            (X509Certificate) certFactory.generateCertificate(new FileInputStream(new File(certFile)));
+                } catch (FileNotFoundException e) {
+                    LOG.error("Certificate file not found. " + e.getMessage());
+                } catch (CertificateException e) {
+                    LOG.error("Error encountered in certificate generation. " + e.getMessage());
+                } catch (NoSuchProviderException e) {
+                    LOG.error("Error encountered in certificate provider. " + e.getMessage());
+                }
 
                 //retrieve files for encryption
                 toProcess = FileTransactionsEntity.getFilesForEncryption(entity.getExtractId());

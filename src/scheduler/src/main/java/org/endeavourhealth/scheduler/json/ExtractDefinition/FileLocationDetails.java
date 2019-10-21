@@ -5,6 +5,7 @@ public class FileLocationDetails {
     private String source = null;
     private String destination = null;
     private String housekeep = null;
+    private String certificate = null;
 
     /* private FileLocationDetails() {}
 
@@ -37,4 +38,7 @@ public class FileLocationDetails {
         this.housekeep = housekeep;
     }
 
+    public String getCertificate() { return certificate; }
+
+    public void setCertificate(String certificate) { this.certificate = certificate; }
 }
