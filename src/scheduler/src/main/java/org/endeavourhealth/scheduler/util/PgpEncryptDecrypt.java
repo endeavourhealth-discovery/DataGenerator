@@ -114,12 +114,19 @@ public class PgpEncryptDecrypt {
 
     public static void main(String args[]) {
 
+        if (args.length != 2) {
+            LOG.info("Application requires 2 parameters.");
+            LOG.info("Parameter 1: File to encrypt");
+            LOG.info("Parameter 2: Certificate file");
+            return;
+        }
+
         X509Certificate certificate = null;
         try {
             Security.addProvider(new BouncyCastleProvider());
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
             certificate =
-                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(new File(args[0])));
+                    (X509Certificate) certFactory.generateCertificate(new FileInputStream(new File(args[1])));
         } catch (FileNotFoundException e) {
             LOG.error("Certificate file not found. " + e.getMessage());
         } catch (CertificateException e) {
@@ -131,7 +138,6 @@ public class PgpEncryptDecrypt {
         File file = new File(args[0]);
         boolean success = PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
         if (success) {
-
             LOG.info("File: " + args[0] + " encrypted.");
         }
     }
