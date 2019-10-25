@@ -22,14 +22,14 @@ public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         if (args.length != 4) {
             LOG.info("Application requires 4 parameters.");
             LOG.info("Parameter 1: P12 file");
             LOG.info("Parameter 2: Alias");
             LOG.info("Parameter 3: Password");
-            LOG.info("Parameter 4: Main file (.zip) that needs to be decrypted.");
+            LOG.info("Parameter 4: File that needs to be decrypted.");
             return;
         }
 
@@ -44,27 +44,28 @@ public class Main {
             PrivateKey key = (PrivateKey) keystore.getKey(args[1], keyPassword);
 
             File file = new File(args[3]);
-            if (!file.getName().contains(".zip")) {
-                LOG.info("Parameter 4 needs to be a zip file.");
-                return;
-            }
+            //if (!file.getName().contains(".zip")) {
+            //    LOG.info("Parameter 4 needs to be a zip file.");
+            //    return;
+            //}
 
-            Path path = FileSystems.getDefault().getPath(".").toAbsolutePath();
-            String sPath = path.toFile().getAbsolutePath();
-            sPath = sPath.substring(0, sPath.length() - 1);
-            File destination = new File(sPath);
+            //Path path = FileSystems.getDefault().getPath(".").toAbsolutePath();
+            //String sPath = path.toFile().getAbsolutePath();
+            //sPath = sPath.substring(0, sPath.length() - 1);
+            //File destination = new File(sPath);
 
-            File[] files = getFilesFromDirectory(file.getParent(), file.getName().substring(0, file.getName().length() - 2));
-            if (files != null && files.length != 0) {
-                for (File zipPart : files) {
-                    FileUtils.copyFileToDirectory(zipPart, destination, false);
-                    LOG.info("Encrypted file: " + file.getAbsolutePath() + " copied to: " + destination.getAbsolutePath());
-                }
-            }
+            //File[] files = getFilesFromDirectory(file.getParent(), file.getName().substring(0, file.getName().length() - 2));
+            //if (files != null && files.length != 0) {
+            //    for (File zipPart : files) {
+            //        FileUtils.copyFileToDirectory(zipPart, destination, false);
+            //        LOG.info("Encrypted file: " + file.getAbsolutePath() + " copied to: " + destination.getAbsolutePath());
+            //    }
+            //}
 
-            File unencrypted = new File(destination.getAbsolutePath() + File.separator + file.getName());
-            if (Main.decryptFile(unencrypted, key)) {
-                LOG.info(unencrypted.getAbsolutePath() + " was decrypted.");
+            //File unencrypted = new File(destination.getAbsolutePath() + File.separator + file.getName());
+
+            if (Main.decryptFile(file, key)) {
+                LOG.info(file.getAbsolutePath() + " was decrypted.");
             } else {
                 LOG.info("File decryption failed.");
             }
