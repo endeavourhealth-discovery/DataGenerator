@@ -5,7 +5,6 @@ import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.endeavourhealth.scheduler.job.EncryptFiles;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -109,6 +108,23 @@ public class ZipEncryptUpload {
         }
 
         try {
+            for (File file : staging_dir.listFiles()) {
+                if (!ZipEncryptUpload.encryptFile(file, new File(args[7]))) {
+                    LOG.info("");
+                    LOG.error("Unable to encrypt the zip file/s. ");
+                    LOG.info("");
+                    System.exit(-1);
+                }
+            }
+        } catch (Exception e) {
+            LOG.info("");
+            LOG.error("Unable to encrypt the zip file/s. " + e.getMessage());
+            LOG.info("");
+            System.exit(-1);
+        }
+
+        /*
+        try {
             File zipFile = new File(staging_dir.getAbsolutePath() +
                     File.separator +
                     source_dir.getName() +
@@ -125,6 +141,7 @@ public class ZipEncryptUpload {
             LOG.info("");
             System.exit(-1);
         }
+        */
 
         try {
             sftp.open();
