@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
@@ -29,6 +30,7 @@ public class RemoteServerFiler {
 
     private static final String COLUMN_CLASS_MAPPINGS = "ColumnClassMappings.json";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd kk:mm:ss";
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT;
 
     private static final String COL_IS_DELETE = "is_delete";
@@ -321,7 +323,14 @@ public class RemoteServerFiler {
             if (Strings.isNullOrEmpty(value)) {
                 statement.setNull(index, Types.DATE);
             } else {
-                Date d = new SimpleDateFormat(DATE_FORMAT).parse(value);
+                //Date d = new SimpleDateFormat(DATE_FORMAT).parse(value);
+                //statement.setTimestamp(index, new Timestamp(d.getTime()));
+                Date d = null;
+                try {
+                    d = new SimpleDateFormat(DATE_TIME_FORMAT).parse(value);
+                } catch (ParseException e) {
+                    d = new SimpleDateFormat(DATE_FORMAT).parse(value);
+                }
                 statement.setTimestamp(index, new Timestamp(d.getTime()));
             }
 
