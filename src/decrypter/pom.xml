@@ -35,6 +35,11 @@
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>${lingala.zip4j.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
