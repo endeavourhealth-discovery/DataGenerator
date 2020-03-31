@@ -34,6 +34,8 @@ public class Main {
             System.exit(-1);
         }
 
+        boolean enterprise = Boolean.valueOf(properties.getProperty(FilerConstants.ENTERPRISE, "false"));
+
         File stagingDir = new File(properties.getProperty(FilerConstants.STAGING));
         File successDir = new File(properties.getProperty(FilerConstants.SUCCESS));
         File failureDir = new File(properties.getProperty(FilerConstants.FAILURE));
@@ -137,8 +139,13 @@ public class Main {
                     byte[] bytes = IOUtils.toByteArray(stream);
                     LOG.trace("Filing " + bytes.length + "b from file " + zip.getName() + " into DB Server");
                     try {
-                        RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                properties, keywordEscapeChar, batchSize, bytes);
+                        if (enterprise) {
+                            RemoteEnterpriseFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
+                                    properties, keywordEscapeChar, batchSize, bytes);
+                        } else {
+                            RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
+                                    properties, keywordEscapeChar, batchSize, bytes);
+                        }
                         nSuccess++;
                         lSuccess.add(zip.getName().substring(24, 60));
                     } catch (Exception e) {

@@ -2,6 +2,8 @@ package org.endeavourhealth.filer.models;
 
 public class FilerConstants {
 
+    public static final String ENTERPRISE = "enterprise.schema";
+
     public static final String STAGING = "directory.staging";
     public static final String SUCCESS = "directory.success";
     public static final String FAILURE = "directory.failure";
