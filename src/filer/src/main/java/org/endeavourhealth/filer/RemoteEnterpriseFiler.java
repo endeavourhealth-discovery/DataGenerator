@@ -169,19 +169,48 @@ public class RemoteEnterpriseFiler {
         return baos.toByteArray();
     }
 
+    private static ArrayList<String> getTableColumns(Connection connection, String tableName) throws Exception{
+        ArrayList<String> columns = new ArrayList<>();
+        String sql = null;
+        if (ConnectionManager.isSqlServer(connection) || ConnectionManager.isPostgreSQL(connection)) {
+            sql = "select column_name as field from information_schema.columns where table_name = '" + tableName + "';";
+        } else {
+            sql = "describe " + tableName + ";";
+        }
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        while (resultSet.next()) {
+            columns.add(resultSet.getString("field"));
+        }
+        resultSet.close();
+        ps.close();
+        return columns;
+    }
+
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode allColumnClassMappings, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
+        ArrayList<String> actualColumns = getTableColumns(connection, tableName);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(csvBytes);
         InputStreamReader isr = new InputStreamReader(bais);
         CSVParser csvParser = new CSVParser(isr, CSV_FORMAT.withHeader());
 
-        //find out what columns we've got
         Map<String, Integer> csvHeaderMap = csvParser.getHeaderMap();
+        for (String column : csvHeaderMap.keySet()) {
+            if (!column.equals(COL_SAVE_MODE)) {
+                if (!actualColumns.contains(column)) {
+                    csvHeaderMap.remove(column);
+                }
+            }
+        }
+
+        //find out what columns we've got
         List<String> columns = new ArrayList<>();
         HashMap<String, Class> columnClasses = new HashMap<>();
         createHeaderColumnMap(csvHeaderMap, entryFileName, allColumnClassMappings, columns, columnClasses);
+
 
         //since we're dealing with small volumes, we can just read keep all the records in memory
         List<CSVRecord> upserts = new ArrayList<>();

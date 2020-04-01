@@ -170,13 +170,42 @@ public class RemoteServerFiler {
         return baos.toByteArray();
     }
 
+    private static ArrayList<String> getTableColumns(Connection connection, String tableName) throws Exception{
+        ArrayList<String> columns = new ArrayList<>();
+        String sql = null;
+        if (ConnectionManager.isSqlServer(connection) || ConnectionManager.isPostgreSQL(connection)) {
+            sql = "select column_name as field from information_schema.columns where table_name = '" + tableName + "';";
+        } else {
+            sql = "describe " + tableName + ";";
+        }
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        while (resultSet.next()) {
+            columns.add(resultSet.getString("field"));
+        }
+        resultSet.close();
+        ps.close();
+        return columns;
+    }
+
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode columnClassJson, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
+        ArrayList<String> actualColumns = getTableColumns(connection, tableName);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(csvBytes);
         InputStreamReader isr = new InputStreamReader(bais);
         CSVParser csvParser = new CSVParser(isr, CSV_FORMAT.withHeader());
+
+        Map<String, Integer> csvHeaderMap = csvParser.getHeaderMap();
+        for (String column : csvHeaderMap.keySet()) {
+            if (!column.equals(COL_IS_DELETE)) {
+                if (!actualColumns.contains(column)) {
+                    csvHeaderMap.remove(column);
+                }
+            }
+        }
 
         //find out what columns we've got
         List<String> columns = createHeaderList(csvParser);
