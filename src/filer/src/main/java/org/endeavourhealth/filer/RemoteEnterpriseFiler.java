@@ -197,13 +197,19 @@ public class RemoteEnterpriseFiler {
         InputStreamReader isr = new InputStreamReader(bais);
         CSVParser csvParser = new CSVParser(isr, CSV_FORMAT.withHeader());
 
+        ArrayList<String> removeCols = new ArrayList<>();
         Map<String, Integer> csvHeaderMap = csvParser.getHeaderMap();
         for (String column : csvHeaderMap.keySet()) {
             if (!column.equals(COL_SAVE_MODE)) {
                 if (!actualColumns.contains(column)) {
-                    csvHeaderMap.remove(column);
+                    removeCols.add(column);
                 }
             }
+        }
+
+        for (String column : removeCols) {
+            LOG.debug("Removing column:" + column + " from the header map for table:" + tableName);
+            csvHeaderMap.remove(column);
         }
 
         //find out what columns we've got

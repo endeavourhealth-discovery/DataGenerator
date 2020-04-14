@@ -198,17 +198,21 @@ public class RemoteServerFiler {
         InputStreamReader isr = new InputStreamReader(bais);
         CSVParser csvParser = new CSVParser(isr, CSV_FORMAT.withHeader());
 
-        Map<String, Integer> csvHeaderMap = csvParser.getHeaderMap();
-        for (String column : csvHeaderMap.keySet()) {
-            if (!column.equals(COL_IS_DELETE)) {
+        //find out what columns we've got
+        List<String> columns = createHeaderList(csvParser);
+        List<String> columnsRemove = new ArrayList<>();
+        for (String column : columns) {
+            if (!column.equals(COL_IS_DELETE) && !column.equals(COL_ID)) {
                 if (!actualColumns.contains(column)) {
-                    csvHeaderMap.remove(column);
+                    columnsRemove.add(column);
                 }
             }
         }
+        for (String column : columnsRemove) {
+            LOG.debug("Removing column:" + column + " from the header map for table:" + tableName);
+            columns.remove(column);
+        }
 
-        //find out what columns we've got
-        List<String> columns = createHeaderList(csvParser);
         Map<String, Class> columnClasses = createHeaderColumnMap(entryFileName, columnClassJson, columns);
 
         //validate that file has "id" and "is_delete" always
