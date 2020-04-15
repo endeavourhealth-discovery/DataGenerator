@@ -202,8 +202,8 @@ public class Main {
                 FileUtils.forceDelete(summary);
             }
 
-            FileUtils.deleteDirectory(stagingDir);
-            stagingDir.mkdirs();
+            //FileUtils.deleteDirectory(stagingDir);
+            //stagingDir.mkdirs();
 
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());

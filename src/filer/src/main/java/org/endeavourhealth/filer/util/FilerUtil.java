@@ -176,7 +176,6 @@ public class FilerUtil {
     }
 
     public static File createSummaryFiles(File source, ArrayList<String> lSuccess, ArrayList<String> lFailures) throws Exception {
-        FileUtils.forceDelete(source);
         String name = source.getAbsolutePath();
         name = name.replace("Data","Results");
         File results = new File(name);
