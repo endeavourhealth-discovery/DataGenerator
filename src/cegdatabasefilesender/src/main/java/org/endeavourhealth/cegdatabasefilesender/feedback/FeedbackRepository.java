@@ -40,6 +40,7 @@ public class FeedbackRepository {
         // logger.info("Processing {}", successResult);
 
         String successResultUuid = successResult.getUuid();
+        successResultUuid = successResultUuid.replace("\n", "").replace("\r", "");
 
         // logger.info("Processing {}", successResultUuid);
 
@@ -123,6 +124,8 @@ public class FeedbackRepository {
         // logger.info("Processing {}", failureResult);
 
         String failureResultUuid = failureResult.getUuid();
+        failureResultUuid = failureResultUuid.replace("\n", "").replace("\r", "");
+
         String failureResultMessage = failureResult.getErrorMessage();
 
         // logger.info("Processing {}", failureResultUuid);
