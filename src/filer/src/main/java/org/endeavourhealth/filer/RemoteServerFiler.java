@@ -650,11 +650,10 @@ public class RemoteServerFiler {
                 //LOG.debug("" + insert);
                 insert.addBatch();
             }
-            /*
-            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1) {
+            //Comment this if block if filer is not for CEG
+            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON");
             }
-             */
             insert.executeBatch();
 
             connection.commit();
@@ -665,11 +664,10 @@ public class RemoteServerFiler {
             throw new Exception("Exception with upsert " + insert.toString(), ex);
 
         } finally {
-            /*
-            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1) {
+            //Comment this if block if filer is not for CEG
+            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF");
             }
-             */
             if (insert != null) {
                 insert.close();
             }
