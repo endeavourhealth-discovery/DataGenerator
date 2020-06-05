@@ -28,15 +28,17 @@ import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class ConceptSender {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConceptSender.class);
+    private static final String ALL = "all";
 
     public static void main(String[] args) throws Exception {
 
-        if (args == null || args.length != 8) {
+        if (args == null || args.length != 9) {
             LOG.error("Invalid number of parameters.");
 
             LOG.info("Required parameters:");
@@ -48,6 +50,7 @@ public class ConceptSender {
             LOG.info("Key File");
             LOG.info("Certificate File");
             LOG.info("Target Schema");
+            LOG.info("Delta Date in yyyy-mm-dd format or ALL if sending all of the table");
 
             System.exit(-1);
         }
@@ -61,6 +64,7 @@ public class ConceptSender {
         LOG.info("Key File          : " + args[5]);
         LOG.info("Certificate File  : " + args[6]);
         LOG.info("Target Schema     : " + args[7]);
+        LOG.info("Delta Date        : " + args[8]);
 
         ConnectionDetails con = new ConnectionDetails();
         con.setHostname(args[1]);
@@ -84,14 +88,15 @@ public class ConceptSender {
             System.exit(-1);
         }
 
-        ArrayList<String> concept = getConcept();
-        ArrayList<String> conceptMap = getConceptMap();
         File adhocDir = new File(args[0]);
         if (adhocDir.exists()) {
             FileUtils.deleteDirectory(adhocDir);
         }
         FileUtils.forceMkdir(adhocDir);
+
+        ArrayList<String> concept = getConcept(args[8]);
         createConceptFile(adhocDir, concept, args[7]);
+        ArrayList<String> conceptMap = getConceptMap(args[8]);
         createConceptMapFile(adhocDir, conceptMap, args[7]);
 
         File zipFile = zipAdhocFiles(adhocDir).getFile();
@@ -137,72 +142,104 @@ public class ConceptSender {
         writer.close();
     }
 
-    private static ArrayList<String> getConcept() throws Exception {
+    private static ArrayList<String> getConcept(String date) throws Exception {
+
+        if (!date.equalsIgnoreCase(ALL)) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.applyPattern(date);
+            } catch (Exception e) {
+                throw new Exception("Invalid date specified. " + date);
+            }
+        }
 
         ArrayList<String> concepts = new ArrayList<>();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
-        String sql = "select * from data_sharing_manager.concept order by dbid asc;";
+        String sql = "";
+        if (date.equalsIgnoreCase(ALL)) {
+            sql = "select * from information_model.concept order by dbid asc;";
+        } else {
+            sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
+        }
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
 
         LOG.info("Fetching contents of concept table.");
+        String query = "";
+        String value = "";
         int i = 0;
         while (resultSet.next()) {
-            String insert = "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count]);";
-            insert = insert.replace("[dbid]", String.valueOf(resultSet.getLong(1)));
-            insert = insert.replace("[document]", String.valueOf(resultSet.getLong(2)));
 
-            String value = resultSet.getString(3);
-            if (StringUtils.isNotEmpty(value)) {
-                value = replaceInvalidChars(value);
-                insert = insert.replace("[id]", "'" +  value + "'");
+            if (date.equalsIgnoreCase(ALL)) {
+                query = "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
             } else {
-                insert = insert.replace("[id]", "null");
+                query = "update concept set document = [document], " +
+                        "id = [id]," +
+                        "draft = [draft]," +
+                        "name = [name]," +
+                        "description = [description]," +
+                        "scheme = [scheme]," +
+                        "code = [code]," +
+                        "use_count = [use_count]," +
+                        "updated = [updated] where dbid = [dbid] " +
+                        "if @@ROWCOUNT = 0 " +
+                        "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
             }
 
-            insert = insert.replace("[draft]", String.valueOf(resultSet.getLong(4)));
+            query = query.replace("[dbid]", String.valueOf(resultSet.getLong(1)));
+            query = query.replace("[document]", String.valueOf(resultSet.getLong(2)));
+            value = resultSet.getString(3);
+            if (StringUtils.isNotEmpty(value)) {
+                value = replaceInvalidChars(value);
+                query = query.replace("[id]", "'" +  value + "'");
+            } else {
+                query = query.replace("[id]", "null");
+            }
+            query = query.replace("[draft]", String.valueOf(resultSet.getLong(4)));
             value = resultSet.getString(5);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                insert = insert.replace("[name]", "'" +  value + "'");
+                query = query.replace("[name]", "'" +  value + "'");
             } else {
-                insert = insert.replace("[name]", "null");
+                query = query.replace("[name]", "null");
             }
             value = resultSet.getString(6);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                insert = insert.replace("[description]", "'" +  value + "'");
+                query = query.replace("[description]", "'" +  value + "'");
             } else {
-                insert = insert.replace("[description]", "null");
+                query = query.replace("[description]", "null");
             }
             value = resultSet.getString(7);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                insert = insert.replace("[scheme]", "'" +  value + "'");
+                query = query.replace("[scheme]", "'" +  value + "'");
             } else {
-                insert = insert.replace("[scheme]", "null");
+                query = query.replace("[scheme]", "null");
             }
             value = resultSet.getString(8);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                insert = insert.replace("[code]", "'" +  value + "'");
+                query = query.replace("[code]", "'" +  value + "'");
             } else {
-                insert = insert.replace("[code]", "null");
+                query = query.replace("[code]", "null");
             }
-            insert = insert.replace("[use_count]", String.valueOf(resultSet.getLong(9)));
-            concepts.add(insert);
+            query = query.replace("[use_count]", String.valueOf(resultSet.getLong(9)));
+            query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(10)) + "'");
 
-            /*
+            concepts.add(query);
             i++;
-            if (i == 10) {
-                break;
+            if(i % 10000 == 0 ) {
+                LOG.info("Records added: " + i);
+                System.gc();
             }
-             */
         }
+        LOG.info("Total records added: " + concepts.size());
+        connection.close();
         resultSet.close();
         ps.close();
         return concepts;
@@ -212,32 +249,58 @@ public class ConceptSender {
         return value.replace("'", "''");
     }
 
-    private static ArrayList<String> getConceptMap() throws Exception {
+    private static ArrayList<String> getConceptMap(String date) throws Exception {
+
+        if (!date.equalsIgnoreCase(ALL)) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.applyPattern(date);
+            } catch (Exception e) {
+                throw new Exception("Invalid date specified. " + date);
+            }
+        }
 
         ArrayList<String> conceptMap = new ArrayList<>();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
-        String sql = "select *  from data_sharing_manager.concept_map order by core asc;";
+
+        String sql = "";
+        if (date.equalsIgnoreCase(ALL)) {
+            sql = "select *  from information_model.concept_map order by legacy asc;";
+        } else {
+            sql = "select *  from information_model.concept_map where updated > '" + date + "' order by legacy asc;";
+        }
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
         LOG.info("Fetching contents of concept_map table.");
+
+        String query = "";
         int i = 0;
         while (resultSet.next()) {
-            String insert = "insert into concept_map values ([legacy],[core]);";
-            insert = insert.replace("[legacy]", String.valueOf(resultSet.getLong(1)));
-            insert = insert.replace("[core]", String.valueOf(resultSet.getLong(2)));
-            conceptMap.add(insert);
-
-            /*
-            i++;
-            if (i == 10) {
-                break;
+            if (date.equalsIgnoreCase(ALL)) {
+                query = "insert into concept_map values ([legacy],[core],[updated]);";
+            } else {
+                query = "update concept_map set core = [core], " +
+                        "updated = [updated] where legacy = [legacy] " +
+                        "if @@ROWCOUNT = 0 " +
+                        "insert into concept_map values ([legacy],[core],[updated]);";
             }
-             */
+            query = query.replace("[legacy]", String.valueOf(resultSet.getLong(1)));
+            query = query.replace("[core]", String.valueOf(resultSet.getLong(2)));
+            query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(3)) + "'");
+
+            conceptMap.add(query);
+            i++;
+            if(i % 10000 == 0 ) {
+                LOG.info("Records added: " + i);
+                System.gc();
+            }
         }
+        LOG.info("Total records added: " + conceptMap.size());
+        connection.close();
         resultSet.close();
         ps.close();
         return conceptMap;

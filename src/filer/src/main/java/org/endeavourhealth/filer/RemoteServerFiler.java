@@ -651,9 +651,11 @@ public class RemoteServerFiler {
                 insert.addBatch();
             }
             //Comment this if block if filer is not for CEG
+            /*
             if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON");
             }
+             */
             insert.executeBatch();
 
             connection.commit();
@@ -665,9 +667,11 @@ public class RemoteServerFiler {
 
         } finally {
             //Comment this if block if filer is not for CEG
+            /*
             if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF");
             }
+             */
             if (insert != null) {
                 insert.close();
             }

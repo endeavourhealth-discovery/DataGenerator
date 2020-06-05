@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -101,7 +102,11 @@ public class Main {
                 File merge = new File(name + "_merge.zip");
                 try {
                     zipFile.mergeSplitFiles(merge);
-                    FileUtils.forceDelete(file);
+                    //FileUtils.forceDelete(file);
+                    System.gc();
+                    Thread.sleep(1000);
+                    Path filepath = file.toPath();
+                    Files.delete(filepath);
                     FileUtils.copyFile(merge, file);
                     FileUtils.forceDelete(merge);
                 } catch (ZipException ex) {
