@@ -1,11 +1,13 @@
 package org.endeavourhealth.cegdatabasefilesender;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
@@ -16,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -30,11 +34,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConceptSender {
 
+    private static EntityManagerFactory entityManagerFactory = null;
     private static final Logger LOG = LoggerFactory.getLogger(ConceptSender.class);
-    private static final String ALL = "all";
 
     public static void main(String[] args) throws Exception {
 
@@ -50,7 +56,7 @@ public class ConceptSender {
             LOG.info("Key File");
             LOG.info("Certificate File");
             LOG.info("Target Schema");
-            LOG.info("Delta Date in yyyy-mm-dd format or ALL if sending all of the table");
+            LOG.info("Delta Date in yyyy-mm-dd format");
 
             System.exit(-1);
         }
@@ -65,6 +71,27 @@ public class ConceptSender {
         LOG.info("Certificate File  : " + args[6]);
         LOG.info("Target Schema     : " + args[7]);
         LOG.info("Delta Date        : " + args[8]);
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.applyPattern(args[8]);
+        } catch (Exception e) {
+            throw new Exception("Invalid date specified. " + args[8]);
+        }
+
+        JsonNode json = ConfigManager.getConfigurationAsJson("database", "information-model");
+        String url = json.get("url").asText();
+        String user = json.get("username").asText();
+        String pass = json.get("password").asText();
+
+        Map<String, Object> properties = new HashMap<>();
+        //properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
+        properties.put("hibernate.hikari.dataSource.url", url);
+        properties.put("hibernate.hikari.dataSource.user", user);
+        properties.put("hibernate.hikari.dataSource.password", pass);
+        properties.put("javax.persistence.provider", "org.hibernate.jpa.HibernatePersistenceProvider");
+        properties.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
+        entityManagerFactory = Persistence.createEntityManagerFactory("information_model", properties);
 
         ConnectionDetails con = new ConnectionDetails();
         con.setHostname(args[1]);
@@ -96,8 +123,12 @@ public class ConceptSender {
 
         ArrayList<String> concept = getConcept(args[8]);
         createConceptFile(adhocDir, concept, args[7]);
+
         ArrayList<String> conceptMap = getConceptMap(args[8]);
         createConceptMapFile(adhocDir, conceptMap, args[7]);
+
+        //ArrayList<String> conceptProperty = getConceptProperty(args[8]);
+        //createConceptPropertyFile(adhocDir, conceptProperty, args[7]);
 
         File zipFile = zipAdhocFiles(adhocDir).getFile();
         File cert = new File(args[6]);
@@ -142,53 +173,59 @@ public class ConceptSender {
         writer.close();
     }
 
-    private static ArrayList<String> getConcept(String date) throws Exception {
-
-        if (!date.equalsIgnoreCase(ALL)) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                sdf.applyPattern(date);
-            } catch (Exception e) {
-                throw new Exception("Invalid date specified. " + date);
-            }
+    private static void createConceptPropertyFile(File adhocDir, ArrayList<String> conceptProperty, String schema) throws Exception {
+        File conceptMapFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept_property_object.sql");
+        conceptMapFile.createNewFile();
+        LOG.info("Generating concept_property_object sql.");
+        FileWriter writer = new FileWriter(conceptMapFile);
+        writer.write("use " + schema + ";" + System.lineSeparator());
+        for(String str: conceptProperty) {
+            writer.write(str + System.lineSeparator());
         }
+        writer.close();
+    }
+
+    private static void createConceptTctFile(File adhocDir, ArrayList<String> conceptTct, String schema) throws Exception {
+        File conceptTctFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept_tct.sql");
+        conceptTctFile.createNewFile();
+        LOG.info("Generating concept_tct sql.");
+        FileWriter writer = new FileWriter(conceptTctFile);
+        writer.write("use " + schema + ";" + System.lineSeparator());
+        for(String str: conceptTct) {
+            writer.write(str + System.lineSeparator());
+        }
+        writer.close();
+    }
+
+    private static ArrayList<String> getConcept(String date) throws Exception {
 
         ArrayList<String> concepts = new ArrayList<>();
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
-        String sql = "";
-        if (date.equalsIgnoreCase(ALL)) {
-            sql = "select * from information_model.concept order by dbid asc;";
-        } else {
-            sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
-        }
+        String sql = sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
-
         LOG.info("Fetching contents of concept table.");
+
         String query = "";
         String value = "";
         int i = 0;
         while (resultSet.next()) {
 
-            if (date.equalsIgnoreCase(ALL)) {
-                query = "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
-            } else {
-                query = "update concept set document = [document], " +
-                        "id = [id]," +
-                        "draft = [draft]," +
-                        "name = [name]," +
-                        "description = [description]," +
-                        "scheme = [scheme]," +
-                        "code = [code]," +
-                        "use_count = [use_count]," +
-                        "updated = [updated] where dbid = [dbid] " +
-                        "if @@ROWCOUNT = 0 " +
-                        "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
-            }
+            query = "update concept set document = [document], " +
+                    "id = [id]," +
+                    "draft = [draft]," +
+                    "name = [name]," +
+                    "description = [description]," +
+                    "scheme = [scheme]," +
+                    "code = [code]," +
+                    "use_count = [use_count]," +
+                    "updated = [updated] where dbid = [dbid] " +
+                    "if @@ROWCOUNT = 0 " +
+                    "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
 
             query = query.replace("[dbid]", String.valueOf(resultSet.getLong(1)));
             query = query.replace("[document]", String.valueOf(resultSet.getLong(2)));
@@ -251,27 +288,13 @@ public class ConceptSender {
 
     private static ArrayList<String> getConceptMap(String date) throws Exception {
 
-        if (!date.equalsIgnoreCase(ALL)) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                sdf.applyPattern(date);
-            } catch (Exception e) {
-                throw new Exception("Invalid date specified. " + date);
-            }
-        }
-
         ArrayList<String> conceptMap = new ArrayList<>();
 
         EntityManager entityManager = PersistenceManager.getEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
-        String sql = "";
-        if (date.equalsIgnoreCase(ALL)) {
-            sql = "select *  from information_model.concept_map order by legacy asc;";
-        } else {
-            sql = "select *  from information_model.concept_map where updated > '" + date + "' order by legacy asc;";
-        }
+        String sql = "select *  from information_model.concept_map where updated > '" + date + "' order by legacy asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
@@ -280,14 +303,11 @@ public class ConceptSender {
         String query = "";
         int i = 0;
         while (resultSet.next()) {
-            if (date.equalsIgnoreCase(ALL)) {
-                query = "insert into concept_map values ([legacy],[core],[updated]);";
-            } else {
-                query = "update concept_map set core = [core], " +
-                        "updated = [updated] where legacy = [legacy] " +
-                        "if @@ROWCOUNT = 0 " +
-                        "insert into concept_map values ([legacy],[core],[updated]);";
-            }
+            query = "update concept_map set core = [core], " +
+                    "updated = [updated] where legacy = [legacy] " +
+                    "if @@ROWCOUNT = 0 " +
+                    "insert into concept_map values ([legacy],[core],[updated]);";
+
             query = query.replace("[legacy]", String.valueOf(resultSet.getLong(1)));
             query = query.replace("[core]", String.valueOf(resultSet.getLong(2)));
             query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(3)) + "'");
@@ -306,8 +326,59 @@ public class ConceptSender {
         return conceptMap;
     }
 
+    private static ArrayList<String> getConceptProperty(String date) throws Exception {
+
+        ArrayList<String> conceptProperty = new ArrayList<>();
+
+        EntityManager entityManager = PersistenceManager.getEntityManager();
+        SessionImpl session = (SessionImpl) entityManager.getDelegate();
+        Connection connection = session.connection();
+
+        String sql = "select * from information_model.concept_property_object where updated > '" + date + "' order by dbid asc;";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        LOG.info("Fetching contents of concept_property_object table.");
+
+        String query = "";
+        int i = 0;
+        while (resultSet.next()) {
+            /*
+            query = "update concept_property_object set dbid = [dbid], " +
+                    "group = [group]," +
+                    "property = [property]," +
+                    "value = [value]," +
+                    "updated = [updated] " +
+                    "where dbid = [dbid]  " +
+                    "and group = [group]  " +
+                    "and property = [property]  " +
+                    "if @@ROWCOUNT = 0 " +
+                    "insert into concept values ([dbid],[group],[property],[value],[updated]);";
+             */
+            query =  "insert into concept_property_object values ([dbid],[group],[property],[value],[updated]);";
+
+            query = query.replace("[dbid]", String.valueOf(resultSet.getLong(1)));
+            query = query.replace("[group]", String.valueOf(resultSet.getLong(2)));
+            query = query.replace("[property]", String.valueOf(resultSet.getLong(3)));
+            query = query.replace("[value]", String.valueOf(resultSet.getLong(4)));
+            query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(5)) + "'");
+
+            conceptProperty.add(query);
+            i++;
+            if(i % 10000 == 0 ) {
+                LOG.info("Records added: " + i);
+                System.gc();
+            }
+        }
+        LOG.info("Total records added: " + conceptProperty.size());
+        connection.close();
+        resultSet.close();
+        ps.close();
+        return conceptProperty;
+    }
+
     private static ZipFile zipAdhocFiles(File dataDir) throws Exception {
-        File zip = new File(dataDir.getParentFile().getAbsolutePath() + File.separator + "adhoc" + ".zip");
+        File zip = new File(dataDir.getParentFile().getAbsolutePath() + File.separator + "concepts" + ".zip");
         if (zip.exists()) {
             FileUtils.forceDelete(zip);
         }
