@@ -40,15 +40,17 @@ import java.util.Map;
 public class ConceptSender {
 
     private static EntityManagerFactory entityManagerFactory = null;
+    private static EntityManager entityManager = null;
     private static final Logger LOG = LoggerFactory.getLogger(ConceptSender.class);
 
     public static void main(String[] args) throws Exception {
 
-        if (args == null || args.length != 9) {
+        if (args == null || args.length != 10) {
             LOG.error("Invalid number of parameters.");
 
             LOG.info("Required parameters:");
             LOG.info("Source Directory");
+            LOG.info("Archive Directory");
             LOG.info("Hostname");
             LOG.info("Port");
             LOG.info("Username");
@@ -63,20 +65,21 @@ public class ConceptSender {
 
         LOG.info("Running Concept Sender with the following parameters:");
         LOG.info("Source Directory  : " + args[0]);
-        LOG.info("Hostname          : " + args[1]);
-        LOG.info("Port              : " + args[2]);
-        LOG.info("Username          : " + args[3]);
-        LOG.info("SFTP Location     : " + args[4]);
-        LOG.info("Key File          : " + args[5]);
-        LOG.info("Certificate File  : " + args[6]);
-        LOG.info("Target Schema     : " + args[7]);
-        LOG.info("Delta Date        : " + args[8]);
+        LOG.info("Archive Directory : " + args[1]);
+        LOG.info("Hostname          : " + args[2]);
+        LOG.info("Port              : " + args[3]);
+        LOG.info("Username          : " + args[4]);
+        LOG.info("SFTP Location     : " + args[5]);
+        LOG.info("Key File          : " + args[6]);
+        LOG.info("Certificate File  : " + args[7]);
+        LOG.info("Target Schema     : " + args[8]);
+        LOG.info("Delta Date        : " + args[9]);
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.applyPattern(args[8]);
+            sdf.applyPattern(args[9]);
         } catch (Exception e) {
-            throw new Exception("Invalid date specified. " + args[8]);
+            throw new Exception("Invalid date specified. " + args[9]);
         }
 
         JsonNode json = ConfigManager.getConfigurationAsJson("database", "information-model");
@@ -92,13 +95,14 @@ public class ConceptSender {
         properties.put("javax.persistence.provider", "org.hibernate.jpa.HibernatePersistenceProvider");
         properties.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
         entityManagerFactory = Persistence.createEntityManagerFactory("information_model", properties);
+        entityManager = entityManagerFactory.createEntityManager();
 
         ConnectionDetails con = new ConnectionDetails();
-        con.setHostname(args[1]);
-        con.setPort(Integer.valueOf(args[2]));
-        con.setUsername(args[3]);
+        con.setHostname(args[2]);
+        con.setPort(Integer.valueOf(args[3]));
+        con.setUsername(args[4]);
         try {
-            con.setClientPrivateKey(FileUtils.readFileToString(new File(args[5]), (String) null));
+            con.setClientPrivateKey(FileUtils.readFileToString(new File(args[6]), (String) null));
             con.setClientPrivateKeyPassword("");
         } catch (IOException e) {
             LOG.error("Unable to read client private key file." + e.getMessage());
@@ -115,32 +119,39 @@ public class ConceptSender {
             System.exit(-1);
         }
 
-        File adhocDir = new File(args[0]);
-        if (adhocDir.exists()) {
-            FileUtils.deleteDirectory(adhocDir);
+        File sourceDir = new File(args[0]);
+        if (sourceDir.exists()) {
+            FileUtils.deleteDirectory(sourceDir);
         }
-        FileUtils.forceMkdir(adhocDir);
+        FileUtils.forceMkdir(sourceDir);
 
-        ArrayList<String> concept = getConcept(args[8]);
-        createConceptFile(adhocDir, concept, args[7]);
+        ArrayList<String> concept = getConcept(args[9]);
+        createConceptFile(sourceDir, concept, args[8]);
 
-        ArrayList<String> conceptMap = getConceptMap(args[8]);
-        createConceptMapFile(adhocDir, conceptMap, args[7]);
+        ArrayList<String> conceptMap = getConceptMap(args[9]);
+        createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        //ArrayList<String> conceptProperty = getConceptProperty(args[8]);
-        //createConceptPropertyFile(adhocDir, conceptProperty, args[7]);
+        //ArrayList<String> conceptProperty = getConceptProperty(args[9]);
+        //createConceptPropertyFile(adhocDir, conceptProperty, args[8]);
 
-        File zipFile = zipAdhocFiles(adhocDir).getFile();
-        File cert = new File(args[6]);
+        File zipFile = zipAdhocFiles(sourceDir).getFile();
+        File cert = new File(args[7]);
 
         encryptFile(zipFile, cert);
 
         try {
             sftp.open();
-            String location = args[4];
+            String location = args[5];
             LOG.info("Starting file upload.");
             sftp.put(zipFile.getAbsolutePath(), location);
             sftp.close();
+            File archiveDir = new File(args[1]);
+            if (!archiveDir.exists()) {
+                FileUtils.forceMkdir(archiveDir);
+            }
+            File archive = new File(archiveDir.getAbsolutePath() + File.separator +
+                    zipFile.getName().substring(0, zipFile.getName().length()-4) + "_" + args[9] + ".zip");
+            FileUtils.copyFile(zipFile, archive);
         } catch (Exception e) {
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
             System.exit(-1);
@@ -201,10 +212,9 @@ public class ConceptSender {
 
         ArrayList<String> concepts = new ArrayList<>();
 
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
-        String sql = sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
+        String sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
@@ -276,7 +286,7 @@ public class ConceptSender {
             }
         }
         LOG.info("Total records added: " + concepts.size());
-        connection.close();
+        //connection.close();
         resultSet.close();
         ps.close();
         return concepts;
@@ -290,7 +300,6 @@ public class ConceptSender {
 
         ArrayList<String> conceptMap = new ArrayList<>();
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
@@ -320,7 +329,7 @@ public class ConceptSender {
             }
         }
         LOG.info("Total records added: " + conceptMap.size());
-        connection.close();
+        //connection.close();
         resultSet.close();
         ps.close();
         return conceptMap;
@@ -330,7 +339,6 @@ public class ConceptSender {
 
         ArrayList<String> conceptProperty = new ArrayList<>();
 
-        EntityManager entityManager = PersistenceManager.getEntityManager();
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
