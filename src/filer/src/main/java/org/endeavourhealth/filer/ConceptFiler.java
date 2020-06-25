@@ -111,16 +111,16 @@ public class ConceptFiler {
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
             if (success) {
                 LOG.info("Committing all transactions.");
-                File dest = new File(successDir.getAbsolutePath() +
-                        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
-                LOG.info("Moving " + CONCEPTS_FILENAME + " to success directory.");
-                FileUtils.copyFile(conceptsFile, dest);
+                //File dest = new File(successDir.getAbsolutePath() +
+                //        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
+                //LOG.info("Moving " + CONCEPTS_FILENAME + " to success directory.");
+                //FileUtils.copyFile(conceptsFile, dest);
             } else {
                 LOG.info("Rolling back all transactions.");
-                File dest = new File(failureDir.getAbsolutePath() +
-                        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
-                LOG.info("Moving " + CONCEPTS_FILENAME + " to failure directory.");
-                FileUtils.copyFile(conceptsFile, dest);
+                //File dest = new File(failureDir.getAbsolutePath() +
+                //        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
+                //LOG.info("Moving " + CONCEPTS_FILENAME + " to failure directory.");
+                //FileUtils.copyFile(conceptsFile, dest);
             }
             FileUtils.deleteDirectory(conceptDir);
             FileUtils.forceDelete(conceptsFile);

@@ -131,8 +131,8 @@ public class ConceptSender {
         ArrayList<String> conceptMap = getConceptMap(args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        //ArrayList<String> conceptProperty = getConceptProperty(args[9]);
-        //createConceptPropertyFile(adhocDir, conceptProperty, args[8]);
+        ArrayList<String> conceptProperty = getConceptProperty(args[9]);
+        createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
 
         File zipFile = zipAdhocFiles(sourceDir).getFile();
         File cert = new File(args[7]);
@@ -342,7 +342,7 @@ public class ConceptSender {
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
-        String sql = "select * from information_model.concept_property_object where updated > '" + date + "' order by dbid asc;";
+        String sql = "select * from information_model.cpo_92842 where updated > '" + date + "' order by dbid asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
