@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.common.utility.SlackHelper;
-import org.endeavourhealth.scheduler.models.PersistenceManager;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -42,10 +41,12 @@ public class ConceptSender {
     private static EntityManagerFactory entityManagerFactory = null;
     private static EntityManager entityManager = null;
     private static final Logger LOG = LoggerFactory.getLogger(ConceptSender.class);
+    private static final String MYSQL = "mysql";
+    private static final String SQL_SERVER = "sql_server";
 
     public static void main(String[] args) throws Exception {
 
-        if (args == null || args.length != 10) {
+        if (args == null || args.length != 11) {
             LOG.error("Invalid number of parameters.");
 
             LOG.info("Required parameters:");
@@ -59,27 +60,33 @@ public class ConceptSender {
             LOG.info("Certificate File");
             LOG.info("Target Schema");
             LOG.info("Delta Date in yyyy-mm-dd format");
+            LOG.info("Target Database Server");
 
             System.exit(-1);
         }
 
         LOG.info("Running Concept Sender with the following parameters:");
-        LOG.info("Source Directory  : " + args[0]);
-        LOG.info("Archive Directory : " + args[1]);
-        LOG.info("Hostname          : " + args[2]);
-        LOG.info("Port              : " + args[3]);
-        LOG.info("Username          : " + args[4]);
-        LOG.info("SFTP Location     : " + args[5]);
-        LOG.info("Key File          : " + args[6]);
-        LOG.info("Certificate File  : " + args[7]);
-        LOG.info("Target Schema     : " + args[8]);
-        LOG.info("Delta Date        : " + args[9]);
+        LOG.info("Source Directory       : " + args[0]);
+        LOG.info("Archive Directory      : " + args[1]);
+        LOG.info("Hostname               : " + args[2]);
+        LOG.info("Port                   : " + args[3]);
+        LOG.info("Username               : " + args[4]);
+        LOG.info("SFTP Location          : " + args[5]);
+        LOG.info("Key File               : " + args[6]);
+        LOG.info("Certificate File       : " + args[7]);
+        LOG.info("Target Schema          : " + args[8]);
+        LOG.info("Delta Date             : " + args[9]);
+        LOG.info("Target Database Server : " + args[10]);
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             sdf.applyPattern(args[9]);
         } catch (Exception e) {
             throw new Exception("Invalid date specified. " + args[9]);
+        }
+
+        if (args[10].equalsIgnoreCase("mysql") && args[10].equalsIgnoreCase("sql_server")) {
+            throw new Exception("Invalid Target Database Server specified: " + args[10] + " . Only mysql or sql_server is allowed");
         }
 
         JsonNode json = ConfigManager.getConfigurationAsJson("database", "information-model");
@@ -125,10 +132,10 @@ public class ConceptSender {
         }
         FileUtils.forceMkdir(sourceDir);
 
-        ArrayList<String> concept = getConcept(args[9]);
+        ArrayList<String> concept = getConcept(args[9], args[10]);
         createConceptFile(sourceDir, concept, args[8]);
 
-        ArrayList<String> conceptMap = getConceptMap(args[9]);
+        ArrayList<String> conceptMap = getConceptMap(args[9], args[10]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
         ArrayList<String> conceptProperty = getConceptProperty(args[9]);
@@ -150,7 +157,7 @@ public class ConceptSender {
                 FileUtils.forceMkdir(archiveDir);
             }
             File archive = new File(archiveDir.getAbsolutePath() + File.separator +
-                    zipFile.getName().substring(0, zipFile.getName().length()-4) + "_" + args[9] + ".zip");
+                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[9] + ".zip");
             FileUtils.copyFile(zipFile, archive);
         } catch (Exception e) {
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
@@ -166,7 +173,7 @@ public class ConceptSender {
         LOG.info("Generating concept sql.");
         FileWriter writer = new FileWriter(conceptFile);
         writer.write("use " + schema + ";" + System.lineSeparator());
-        for(String str: concept) {
+        for (String str : concept) {
             writer.write(str + System.lineSeparator());
         }
         writer.close();
@@ -178,7 +185,7 @@ public class ConceptSender {
         LOG.info("Generating concept_map sql.");
         FileWriter writer = new FileWriter(conceptMapFile);
         writer.write("use " + schema + ";" + System.lineSeparator());
-        for(String str: conceptMap) {
+        for (String str : conceptMap) {
             writer.write(str + System.lineSeparator());
         }
         writer.close();
@@ -190,7 +197,10 @@ public class ConceptSender {
         LOG.info("Generating concept_property_object sql.");
         FileWriter writer = new FileWriter(conceptMapFile);
         writer.write("use " + schema + ";" + System.lineSeparator());
-        for(String str: conceptProperty) {
+        //TODO: For now truncate concept_property_object since we have no way to update concept_property_object table yet since it has no PRIMARY key
+        //TODO: We will rebuild all the contents of this table
+        writer.write("truncate table concept_property_object" + ";" + System.lineSeparator());
+        for (String str : conceptProperty) {
             writer.write(str + System.lineSeparator());
         }
         writer.close();
@@ -202,13 +212,13 @@ public class ConceptSender {
         LOG.info("Generating concept_tct sql.");
         FileWriter writer = new FileWriter(conceptTctFile);
         writer.write("use " + schema + ";" + System.lineSeparator());
-        for(String str: conceptTct) {
+        for (String str : conceptTct) {
             writer.write(str + System.lineSeparator());
         }
         writer.close();
     }
 
-    private static ArrayList<String> getConcept(String date) throws Exception {
+    private static ArrayList<String> getConcept(String date, String server) throws Exception {
 
         ArrayList<String> concepts = new ArrayList<>();
 
@@ -225,24 +235,38 @@ public class ConceptSender {
         int i = 0;
         while (resultSet.next()) {
 
-            query = "update concept set document = [document], " +
-                    "id = [id]," +
-                    "draft = [draft]," +
-                    "name = [name]," +
-                    "description = [description]," +
-                    "scheme = [scheme]," +
-                    "code = [code]," +
-                    "use_count = [use_count]," +
-                    "updated = [updated] where dbid = [dbid] " +
-                    "if @@ROWCOUNT = 0 " +
-                    "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
+            if (server.equalsIgnoreCase(SQL_SERVER)) {
+                query = "update concept set document = [document], " +
+                        "id = [id]," +
+                        "draft = [draft]," +
+                        "name = [name]," +
+                        "description = [description]," +
+                        "scheme = [scheme]," +
+                        "code = [code]," +
+                        "use_count = [use_count]," +
+                        "updated = [updated] where dbid = [dbid] " +
+                        "if @@ROWCOUNT = 0 " +
+                        "insert into concept values ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]);";
+            } else {
+                query = "INSERT INTO concept (`dbid`,`document`,`id`,`draft`,`name`,`description`,`scheme`,`code`,`use_count`,`updated`) " +
+                        "VALUES ([dbid],[document],[id],[draft],[name],[description],[scheme],[code],[use_count],[updated]) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "`id` = [id]," +
+                        "`draft` = [draft]," +
+                        "`name` = [name]," +
+                        "`description` = [description]," +
+                        "`scheme` = [scheme]," +
+                        "`code` = [code]," +
+                        "`use_count` = [use_count]," +
+                        "`updated` = [updated];";
+            }
 
             query = query.replace("[dbid]", String.valueOf(resultSet.getLong(1)));
             query = query.replace("[document]", String.valueOf(resultSet.getLong(2)));
             value = resultSet.getString(3);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                query = query.replace("[id]", "'" +  value + "'");
+                query = query.replace("[id]", "'" + value + "'");
             } else {
                 query = query.replace("[id]", "null");
             }
@@ -250,28 +274,28 @@ public class ConceptSender {
             value = resultSet.getString(5);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                query = query.replace("[name]", "'" +  value + "'");
+                query = query.replace("[name]", "'" + value + "'");
             } else {
                 query = query.replace("[name]", "null");
             }
             value = resultSet.getString(6);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                query = query.replace("[description]", "'" +  value + "'");
+                query = query.replace("[description]", "'" + value + "'");
             } else {
                 query = query.replace("[description]", "null");
             }
             value = resultSet.getString(7);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                query = query.replace("[scheme]", "'" +  value + "'");
+                query = query.replace("[scheme]", "'" + value + "'");
             } else {
                 query = query.replace("[scheme]", "null");
             }
             value = resultSet.getString(8);
             if (StringUtils.isNotEmpty(value)) {
                 value = replaceInvalidChars(value);
-                query = query.replace("[code]", "'" +  value + "'");
+                query = query.replace("[code]", "'" + value + "'");
             } else {
                 query = query.replace("[code]", "null");
             }
@@ -280,7 +304,7 @@ public class ConceptSender {
 
             concepts.add(query);
             i++;
-            if(i % 10000 == 0 ) {
+            if (i % 10000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
@@ -296,7 +320,7 @@ public class ConceptSender {
         return value.replace("'", "''");
     }
 
-    private static ArrayList<String> getConceptMap(String date) throws Exception {
+    private static ArrayList<String> getConceptMap(String date, String server) throws Exception {
 
         ArrayList<String> conceptMap = new ArrayList<>();
 
@@ -312,10 +336,19 @@ public class ConceptSender {
         String query = "";
         int i = 0;
         while (resultSet.next()) {
-            query = "update concept_map set core = [core], " +
-                    "updated = [updated] where legacy = [legacy] " +
-                    "if @@ROWCOUNT = 0 " +
-                    "insert into concept_map values ([legacy],[core],[updated]);";
+            if (server.equalsIgnoreCase(SQL_SERVER)) {
+                query = "update concept_map set core = [core], " +
+                        "updated = [updated] where legacy = [legacy] " +
+                        "if @@ROWCOUNT = 0 " +
+                        "insert into concept_map values ([legacy],[core],[updated]);";
+            } else {
+                query = "INSERT INTO concept_map (`legacy`,`core`,`updated`) " +
+                        "VALUES ([legacy],[core],[updated]) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "`legacy` = [legacy]," +
+                        "`core` = [core]," +
+                        "`updated` = [updated];";
+            }
 
             query = query.replace("[legacy]", String.valueOf(resultSet.getLong(1)));
             query = query.replace("[core]", String.valueOf(resultSet.getLong(2)));
@@ -323,7 +356,7 @@ public class ConceptSender {
 
             conceptMap.add(query);
             i++;
-            if(i % 10000 == 0 ) {
+            if (i % 10000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
@@ -342,7 +375,10 @@ public class ConceptSender {
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
-        String sql = "select * from information_model.cpo_92842 where updated > '" + date + "' order by dbid asc;";
+        //TODO: For now always select all as we have no way to update concept_property_object table yet since it has no PRIMARY key
+        //String sql = "select * from information_model.cpo_92842 where updated > '" + date + "' order by dbid asc;";
+        String sql = "select * from information_model.cpo_92842;";
+
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
@@ -373,7 +409,7 @@ public class ConceptSender {
 
             conceptProperty.add(query);
             i++;
-            if(i % 10000 == 0 ) {
+            if (i % 10000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
