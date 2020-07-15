@@ -157,7 +157,7 @@ public class ConceptSender {
                 FileUtils.forceMkdir(archiveDir);
             }
             File archive = new File(archiveDir.getAbsolutePath() + File.separator +
-                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[9] + ".zip");
+                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[10] + ".zip");
             FileUtils.copyFile(zipFile, archive);
         } catch (Exception e) {
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
