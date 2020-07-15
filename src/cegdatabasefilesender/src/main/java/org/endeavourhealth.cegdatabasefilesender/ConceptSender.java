@@ -59,8 +59,8 @@ public class ConceptSender {
             LOG.info("Key File");
             LOG.info("Certificate File");
             LOG.info("Target Schema");
-            LOG.info("Delta Date in yyyy-mm-dd format");
             LOG.info("Target Database Server");
+            LOG.info("Delta Date in yyyy-mm-dd format");
 
             System.exit(-1);
         }
@@ -75,18 +75,18 @@ public class ConceptSender {
         LOG.info("Key File               : " + args[6]);
         LOG.info("Certificate File       : " + args[7]);
         LOG.info("Target Schema          : " + args[8]);
-        LOG.info("Delta Date             : " + args[9]);
-        LOG.info("Target Database Server : " + args[10]);
+        LOG.info("Target Database Server : " + args[9]);
+        LOG.info("Delta Date             : " + args[10]);
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.applyPattern(args[9]);
+            sdf.applyPattern(args[10]);
         } catch (Exception e) {
             throw new Exception("Invalid date specified. " + args[9]);
         }
 
-        if (args[10].equalsIgnoreCase("mysql") && args[10].equalsIgnoreCase("sql_server")) {
-            throw new Exception("Invalid Target Database Server specified: " + args[10] + " . Only mysql or sql_server is allowed");
+        if (args[10].equalsIgnoreCase("mysql") && args[9].equalsIgnoreCase("sql_server")) {
+            throw new Exception("Invalid Target Database Server specified: " + args[9] + " . Only mysql or sql_server is allowed");
         }
 
         JsonNode json = ConfigManager.getConfigurationAsJson("database", "information-model");
@@ -132,13 +132,13 @@ public class ConceptSender {
         }
         FileUtils.forceMkdir(sourceDir);
 
-        ArrayList<String> concept = getConcept(args[9], args[10]);
+        ArrayList<String> concept = getConcept(args[10], args[0]);
         createConceptFile(sourceDir, concept, args[8]);
 
-        ArrayList<String> conceptMap = getConceptMap(args[9], args[10]);
+        ArrayList<String> conceptMap = getConceptMap(args[10], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        ArrayList<String> conceptProperty = getConceptProperty(args[9]);
+        ArrayList<String> conceptProperty = getConceptProperty(args[10]);
         createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
 
         File zipFile = zipAdhocFiles(sourceDir).getFile();
