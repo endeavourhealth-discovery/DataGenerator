@@ -74,7 +74,7 @@ public class ConceptFiler {
             zipFile.extractAll(destPath);
 
             Connection connection = FilerUtil.getConnection(properties);
-            connection.setAutoCommit(true);
+            connection.setAutoCommit(false);
             LOG.info("Database connection established.");
 
             boolean success = true;
