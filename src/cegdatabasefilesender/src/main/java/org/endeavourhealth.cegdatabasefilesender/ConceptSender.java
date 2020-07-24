@@ -224,6 +224,7 @@ public class ConceptSender {
 
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
+        //String sql = "select * from information_model.concept order by dbid asc;";
         String sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
@@ -327,32 +328,37 @@ public class ConceptSender {
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
 
-        String sql = "select *  from information_model.concept_map where updated > '" + date + "' order by legacy asc;";
+        //String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 order by id asc;";
+        String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 and updated > '" + date + "' order by legacy asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
-        LOG.info("Fetching contents of concept_map table.");
+        LOG.info("Fetching updated contents of concept_map table.");
 
         String query = "";
         int i = 0;
         while (resultSet.next()) {
             if (server.equalsIgnoreCase(SQL_SERVER)) {
-                query = "update concept_map set core = [core], " +
-                        "updated = [updated] where legacy = [legacy] " +
+                query = "update concept_map set legacy = [legacy], " +
+                        "core = [core], " +
+                        "updated = [updated], " +
+                        "where id = [id] " +
                         "if @@ROWCOUNT = 0 " +
-                        "insert into concept_map values ([legacy],[core],[updated]);";
+                        "insert into concept_map values ([legacy],[core],[updated],[id]);";
             } else {
-                query = "INSERT INTO concept_map (`legacy`,`core`,`updated`) " +
-                        "VALUES ([legacy],[core],[updated]) " +
+                query = "INSERT INTO concept_map (`legacy`,`core`,`updated`,`id`) " +
+                        "VALUES ([legacy],[core],[updated],[id]) " +
                         "ON DUPLICATE KEY UPDATE " +
                         "`legacy` = [legacy]," +
                         "`core` = [core]," +
+                        "`id` = [id]," +
                         "`updated` = [updated];";
             }
 
             query = query.replace("[legacy]", String.valueOf(resultSet.getLong(1)));
             query = query.replace("[core]", String.valueOf(resultSet.getLong(2)));
             query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(3)) + "'");
+            query = query.replace("[id]", String.valueOf(resultSet.getInt(4)));
 
             conceptMap.add(query);
             i++;
@@ -361,6 +367,25 @@ public class ConceptSender {
                 System.gc();
             }
         }
+
+        sql = "select id from information_model.concept_map where deleted = 1 order by legacy asc;";
+        ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        resultSet = ps.getResultSet();
+        LOG.info("Fetching marked as deleted contents of concept_map table.");
+
+        i = 0;
+        while (resultSet.next()) {
+            query = "DELETE FROM concept_map WHERE id = [id];";
+            query = query.replace("[id]", String.valueOf(resultSet.getInt(1)));
+            conceptMap.add(query);
+            i++;
+            if (i % 10000 == 0) {
+                LOG.info("Records added: " + i);
+                System.gc();
+            }
+        }
+
         LOG.info("Total records added: " + conceptMap.size());
         //connection.close();
         resultSet.close();
