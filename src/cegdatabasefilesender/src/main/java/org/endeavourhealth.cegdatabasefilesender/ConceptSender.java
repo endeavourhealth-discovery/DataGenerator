@@ -132,7 +132,7 @@ public class ConceptSender {
         }
         FileUtils.forceMkdir(sourceDir);
 
-        ArrayList<String> concept = getConcept(args[10], args[0]);
+        ArrayList<String> concept = getConcept(args[10], args[9]);
         createConceptFile(sourceDir, concept, args[8]);
 
         ArrayList<String> conceptMap = getConceptMap(args[10], args[9]);
