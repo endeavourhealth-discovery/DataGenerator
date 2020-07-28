@@ -341,7 +341,7 @@ public class ConceptSender {
             if (server.equalsIgnoreCase(SQL_SERVER)) {
                 query = "update concept_map set legacy = [legacy], " +
                         "core = [core], " +
-                        "updated = [updated], " +
+                        "updated = [updated] " +
                         "where id = [id] " +
                         "if @@ROWCOUNT = 0 " +
                         "insert into concept_map values ([legacy],[core],[updated],[id]);";
