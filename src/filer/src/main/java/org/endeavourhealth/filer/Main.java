@@ -1,6 +1,7 @@
 package org.endeavourhealth.filer;
 
 import com.amazonaws.util.IOUtils;
+import com.amazonaws.util.StringUtils;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
@@ -21,7 +22,7 @@ import java.util.*;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    private static final int batchSize = 50;
+    private static int batchSize = 5000;
 
     public static void main(String[] args) {
 
@@ -34,6 +35,20 @@ public class Main {
             LOG.error("Error in reading config.properties " + e.getMessage());
             System.exit(-1);
         }
+
+        if (!StringUtils.isNullOrEmpty(args[0])) {
+            try {
+                int paramSize = Integer.parseInt(args[0]);
+                if (paramSize < batchSize) {
+                    LOG.info("Ignoring batchSize parameter, less than the default 5000. Parameter: " + args[0]);
+                } else {
+                    batchSize = paramSize;
+                }
+            } catch (Exception e) {
+                LOG.info("Ignoring batchSize parameter, not a valid value: " + args[0]);
+            }
+        }
+        LOG.info("batchSize:" + batchSize);
 
         boolean enterprise = Boolean.valueOf(properties.getProperty(FilerConstants.ENTERPRISE, "false"));
 
