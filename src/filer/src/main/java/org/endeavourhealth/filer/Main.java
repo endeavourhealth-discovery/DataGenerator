@@ -36,7 +36,7 @@ public class Main {
             System.exit(-1);
         }
 
-        if (!StringUtils.isNullOrEmpty(args[0])) {
+        if (args.length > 1 && !StringUtils.isNullOrEmpty(args[0])) {
             try {
                 int paramSize = Integer.parseInt(args[0]);
                 if (paramSize < batchSize) {

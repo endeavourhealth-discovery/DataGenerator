@@ -49,6 +49,7 @@ public class RemoteEnterpriseFiler {
     private static Map<String, HikariDataSource> connectionPools = new ConcurrentHashMap<>();
     private static Map<String, String> escapeCharacters = new ConcurrentHashMap<>();
     private static Map<String, Integer> batchSizes = new ConcurrentHashMap<>();
+    private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
 
     public static void file(String name, String failureDir, Properties properties,
                              String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
@@ -191,7 +192,11 @@ public class RemoteEnterpriseFiler {
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode allColumnClassMappings, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
-        ArrayList<String> actualColumns = getTableColumns(connection, tableName);
+        ArrayList<String> actualColumns = columnsMap.get(tableName);
+        if (actualColumns == null) {
+            actualColumns = getTableColumns(connection, tableName);
+            columnsMap.put(tableName, actualColumns);
+        }
 
         ByteArrayInputStream bais = new ByteArrayInputStream(csvBytes);
         InputStreamReader isr = new InputStreamReader(bais);

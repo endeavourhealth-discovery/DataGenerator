@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,6 +38,8 @@ public class RemoteServerFiler {
     private static final String COL_ID = "id";
 
     private static final int UPSERT_ATTEMPTS = 10;
+
+    private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
 
     public static void  file(String name, String failureDir, Properties properties,
                             String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
@@ -192,7 +195,11 @@ public class RemoteServerFiler {
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode columnClassJson, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
-        ArrayList<String> actualColumns = getTableColumns(connection, tableName);
+        ArrayList<String> actualColumns = columnsMap.get(tableName);
+        if (actualColumns == null) {
+            actualColumns = getTableColumns(connection, tableName);
+            columnsMap.put(tableName, actualColumns);
+        }
 
         ByteArrayInputStream bais = new ByteArrayInputStream(csvBytes);
         InputStreamReader isr = new InputStreamReader(bais);
