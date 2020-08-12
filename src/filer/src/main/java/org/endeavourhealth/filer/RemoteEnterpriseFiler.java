@@ -49,10 +49,9 @@ public class RemoteEnterpriseFiler {
     private static Map<String, HikariDataSource> connectionPools = new ConcurrentHashMap<>();
     private static Map<String, String> escapeCharacters = new ConcurrentHashMap<>();
     private static Map<String, Integer> batchSizes = new ConcurrentHashMap<>();
-    private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
 
     public static void file(String name, String failureDir, Properties properties,
-                             String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
+                             String keywordEscapeChar, int batchSize, byte[] bytes, Map<String, ArrayList> columnsMap) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -78,7 +77,8 @@ public class RemoteEnterpriseFiler {
                     columnClassMappings = ObjectMapperPool.getInstance().readTree(jsonStr);
 
                 } else {
-                    processCsvData(entryFileName, entryBytes, columnClassMappings, connection, keywordEscapeChar, batchSize, deletes);
+                    processCsvData(entryFileName, entryBytes, columnClassMappings, connection, keywordEscapeChar,
+                            batchSize, deletes, columnsMap);
                 }
             }
 
@@ -171,6 +171,7 @@ public class RemoteEnterpriseFiler {
     }
 
     private static ArrayList<String> getTableColumns(Connection connection, String tableName) throws Exception{
+        LOG.info("Getting columns for table:" + tableName);
         ArrayList<String> columns = new ArrayList<>();
         String sql = null;
         if (ConnectionManager.isSqlServer(connection) || ConnectionManager.isPostgreSQL(connection)) {
@@ -189,7 +190,9 @@ public class RemoteEnterpriseFiler {
         return columns;
     }
 
-    private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode allColumnClassMappings, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
+    private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode allColumnClassMappings,
+                                       Connection connection, String keywordEscapeChar, int batchSize,
+                                       List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
         ArrayList<String> actualColumns = columnsMap.get(tableName);

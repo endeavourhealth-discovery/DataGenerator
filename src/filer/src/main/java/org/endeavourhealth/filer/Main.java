@@ -18,11 +18,13 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static int batchSize = 5000;
+    private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
 
@@ -161,10 +163,10 @@ public class Main {
                     try {
                         if (enterprise) {
                             RemoteEnterpriseFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                    properties, keywordEscapeChar, batchSize, bytes);
+                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap);
                         } else {
                             RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                    properties, keywordEscapeChar, batchSize, bytes);
+                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap);
                         }
                         nSuccess++;
                         lSuccess.add(zip.getName().substring(24, 60));

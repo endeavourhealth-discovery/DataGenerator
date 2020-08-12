@@ -42,7 +42,7 @@ public class RemoteServerFiler {
     private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
 
     public static void  file(String name, String failureDir, Properties properties,
-                            String keywordEscapeChar, int batchSize, byte[] bytes) throws Exception {
+                            String keywordEscapeChar, int batchSize, byte[] bytes, Map<String, ArrayList> columnsMap) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -75,7 +75,7 @@ public class RemoteServerFiler {
                     continue;
                 }
 
-                processCsvData(entryFileName, entryBytes, columnClassMappings, connection, keywordEscapeChar, batchSize, deletes);
+                processCsvData(entryFileName, entryBytes, columnClassMappings, connection, keywordEscapeChar, batchSize, deletes, columnsMap);
             }
 
             //now files the deletes
@@ -192,7 +192,9 @@ public class RemoteServerFiler {
         return columns;
     }
 
-    private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode columnClassJson, Connection connection, String keywordEscapeChar, int batchSize, List<DeleteWrapper> deletes) throws Exception {
+    private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode columnClassJson,
+                                       Connection connection, String keywordEscapeChar, int batchSize,
+                                       List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
         ArrayList<String> actualColumns = columnsMap.get(tableName);
