@@ -1,7 +1,9 @@
 package org.endeavourhealth.filer;
 
+import com.microsoft.sqlserver.jdbc.SQLServerConnection;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
 import org.endeavourhealth.filer.util.SftpUtil;
@@ -14,12 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 
 public class ConceptFiler {
@@ -77,7 +75,6 @@ public class ConceptFiler {
             connection.setAutoCommit(false);
             LOG.info("Database connection established.");
 
-            boolean success = true;
             files = FilerUtil.getFilesFromDirectory(destPath, ".sql");
             for (File file : files) {
                 LOG.info("Running statements form file: " + file.getName());
@@ -98,7 +95,6 @@ public class ConceptFiler {
                             }
                         } catch (SQLException e) {
                             LOG.error("Reason: " + e.getMessage());
-                            success = false;
                             break;
                         }
                     }
@@ -108,19 +104,33 @@ public class ConceptFiler {
                 } catch (IOException e) {
                 }
             }
-            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-            if (success) {
-                LOG.info("Committing all transactions.");
-                //File dest = new File(successDir.getAbsolutePath() +
-                //        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
-                //LOG.info("Moving " + CONCEPTS_FILENAME + " to success directory.");
-                //FileUtils.copyFile(conceptsFile, dest);
-            } else {
-                LOG.info("Rolling back all transactions.");
-                //File dest = new File(failureDir.getAbsolutePath() +
-                //        File.separator + format.format(new Date()) + "_" + CONCEPTS_FILENAME);
-                //LOG.info("Moving " + CONCEPTS_FILENAME + " to failure directory.");
-                //FileUtils.copyFile(conceptsFile, dest);
+
+            String schema = null;
+            String dateFromFile = null;
+
+            files = FilerUtil.getFilesFromDirectory(destPath, ".schema");
+            if (files.length > 0) {
+                schema = FilenameUtils.removeExtension(files[0].getName());
+            }
+
+            files = FilerUtil.getFilesFromDirectory(destPath, ".date");
+            if (files.length > 0) {
+                dateFromFile = FilenameUtils.removeExtension(files[0].getName());
+            }
+
+            if (schema != null && dateFromFile != null) {
+                LOG.info("Calling stored procedure " + schema + ".update_tables_with_core_concept_id using date:" + dateFromFile);
+                Date date = new java.sql.Date((new SimpleDateFormat("yyyy-MM-dd").parse(dateFromFile).getTime()));
+                String query = "";
+                if (isSqlServer(connection)) {
+                    query = "exec " + schema + ".dbo.update_tables_with_core_concept_id ?;";
+                } else {
+                    query = "{ call " + schema + ".update_tables_with_core_concept_id(?) };";
+                }
+                PreparedStatement ps = connection.prepareStatement(query);
+                ps.setDate(1,date);
+                ps.execute();
+                LOG.info("Finished stored procedure processing.");
             }
             FileUtils.deleteDirectory(conceptDir);
             FileUtils.forceDelete(conceptsFile);
@@ -132,5 +142,18 @@ public class ConceptFiler {
 
         LOG.info("Ending Subscriber Server Concepts uploader");
         System.exit(0);
+    }
+
+    public static boolean isSqlServer(Connection connection) {
+        if (connection instanceof SQLServerConnection) {
+            return true;
+        } else {
+            try {
+                connection.unwrap(SQLServerConnection.class);
+                return true;
+            } catch (SQLException var2) {
+                return false;
+            }
+        }
     }
 }
