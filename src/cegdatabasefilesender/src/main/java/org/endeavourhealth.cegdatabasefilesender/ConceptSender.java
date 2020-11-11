@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.common.config.ConfigManager;
-import org.endeavourhealth.common.utility.SlackHelper;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.endeavourhealth.scheduler.util.SftpConnection;
@@ -132,6 +131,7 @@ public class ConceptSender {
         }
         FileUtils.forceMkdir(sourceDir);
 
+        /*
         ArrayList<String> concept = getConcept(args[10], args[9]);
         createConceptFile(sourceDir, concept, args[8]);
 
@@ -140,7 +140,10 @@ public class ConceptSender {
 
         ArrayList<String> conceptProperty = getConceptProperty(args[10]);
         createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
+        */
 
+        createSPFile(sourceDir, args[8], args[9]);
+        
         File zipFile = zipAdhocFiles(sourceDir).getFile();
         File cert = new File(args[7]);
 
@@ -167,8 +170,8 @@ public class ConceptSender {
         System.exit(0);
     }
 
-    private static void createConceptFile(File adhocDir, ArrayList<String> concept, String schema) throws Exception {
-        File conceptFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept.sql");
+    private static void createConceptFile(File sourceDir, ArrayList<String> concept, String schema) throws Exception {
+        File conceptFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept.sql");
         conceptFile.createNewFile();
         LOG.info("Generating concept sql.");
         FileWriter writer = new FileWriter(conceptFile);
@@ -179,8 +182,8 @@ public class ConceptSender {
         writer.close();
     }
 
-    private static void createConceptMapFile(File adhocDir, ArrayList<String> conceptMap, String schema) throws Exception {
-        File conceptMapFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept_map.sql");
+    private static void createConceptMapFile(File sourceDir, ArrayList<String> conceptMap, String schema) throws Exception {
+        File conceptMapFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept_map.sql");
         conceptMapFile.createNewFile();
         LOG.info("Generating concept_map sql.");
         FileWriter writer = new FileWriter(conceptMapFile);
@@ -191,8 +194,8 @@ public class ConceptSender {
         writer.close();
     }
 
-    private static void createConceptPropertyFile(File adhocDir, ArrayList<String> conceptProperty, String schema) throws Exception {
-        File conceptMapFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept_property_object.sql");
+    private static void createConceptPropertyFile(File sourceDir, ArrayList<String> conceptProperty, String schema) throws Exception {
+        File conceptMapFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept_property_object.sql");
         conceptMapFile.createNewFile();
         LOG.info("Generating concept_property_object sql.");
         FileWriter writer = new FileWriter(conceptMapFile);
@@ -206,8 +209,8 @@ public class ConceptSender {
         writer.close();
     }
 
-    private static void createConceptTctFile(File adhocDir, ArrayList<String> conceptTct, String schema) throws Exception {
-        File conceptTctFile = new File(adhocDir.getAbsolutePath() + File.separator + "concept_tct.sql");
+    private static void createConceptTctFile(File sourceDir, ArrayList<String> conceptTct, String schema) throws Exception {
+        File conceptTctFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept_tct.sql");
         conceptTctFile.createNewFile();
         LOG.info("Generating concept_tct sql.");
         FileWriter writer = new FileWriter(conceptTctFile);
@@ -470,14 +473,73 @@ public class ConceptSender {
 
         } catch (CertificateException ex) {
             LOG.error("Error encountered in certificate generation. " + ex.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate generation. ", ex);
             throw ex;
 
         } catch (NoSuchProviderException ex) {
             LOG.error("Error encountered in certificate provider. " + ex.getMessage());
-            SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Error encountered in certificate provider. ", ex);
             throw ex;
         }
         return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
+    }
+
+    private static void createSPFile(File sourceDir, String schema, String server) throws Exception {
+
+        File spFiles = new File(sourceDir.getParent() + File.separator + "stored_procedures");
+
+        ArrayList<String> mysqlFilenames = new ArrayList();
+        mysqlFilenames.add("create_tables_mysql.sql");
+        mysqlFilenames.add("create_tables_2_mysql.sql");
+
+        ArrayList<String> mssqlFilenames = new ArrayList();
+        mssqlFilenames.add("create_tables_mssql.sql");
+        mssqlFilenames.add("create_tables_2_mssql.sql");
+
+        ArrayList<String> executeSPs = new ArrayList();
+        executeSPs.add("test_sp1");
+        executeSPs.add("test_sp2");
+
+        File conceptSPFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sp.sql");
+        conceptSPFile.createNewFile();
+        LOG.info("Generating concept_sp sql.");
+        FileWriter writer = new FileWriter(conceptSPFile);
+        writer.write("use " + schema + ";" + System.lineSeparator());
+
+        if (server.equalsIgnoreCase(SQL_SERVER)) {
+            for (String sp : executeSPs) {
+                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
+                writer.write("GO" + System.lineSeparator());
+            }
+            for (String file : mssqlFilenames) {
+                String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
+                contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
+                writer.write(contents + System.lineSeparator());
+                writer.write("GO" + System.lineSeparator());
+            }
+            for (String sp : executeSPs) {
+                writer.write("EXEC " + sp + ";" + System.lineSeparator());
+            }
+            for (String sp : executeSPs) {
+                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
+                writer.write("GO" + System.lineSeparator());
+            }
+        } else {
+            for (String sp : executeSPs) {
+                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
+            }
+            for (String file : mysqlFilenames) {
+                writer.write("DELIMITER //" + System.lineSeparator());
+                String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
+                contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
+                writer.write(contents + System.lineSeparator());
+                writer.write("// DELIMITER ; " + System.lineSeparator());
+            }
+            for (String sp : executeSPs) {
+                writer.write("CALL " + sp + "();" + System.lineSeparator());
+            }
+            for (String sp : executeSPs) {
+                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
+            }
+        }
+        writer.close();
     }
 }
