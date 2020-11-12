@@ -494,51 +494,41 @@ public class ConceptSender {
         mssqlFilenames.add("create_tables_mssql.sql");
         mssqlFilenames.add("create_tables_2_mssql.sql");
 
-        ArrayList<String> executeSPs = new ArrayList();
-        executeSPs.add("test_sp1");
-        executeSPs.add("test_sp2");
+        ArrayList<String> spNames = new ArrayList();
+        spNames.add("test_sp1");
+        spNames.add("test_sp2");
 
-        File conceptSPFile = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sp.sql");
-        conceptSPFile.createNewFile();
-        LOG.info("Generating concept_sp sql.");
-        FileWriter writer = new FileWriter(conceptSPFile);
-        writer.write("use " + schema + ";" + System.lineSeparator());
+        File setupSPS = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sps.setup");
+        setupSPS.createNewFile();
+        LOG.info("Generating concepts.sps file");
+        FileWriter writer = new FileWriter(setupSPS);
+        writer.write("USE " + schema + ";" + System.lineSeparator());
+        for (String sp : spNames) {
+            writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
+        }
 
-        if (server.equalsIgnoreCase(SQL_SERVER)) {
-            for (String sp : executeSPs) {
-                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
-                writer.write("GO" + System.lineSeparator());
-            }
-            for (String file : mssqlFilenames) {
-                String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
-                contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
-                writer.write(contents + System.lineSeparator());
-                writer.write("GO" + System.lineSeparator());
-            }
-            for (String sp : executeSPs) {
-                writer.write("EXEC " + sp + ";" + System.lineSeparator());
-            }
-            for (String sp : executeSPs) {
-                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
-                writer.write("GO" + System.lineSeparator());
-            }
-        } else {
-            for (String sp : executeSPs) {
-                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
-            }
+        if (server.equalsIgnoreCase(MYSQL)) {
             for (String file : mysqlFilenames) {
                 writer.write("DELIMITER //" + System.lineSeparator());
                 String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
                 contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
                 writer.write(contents + System.lineSeparator());
-                writer.write("// DELIMITER ; " + System.lineSeparator());
+                writer.write("// DELIMITER ;" + System.lineSeparator());
             }
-            for (String sp : executeSPs) {
-                writer.write("CALL " + sp + "();" + System.lineSeparator());
+        } else {
+            for (String file : mssqlFilenames) {
+                String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
+                contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
+                writer.write(contents + System.lineSeparator());
             }
-            for (String sp : executeSPs) {
-                writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
-            }
+        }
+
+        writer.close();
+
+        File executeSPS = new File(sourceDir.getAbsolutePath() + File.separator + schema + ".execute");
+        writer = new FileWriter(executeSPS);
+        for (String sp : spNames) {
+            writer.write(sp + System.lineSeparator());
         }
         writer.close();
     }
