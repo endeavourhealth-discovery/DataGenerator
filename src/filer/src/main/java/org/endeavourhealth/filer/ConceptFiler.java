@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class ConceptFiler {
@@ -105,33 +106,59 @@ public class ConceptFiler {
                 }
             }
 
-            String schema = null;
-            String dateFromFile = null;
-
-            files = FilerUtil.getFilesFromDirectory(destPath, ".schema");
-            if (files.length > 0) {
-                schema = FilenameUtils.removeExtension(files[0].getName());
-            }
-
-            files = FilerUtil.getFilesFromDirectory(destPath, ".date");
-            if (files.length > 0) {
-                dateFromFile = FilenameUtils.removeExtension(files[0].getName());
-            }
-
-            if (schema != null && dateFromFile != null) {
-                LOG.info("Calling stored procedure " + schema + ".update_tables_with_core_concept_id using date:" + dateFromFile);
-                Date date = new java.sql.Date((new SimpleDateFormat("yyyy-MM-dd").parse(dateFromFile).getTime()));
-                String query = "";
-                if (isSqlServer(connection)) {
-                    query = "exec " + schema + ".dbo.update_tables_with_core_concept_id ?;";
-                } else {
-                    query = "{ call " + schema + ".update_tables_with_core_concept_id(?) };";
+            files = FilerUtil.getFilesFromDirectory(destPath, ".setup");
+            for (File file : files) {
+                LOG.info("Running statements form file: " + file.getName());
+                try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
+                    String statement;
+                    while ((statement = br.readLine()) != null) {
+                        Statement stmt = connection.createStatement();
+                        try {
+                            LOG.debug(statement);
+                            stmt.execute(statement);
+                        } catch (SQLException e) {
+                        }
+                    }
+                    connection.commit();
+                } catch (IOException e) {
                 }
-                PreparedStatement ps = connection.prepareStatement(query);
-                ps.setDate(1,date);
-                ps.execute();
-                LOG.info("Finished stored procedure processing.");
             }
+
+            ArrayList<String> spNames = new ArrayList<>();
+            files = FilerUtil.getFilesFromDirectory(destPath, ".execute");
+            for (File file : files) {
+                LOG.info("Running statements form file: " + file.getName());
+                String schema = FilenameUtils.removeExtension(file.getName());
+                try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
+                    String spName;
+                    String query;
+                    while ((spName = br.readLine()) != null) {
+                        if (isSqlServer(connection)) {
+                            query = "exec " + schema + ".dbo." + spName + ";";
+                        } else {
+                            query = "{ call " + schema + "." + spName + "};";
+                        }
+                        spNames.add(spName);
+                        LOG.info("Executing stored proc: " + spName);
+                        PreparedStatement ps = connection.prepareStatement(query);
+                        ps.execute();
+                        LOG.info("Finished stored procedure processing.");
+                    }
+                } catch (IOException e) {
+                }
+            }
+
+            for (String spName : spNames) {
+                String query = "DROP PROCEDURE IF EXISTS ";
+                Statement stmt = connection.createStatement();
+                try {
+                    LOG.info("Dropping stored proc: " + spName);
+                    stmt.execute(query + spName + ";");
+                } catch (SQLException e) {
+                }
+            }
+            connection.commit();
+
             FileUtils.deleteDirectory(conceptDir);
             FileUtils.forceDelete(conceptsFile);
 
