@@ -45,7 +45,7 @@ public class ConceptSender {
 
     public static void main(String[] args) throws Exception {
 
-        if (args == null || args.length != 11) {
+        if (args == null || args.length != 12) {
             LOG.error("Invalid number of parameters.");
 
             LOG.info("Required parameters:");
@@ -57,8 +57,9 @@ public class ConceptSender {
             LOG.info("SFTP Location");
             LOG.info("Key File");
             LOG.info("Certificate File");
-            LOG.info("Target Schema");
+            LOG.info("Concepts Schema");
             LOG.info("Target Database Server");
+            LOG.info("Target Schema");
             LOG.info("Delta Date in yyyy-mm-dd format");
 
             System.exit(-1);
@@ -73,18 +74,19 @@ public class ConceptSender {
         LOG.info("SFTP Location          : " + args[5]);
         LOG.info("Key File               : " + args[6]);
         LOG.info("Certificate File       : " + args[7]);
-        LOG.info("Target Schema          : " + args[8]);
+        LOG.info("Concepts Schema        : " + args[8]);
         LOG.info("Target Database Server : " + args[9]);
-        LOG.info("Delta Date             : " + args[10]);
+        LOG.info("Target Schema          : " + args[10]);
+        LOG.info("Delta Date             : " + args[11]);
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.applyPattern(args[10]);
+            sdf.applyPattern(args[11]);
         } catch (Exception e) {
             throw new Exception("Invalid date specified. " + args[9]);
         }
 
-        if (args[10].equalsIgnoreCase("mysql") && args[9].equalsIgnoreCase("sql_server")) {
+        if (args[9].equalsIgnoreCase("mysql") && args[9].equalsIgnoreCase("sql_server")) {
             throw new Exception("Invalid Target Database Server specified: " + args[9] + " . Only mysql or sql_server is allowed");
         }
 
@@ -132,17 +134,17 @@ public class ConceptSender {
         FileUtils.forceMkdir(sourceDir);
 
         /*
-        ArrayList<String> concept = getConcept(args[10], args[9]);
+        ArrayList<String> concept = getConcept(args[11], args[9]);
         createConceptFile(sourceDir, concept, args[8]);
 
-        ArrayList<String> conceptMap = getConceptMap(args[10], args[9]);
+        ArrayList<String> conceptMap = getConceptMap(args[11], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        ArrayList<String> conceptProperty = getConceptProperty(args[10]);
+        ArrayList<String> conceptProperty = getConceptProperty(args[11]);
         createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
         */
 
-        createSPFile(sourceDir, args[8], args[9]);
+        createSPFile(sourceDir, args[8], args[9], args[10]);
         
         File zipFile = zipAdhocFiles(sourceDir).getFile();
         File cert = new File(args[7]);
@@ -160,7 +162,7 @@ public class ConceptSender {
                 FileUtils.forceMkdir(archiveDir);
             }
             File archive = new File(archiveDir.getAbsolutePath() + File.separator +
-                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[10] + ".zip");
+                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[11] + ".zip");
             FileUtils.copyFile(zipFile, archive);
         } catch (Exception e) {
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
@@ -482,27 +484,38 @@ public class ConceptSender {
         return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
     }
 
-    private static void createSPFile(File sourceDir, String schema, String server) throws Exception {
+    private static void createSPFile(File sourceDir, String conceptSchema, String server, String targetSchema) throws Exception {
 
         File spFiles = new File(sourceDir.getParent() + File.separator + "stored_procedures");
 
         ArrayList<String> mysqlFilenames = new ArrayList();
-        mysqlFilenames.add("create_tables_mysql.sql");
-        mysqlFilenames.add("create_tables_2_mysql.sql");
+        mysqlFilenames.add("get_core_concept_id_mysql.sql");
+        mysqlFilenames.add("update_core_concept_id_mysql.sql");
+        mysqlFilenames.add("update_tables_mysql.sql");
 
         ArrayList<String> mssqlFilenames = new ArrayList();
-        mssqlFilenames.add("create_tables_mssql.sql");
-        mssqlFilenames.add("create_tables_2_mssql.sql");
+        mssqlFilenames.add("get_core_concept_id_mssql.sql");
+        mssqlFilenames.add("update_core_concept_id_mssql.sql");
+        mssqlFilenames.add("update_tables_mssql.sql");
+
+        ArrayList<String> functionNames = new ArrayList();
+        functionNames.add("get_core_concept_id");
 
         ArrayList<String> spNames = new ArrayList();
-        spNames.add("test_sp1");
-        spNames.add("test_sp2");
+        spNames.add("update_core_concept_id");
+        spNames.add("update_tables_with_core_concept_id");
+
+        ArrayList<String> execSPNames = new ArrayList();
+        execSPNames.add("update_tables_with_core_concept_id");
 
         File setupSPS = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sps.setup");
         setupSPS.createNewFile();
         LOG.info("Generating concepts.sps file");
         FileWriter writer = new FileWriter(setupSPS);
-        writer.write("USE " + schema + ";" + System.lineSeparator());
+        writer.write("USE " + conceptSchema + ";" + System.lineSeparator());
+        for (String func : functionNames) {
+            writer.write("DROP FUNCTION IF EXISTS " + func + ";" + System.lineSeparator());
+        }
         for (String sp : spNames) {
             writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
         }
@@ -512,6 +525,7 @@ public class ConceptSender {
                 writer.write("DELIMITER //" + System.lineSeparator());
                 String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
                 contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
+                contents = contents.replaceAll("<target>", targetSchema);
                 writer.write(contents + System.lineSeparator());
                 writer.write("// DELIMITER ;" + System.lineSeparator());
             }
@@ -519,15 +533,16 @@ public class ConceptSender {
             for (String file : mssqlFilenames) {
                 String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
                 contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
+                contents = contents.replaceAll("<target>", targetSchema);
                 writer.write(contents + System.lineSeparator());
             }
         }
 
         writer.close();
 
-        File executeSPS = new File(sourceDir.getAbsolutePath() + File.separator + schema + ".execute");
+        File executeSPS = new File(sourceDir.getAbsolutePath() + File.separator + conceptSchema + ".execute");
         writer = new FileWriter(executeSPS);
-        for (String sp : spNames) {
+        for (String sp : execSPNames) {
             writer.write(sp + System.lineSeparator());
         }
         writer.close();
