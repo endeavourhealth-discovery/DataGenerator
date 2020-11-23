@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.endeavourhealth.filer.models.FilerConstants;
 import org.endeavourhealth.filer.util.FilerUtil;
+import org.endeavourhealth.filer.util.RemoteFile;
 import org.endeavourhealth.filer.util.SftpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class ConceptFiler {
@@ -50,19 +52,31 @@ public class ConceptFiler {
 
             try {
                 sftp.open();
-                LOG.info("Downloading file: " + CONCEPTS_FILENAME);
-                InputStream inputStream = sftp.getFile(properties.getProperty(FilerConstants.INCOMING), CONCEPTS_FILENAME);
-                conceptsFile = new File(stagingDir.getAbsolutePath() + File.separator + CONCEPTS_FILENAME);
-                Files.copy(inputStream, conceptsFile.toPath());
-                inputStream.close();
-                LOG.info("Deleting file: " + CONCEPTS_FILENAME + " from SFTP server.");
-                sftp.deleteFile(CONCEPTS_FILENAME);
+
+                List<RemoteFile> list = sftp.getFileList(properties.getProperty(FilerConstants.INCOMING));
+                if (list.size() == 0) {
+                    LOG.info("SFTP server location is empty.");
+                    LOG.info("Ending Concept Filer");
+                    System.exit(0);
+                }
+                for (RemoteFile file : list) {
+                    String remoteFilePath = file.getFullPath();
+                    LOG.info("Downloading file: " + file.getFilename());
+                    InputStream inputStream = sftp.getFile(remoteFilePath);
+                    File dest = new File(stagingDir.getAbsolutePath() + File.separator + file.getFilename());
+                    Files.copy(inputStream, dest.toPath());
+                    inputStream.close();
+                    LOG.info("Deleting file: " + file.getFilename() + " from SFTP server.");
+                    sftp.deleteFile(remoteFilePath);
+                }
+
                 sftp.close();
             } catch (Exception e) {
                 LOG.error("Error in downloading/deleting files from SFTP server " + e.getMessage());
                 System.exit(-1);
             }
 
+            conceptsFile = new File(stagingDir.getAbsolutePath() + File.separator + CONCEPTS_FILENAME);
             File files[] = new File[] { conceptsFile };
             FilerUtil.decryptFiles(files, properties);
             LOG.info("Deflating zip file: " + conceptsFile.getName());

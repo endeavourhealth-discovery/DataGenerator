@@ -5,6 +5,7 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.endeavourhealth.common.config.ConfigManager;
@@ -133,7 +134,6 @@ public class ConceptSender {
         }
         FileUtils.forceMkdir(sourceDir);
 
-        /*
         ArrayList<String> concept = getConcept(args[11], args[9]);
         createConceptFile(sourceDir, concept, args[8]);
 
@@ -142,32 +142,47 @@ public class ConceptSender {
 
         ArrayList<String> conceptProperty = getConceptProperty(args[11]);
         createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
-        */
 
-        createSPFile(sourceDir, args[8], args[9], args[10]);
-        
-        File zipFile = zipAdhocFiles(sourceDir).getFile();
+        createSPFile(sourceDir, args[8], args[9], args[10], args[11]);
+
+        ArrayList<File> zipFiles = new ArrayList<>();
+        File zipFile = zipFiles(sourceDir).getFile();
         File cert = new File(args[7]);
 
         encryptFile(zipFile, cert);
 
         try {
+            for (File file : sourceDir.getParentFile().listFiles()) {
+                if (file.isFile() && file.getName().startsWith("concepts")) {
+                    zipFiles.add(file);
+                }
+            }
             sftp.open();
             String location = args[5];
             LOG.info("Starting file upload.");
-            sftp.put(zipFile.getAbsolutePath(), location);
+            for (File file : zipFiles) {
+                sftp.put(file.getAbsolutePath(), location);
+            }
             sftp.close();
             File archiveDir = new File(args[1]);
             if (!archiveDir.exists()) {
                 FileUtils.forceMkdir(archiveDir);
             }
-            File archive = new File(archiveDir.getAbsolutePath() + File.separator +
-                    zipFile.getName().substring(0, zipFile.getName().length() - 4) + "_" + args[11] + ".zip");
-            FileUtils.copyFile(zipFile, archive);
+            for (File file : zipFiles) {
+                File archive = new File(archiveDir.getAbsolutePath() + File.separator +
+                        file.getName().substring(0, file.getName().length() - 4) + "_" + args[11] + "." +
+                        FilenameUtils.getExtension(file.getName()));
+                FileUtils.copyFile(file, archive);
+            }
         } catch (Exception e) {
             LOG.error("Unable to do SFTP operation. " + e.getMessage());
             System.exit(-1);
         }
+
+        for (File file : zipFiles) {
+            file.deleteOnExit();
+        }
+
         LOG.info("Process completed.");
         System.exit(0);
     }
@@ -334,7 +349,7 @@ public class ConceptSender {
         Connection connection = session.connection();
 
         //String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 order by id asc;";
-        String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 and updated > '" + date + "' order by legacy asc;";
+        String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > '" + date + "' order by id asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
@@ -347,6 +362,7 @@ public class ConceptSender {
                 query = "update concept_map set legacy = [legacy], " +
                         "core = [core], " +
                         "updated = [updated] " +
+                        "deleted = [deleted] " +
                         "where id = [id] " +
                         "if @@ROWCOUNT = 0 " +
                         "insert into concept_map values ([legacy],[core],[updated],[id]);";
@@ -357,6 +373,7 @@ public class ConceptSender {
                         "`legacy` = [legacy]," +
                         "`core` = [core]," +
                         "`id` = [id]," +
+                        "`deleted` = [deleted]," +
                         "`updated` = [updated];";
             }
 
@@ -364,25 +381,8 @@ public class ConceptSender {
             query = query.replace("[core]", String.valueOf(resultSet.getLong(2)));
             query = query.replace("[updated]", "'" + String.valueOf(resultSet.getTimestamp(3)) + "'");
             query = query.replace("[id]", String.valueOf(resultSet.getInt(4)));
+            query = query.replace("[deleted]", String.valueOf(resultSet.getInt(5)));
 
-            conceptMap.add(query);
-            i++;
-            if (i % 10000 == 0) {
-                LOG.info("Records added: " + i);
-                System.gc();
-            }
-        }
-
-        sql = "select id from information_model.concept_map where deleted = 1 order by legacy asc;";
-        ps = connection.prepareStatement(sql);
-        ps.executeQuery();
-        resultSet = ps.getResultSet();
-        LOG.info("Fetching marked as deleted contents of concept_map table.");
-
-        i = 0;
-        while (resultSet.next()) {
-            query = "DELETE FROM concept_map WHERE id = [id];";
-            query = query.replace("[id]", String.valueOf(resultSet.getInt(1)));
             conceptMap.add(query);
             i++;
             if (i % 10000 == 0) {
@@ -451,7 +451,7 @@ public class ConceptSender {
         return conceptProperty;
     }
 
-    private static ZipFile zipAdhocFiles(File dataDir) throws Exception {
+    private static ZipFile zipFiles(File dataDir) throws Exception {
         File zip = new File(dataDir.getParentFile().getAbsolutePath() + File.separator + "concepts" + ".zip");
         if (zip.exists()) {
             FileUtils.forceDelete(zip);
@@ -459,9 +459,9 @@ public class ConceptSender {
         ZipFile zipFile = new ZipFile(zip);
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+        parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_MAXIMUM);
         parameters.setIncludeRootFolder(false);
-        zipFile.createZipFileFromFolder(dataDir, parameters, false, 0);
+        zipFile.createZipFileFromFolder(dataDir, parameters, true, 10485760);
         return zipFile;
     }
 
@@ -484,22 +484,17 @@ public class ConceptSender {
         return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
     }
 
-    private static void createSPFile(File sourceDir, String conceptSchema, String server, String targetSchema) throws Exception {
+    private static void createSPFile(File sourceDir, String conceptSchema, String server, String targetSchema, String date) throws Exception {
 
         File spFiles = new File(sourceDir.getParent() + File.separator + "stored_procedures");
 
         ArrayList<String> mysqlFilenames = new ArrayList();
-        mysqlFilenames.add("get_core_concept_id_mysql.sql");
         mysqlFilenames.add("update_core_concept_id_mysql.sql");
         mysqlFilenames.add("update_tables_mysql.sql");
 
         ArrayList<String> mssqlFilenames = new ArrayList();
-        mssqlFilenames.add("get_core_concept_id_mssql.sql");
         mssqlFilenames.add("update_core_concept_id_mssql.sql");
         mssqlFilenames.add("update_tables_mssql.sql");
-
-        ArrayList<String> functionNames = new ArrayList();
-        functionNames.add("get_core_concept_id");
 
         ArrayList<String> spNames = new ArrayList();
         spNames.add("update_core_concept_id");
@@ -508,14 +503,12 @@ public class ConceptSender {
         ArrayList<String> execSPNames = new ArrayList();
         execSPNames.add("update_tables_with_core_concept_id");
 
+        date = "'" + date + "'";
         File setupSPS = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sps.setup");
         setupSPS.createNewFile();
         LOG.info("Generating concepts.sps file");
         FileWriter writer = new FileWriter(setupSPS);
         writer.write("USE " + conceptSchema + ";" + System.lineSeparator());
-        for (String func : functionNames) {
-            writer.write("DROP FUNCTION IF EXISTS " + func + ";" + System.lineSeparator());
-        }
         for (String sp : spNames) {
             writer.write("DROP PROCEDURE IF EXISTS " + sp + ";" + System.lineSeparator());
         }
@@ -526,6 +519,7 @@ public class ConceptSender {
                 String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
                 contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
                 contents = contents.replaceAll("<target>", targetSchema);
+                contents = contents.replaceAll("<last_updated_date>", date);
                 writer.write(contents + System.lineSeparator());
                 writer.write("// DELIMITER ;" + System.lineSeparator());
             }
@@ -534,6 +528,7 @@ public class ConceptSender {
                 String contents = FileUtils.readFileToString(new File(spFiles + File.separator + file));
                 contents = contents.replaceAll("(\r\n|\r|\n|\n\r)", " ");
                 contents = contents.replaceAll("<target>", targetSchema);
+                contents = contents.replaceAll("<last_updated_date>", date);
                 writer.write(contents + System.lineSeparator());
             }
         }
