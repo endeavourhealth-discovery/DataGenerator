@@ -140,8 +140,8 @@ public class ConceptSender {
         ArrayList<String> conceptMap = getConceptMap(args[11], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        ArrayList<String> conceptProperty = getConceptProperty(args[11]);
-        createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
+        //ArrayList<String> conceptProperty = getConceptProperty(args[11]);
+        //createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
 
         createSPFile(sourceDir, args[8], args[9], args[10], args[11]);
 
@@ -338,6 +338,7 @@ public class ConceptSender {
     }
 
     private static String replaceInvalidChars(String value) {
+        value = value.replace("\n", "").replace("\r", "");
         return value.replace("'", "''");
     }
 
