@@ -162,6 +162,7 @@ public class ConceptFiler {
                 }
             }
 
+            spNames.add("update_core_concept_id");
             for (String spName : spNames) {
                 String query = "DROP PROCEDURE IF EXISTS ";
                 Statement stmt = connection.createStatement();

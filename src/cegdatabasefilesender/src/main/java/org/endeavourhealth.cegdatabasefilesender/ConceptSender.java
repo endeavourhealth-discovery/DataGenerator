@@ -245,7 +245,7 @@ public class ConceptSender {
         SessionImpl session = (SessionImpl) entityManager.getDelegate();
         Connection connection = session.connection();
         //String sql = "select * from information_model.concept order by dbid asc;";
-        String sql = "select * from information_model.concept where updated > '" + date + "' order by dbid asc;";
+        String sql = "select * from information_model.concept where updated > '" + date + "' order by updated asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
