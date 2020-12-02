@@ -661,7 +661,8 @@ public class RemoteServerFiler {
             }
             //Comment this if block if filer is not for CEG
             /*
-            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
+            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1
+                    && tableName.indexOf("organization_additional") == -1 && tableName.indexOf("organization_v2") == -1 && tableName.indexOf("abp_classification_v2") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON");
             }
              */
@@ -677,7 +678,8 @@ public class RemoteServerFiler {
         } finally {
             //Comment this if block if filer is not for CEG
             /*
-            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1) {
+            if (ConnectionManager.isSqlServer(connection) && tableName.indexOf("person") == -1 && tableName.indexOf("patient_address_match") == -1
+                    && tableName.indexOf("organization_additional") == -1 && tableName.indexOf("organization_v2") == -1 && tableName.indexOf("abp_classification_v2") == -1) {
                 connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF");
             }
              */
