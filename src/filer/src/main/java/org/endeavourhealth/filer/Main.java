@@ -25,6 +25,8 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static int batchSize = 5000;
     private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
+    private static Map<String, ArrayList> pksMap = new ConcurrentHashMap<>();
+    private static ArrayList<String> identityTables = new ArrayList();
 
     public static void main(String[] args) {
 
@@ -166,7 +168,7 @@ public class Main {
                                     properties, keywordEscapeChar, batchSize, bytes, columnsMap);
                         } else {
                             RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap);
+                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap, pksMap, identityTables);
                         }
                         nSuccess++;
                         lSuccess.add(zip.getName().substring(24, 60));
