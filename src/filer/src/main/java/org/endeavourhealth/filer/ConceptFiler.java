@@ -2,6 +2,7 @@ package org.endeavourhealth.filer;
 
 import com.microsoft.sqlserver.jdbc.SQLServerConnection;
 import net.lingala.zip4j.core.ZipFile;
+import org.apache.commons.io.FileDeleteStrategy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.endeavourhealth.filer.models.FilerConstants;
@@ -18,7 +19,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -113,6 +113,7 @@ public class ConceptFiler {
                             break;
                         }
                     }
+                    br.close();
                     int[] executed = batch.executeBatch();
                     LOG.info("Executed statements:" + executed.length);
                     connection.commit();
@@ -133,6 +134,7 @@ public class ConceptFiler {
                         } catch (SQLException e) {
                         }
                     }
+                    br.close();
                     connection.commit();
                 } catch (IOException e) {
                 }
@@ -163,6 +165,7 @@ public class ConceptFiler {
             }
 
             spNames.add("update_core_concept_id");
+            spNames.add("update_bnf_reference");
             for (String spName : spNames) {
                 String query = "DROP PROCEDURE IF EXISTS ";
                 Statement stmt = connection.createStatement();
@@ -175,7 +178,7 @@ public class ConceptFiler {
             connection.commit();
 
             FileUtils.deleteDirectory(conceptDir);
-            FileUtils.forceDelete(conceptsFile);
+            FileDeleteStrategy.FORCE.deleteQuietly(conceptsFile);
 
         } catch (Exception e) {
             LOG.error("Unhandled exception occurred. " + e.getMessage());

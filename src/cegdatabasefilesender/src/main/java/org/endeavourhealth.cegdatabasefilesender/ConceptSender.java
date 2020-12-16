@@ -1,6 +1,5 @@
 package org.endeavourhealth.cegdatabasefilesender;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
@@ -8,17 +7,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.endeavourhealth.common.config.ConfigManager;
+import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
 import org.endeavourhealth.scheduler.util.SftpConnection;
-import org.hibernate.internal.SessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -33,13 +28,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ConceptSender {
 
-    private static EntityManagerFactory entityManagerFactory = null;
-    private static EntityManager entityManager = null;
     private static final Logger LOG = LoggerFactory.getLogger(ConceptSender.class);
     private static final String MYSQL = "mysql";
     private static final String SQL_SERVER = "sql_server";
@@ -91,21 +82,6 @@ public class ConceptSender {
             throw new Exception("Invalid Target Database Server specified: " + args[9] + " . Only mysql or sql_server is allowed");
         }
 
-        JsonNode json = ConfigManager.getConfigurationAsJson("database", "information-model");
-        String url = json.get("url").asText();
-        String user = json.get("username").asText();
-        String pass = json.get("password").asText();
-
-        Map<String, Object> properties = new HashMap<>();
-        //properties.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
-        properties.put("hibernate.hikari.dataSource.url", url);
-        properties.put("hibernate.hikari.dataSource.user", user);
-        properties.put("hibernate.hikari.dataSource.password", pass);
-        properties.put("javax.persistence.provider", "org.hibernate.jpa.HibernatePersistenceProvider");
-        properties.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
-        entityManagerFactory = Persistence.createEntityManagerFactory("information_model", properties);
-        entityManager = entityManagerFactory.createEntityManager();
-
         ConnectionDetails con = new ConnectionDetails();
         con.setHostname(args[2]);
         con.setPort(Integer.valueOf(args[3]));
@@ -140,10 +116,13 @@ public class ConceptSender {
         ArrayList<String> conceptMap = getConceptMap(args[11], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
-        //ArrayList<String> conceptProperty = getConceptProperty(args[11]);
-        //createConceptPropertyFile(sourceDir, conceptProperty, args[8]);
+        ArrayList<String> snomedToBnf = getSnomedToBNFData(args[11], args[9]);
+        boolean hasSnomedToBnf = snomedToBnf.size() > 0;
+        if (hasSnomedToBnf) {
+            createSnomedToBNFFile(sourceDir, snomedToBnf, args[8]);
+        }
 
-        createSPFile(sourceDir, args[8], args[9], args[10], args[11]);
+        createSPFile(sourceDir, args[8], args[9], args[10], args[11], hasSnomedToBnf);
 
         ArrayList<File> zipFiles = new ArrayList<>();
         File zipFile = zipFiles(sourceDir).getFile();
@@ -185,6 +164,66 @@ public class ConceptSender {
 
         LOG.info("Process completed.");
         System.exit(0);
+    }
+
+    private static void createSnomedToBNFFile(File sourceDir, ArrayList<String> data, String schema) throws Exception {
+        File file = new File(sourceDir.getAbsolutePath() + File.separator + "SnomedToBnf.sql");
+        file.createNewFile();
+        LOG.info("Generating snomed to bnf sql.");
+        FileWriter writer = new FileWriter(file);
+        writer.write("use " + schema + ";" + System.lineSeparator());
+        for (String str : data) {
+            writer.write(str + System.lineSeparator());
+        }
+        writer.close();
+    }
+
+    private static ArrayList<String> getSnomedToBNFData(String date, String server) throws Exception {
+
+        ArrayList<String> data = new ArrayList<>();
+        Connection connection = ConnectionManager.getReferenceNonPooledConnection();
+
+        String sql = "select * from reference.snomed_to_bnf_chapter_lookup where dt_last_updated > '" + date + "' order by snomed_code asc;";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        LOG.info("Fetching contents of snomed_to_bnf_chapter_lookup table.");
+
+        String query = "";
+        int i = 0;
+        while (resultSet.next()) {
+
+            if (server.equalsIgnoreCase(SQL_SERVER)) {
+                query = "update snomed_to_bnf_chapter_lookup " +
+                        "set bnf_chapter_code = '[bnf_chapter_code]', " +
+                        "dt_last_updated = '[dt_last_updated]' " +
+                        "where snomed_code = '[snomed_code]' " +
+                        "if @@ROWCOUNT = 0 " +
+                        "insert into snomed_to_bnf_chapter_lookup values ('[snomed_code]','[bnf_chapter_code]','[dt_last_updated]');";
+            } else {
+                query = "INSERT INTO snomed_to_bnf_chapter_lookup (`snomed_code`,`bnf_chapter_code`,`dt_last_updated`) " +
+                        "VALUES ('[snomed_code]','[bnf_chapter_code]','[dt_last_updated]') " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "`bnf_chapter_code` = '[bnf_chapter_code]'," +
+                        "`dt_last_updated` = '[dt_last_updated]';";
+            }
+
+            query = query.replace("[snomed_code]", resultSet.getString(1));
+            query = query.replace("[bnf_chapter_code]", resultSet.getString(2));
+            query = query.replace("[dt_last_updated]", String.valueOf(resultSet.getTimestamp(3)));
+
+            data.add(query);
+            i++;
+            if (i % 10000 == 0) {
+                LOG.info("Records added: " + i);
+                System.gc();
+            }
+        }
+        LOG.info("Total records added: " + data.size());
+        resultSet.close();
+        ps.close();
+        connection.close();
+        return data;
     }
 
     private static void createConceptFile(File sourceDir, ArrayList<String> concept, String schema) throws Exception {
@@ -242,8 +281,8 @@ public class ConceptSender {
 
         ArrayList<String> concepts = new ArrayList<>();
 
-        SessionImpl session = (SessionImpl) entityManager.getDelegate();
-        Connection connection = session.connection();
+        Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
+
         //String sql = "select * from information_model.concept order by dbid asc;";
         String sql = "select * from information_model.concept where updated > '" + date + "' order by updated asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
@@ -337,17 +376,11 @@ public class ConceptSender {
         return concepts;
     }
 
-    private static String replaceInvalidChars(String value) {
-        value = value.replace("\n", "").replace("\r", "");
-        return value.replace("'", "''");
-    }
-
     private static ArrayList<String> getConceptMap(String date, String server) throws Exception {
 
         ArrayList<String> conceptMap = new ArrayList<>();
 
-        SessionImpl session = (SessionImpl) entityManager.getDelegate();
-        Connection connection = session.connection();
+        Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
 
         //String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 order by id asc;";
         String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > '" + date + "' order by id asc;";
@@ -362,14 +395,14 @@ public class ConceptSender {
             if (server.equalsIgnoreCase(SQL_SERVER)) {
                 query = "update concept_map set legacy = [legacy], " +
                         "core = [core], " +
-                        "updated = [updated] " +
+                        "updated = [updated], " +
                         "deleted = [deleted] " +
                         "where id = [id] " +
                         "if @@ROWCOUNT = 0 " +
-                        "insert into concept_map values ([legacy],[core],[updated],[id]);";
+                        "insert into concept_map values ([legacy],[core],[updated],[id],[deleted]);";
             } else {
-                query = "INSERT INTO concept_map (`legacy`,`core`,`updated`,`id`) " +
-                        "VALUES ([legacy],[core],[updated],[id]) " +
+                query = "INSERT INTO concept_map (`legacy`,`core`,`updated`,`id`,`deleted`) " +
+                        "VALUES ([legacy],[core],[updated],[id],[deleted]) " +
                         "ON DUPLICATE KEY UPDATE " +
                         "`legacy` = [legacy]," +
                         "`core` = [core]," +
@@ -403,8 +436,7 @@ public class ConceptSender {
 
         ArrayList<String> conceptProperty = new ArrayList<>();
 
-        SessionImpl session = (SessionImpl) entityManager.getDelegate();
-        Connection connection = session.connection();
+        Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
 
         //TODO: For now always select all as we have no way to update concept_property_object table yet since it has no PRIMARY key
         //String sql = "select * from information_model.cpo_92842 where updated > '" + date + "' order by dbid asc;";
@@ -485,24 +517,40 @@ public class ConceptSender {
         return PgpEncryptDecrypt.encryptFile(file, certificate, "BC");
     }
 
-    private static void createSPFile(File sourceDir, String conceptSchema, String server, String targetSchema, String date) throws Exception {
+    private static void createSPFile(File sourceDir, String conceptSchema, String server,
+                                     String targetSchema, String date, boolean hasSnomedToBnf) throws Exception {
 
         File spFiles = new File(sourceDir.getParent() + File.separator + "stored_procedures");
 
         ArrayList<String> mysqlFilenames = new ArrayList();
         mysqlFilenames.add("update_core_concept_id_mysql.sql");
-        mysqlFilenames.add("update_tables_mysql.sql");
+        mysqlFilenames.add("update_core_concept_tables_mysql.sql");
+        if (hasSnomedToBnf) {
+            mysqlFilenames.add("update_bnf_reference_mysql.sql");
+            mysqlFilenames.add("update_bnf_tables_mysql.sql");
+        }
 
         ArrayList<String> mssqlFilenames = new ArrayList();
         mssqlFilenames.add("update_core_concept_id_mssql.sql");
-        mssqlFilenames.add("update_tables_mssql.sql");
+        mssqlFilenames.add("update_core_concept_tables_mssql.sql");
+        if (hasSnomedToBnf) {
+            mssqlFilenames.add("update_bnf_reference_mssql.sql");
+            mssqlFilenames.add("update_bnf_tables_mssql.sql");
+        }
 
         ArrayList<String> spNames = new ArrayList();
         spNames.add("update_core_concept_id");
         spNames.add("update_tables_with_core_concept_id");
+        if (hasSnomedToBnf) {
+            spNames.add("update_bnf_reference");
+            spNames.add("update_tables_with_bnf");
+        }
 
         ArrayList<String> execSPNames = new ArrayList();
         execSPNames.add("update_tables_with_core_concept_id");
+        if (hasSnomedToBnf) {
+            execSPNames.add("update_tables_with_bnf");
+        }
 
         date = "'" + date + "'";
         File setupSPS = new File(sourceDir.getAbsolutePath() + File.separator + "concept_sps.setup");
@@ -542,5 +590,10 @@ public class ConceptSender {
             writer.write(sp + System.lineSeparator());
         }
         writer.close();
+    }
+
+    private static String replaceInvalidChars(String value) {
+        value = value.replace("\n", "").replace("\r", "");
+        return value.replace("'", "''");
     }
 }
