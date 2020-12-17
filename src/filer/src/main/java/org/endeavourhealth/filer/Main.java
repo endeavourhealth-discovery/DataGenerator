@@ -26,7 +26,7 @@ public class Main {
     private static int batchSize = 5000;
     private static Map<String, ArrayList> columnsMap = new ConcurrentHashMap<>();
     private static Map<String, ArrayList> pksMap = new ConcurrentHashMap<>();
-    private static ArrayList<String> identityTables = new ArrayList();
+    private static Map<String, Boolean> identityTables = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
 

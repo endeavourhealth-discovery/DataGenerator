@@ -43,7 +43,7 @@ public class RemoteServerFiler {
                              String keywordEscapeChar, int batchSize, byte[] bytes,
                              Map<String, ArrayList> columnsMap,
                              Map<String, ArrayList> pksMap,
-                             ArrayList<String> identityTables) throws Exception {
+                             Map<String, Boolean> identityTables) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -197,7 +197,7 @@ public class RemoteServerFiler {
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode columnClassJson,
                                        Connection connection, String keywordEscapeChar, int batchSize,
                                        List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap,
-                                       Map<String, ArrayList> pksMap, ArrayList<String> identityTables) throws Exception {
+                                       Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
         ArrayList<String> actualColumns = columnsMap.get(tableName);
@@ -443,7 +443,7 @@ public class RemoteServerFiler {
         return pks;
     }
 
-    private static String checkForIdentityTable(String tableName, Connection connection) throws Exception {
+    private static boolean checkForIdentityTable(String tableName, Connection connection) throws Exception {
         int count = 0;
         String sql = "SELECT count(*) as value " +
                 "FROM sys.identity_columns " +
@@ -456,17 +456,12 @@ public class RemoteServerFiler {
         }
         resultSet.close();
         ps.close();
-        if (count == 0) {
-            return null;
-        } else {
-            return tableName;
-        }
+        return (count != 0);
     }
 
     private static PreparedStatement createUpsertPreparedStatement(String tableName, List<String> columns,
                                                                    Connection connection, String keywordEscapeChar,
-                                                                   Map<String, ArrayList> pksMap,
-                                                                   ArrayList<String> identityTables) throws Exception {
+                                                                   Map<String, ArrayList> pksMap) throws Exception {
 
         if (ConnectionManager.isSqlServer(connection)) {
 
@@ -478,7 +473,7 @@ public class RemoteServerFiler {
 
             /*
             MERGE INTO organization_additional AS t USING
-                (SELECT id=4054848834, property_id=1561501, value_id=0, json_value=null, value='Hatszz Prestige Care Limited',name='name') AS s
+                (SELECT id=?, property_id=?, value_id=?, json_value=?, value=?,name=?) AS s
               ON t.id = s.id
               AND t.property_id = s.property_id
               AND t.value_id = s.value_id
@@ -612,13 +607,13 @@ public class RemoteServerFiler {
      */
     private static void fileUpsertsWithRetry(List<CSVRecord> csvRecords, List<String> columns, Map<String, Class> columnClasses,
                                              String tableName, Connection connection, String keywordEscapeChar,
-                                             Map<String, ArrayList> pksMap, ArrayList<String> identityTables) throws Exception {
+                                             Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         int attemptsMade = 0;
         while (true) {
 
             try {
-                fileUpserts(csvRecords, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap,identityTables);
+                fileUpserts(csvRecords, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap, identityTables);
 
                 //if we execute without error, break out
                 break;
@@ -663,7 +658,7 @@ public class RemoteServerFiler {
 
     private static void fileUpserts(List<CSVRecord> csvRecords, List<String> columns, Map<String, Class> columnClasses,
                                     String tableName, Connection connection, String keywordEscapeChar,
-                                    Map<String, ArrayList> pksMap, ArrayList<String> identityTables) throws Exception {
+                                    Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         if (csvRecords.isEmpty()) {
             return;
@@ -673,7 +668,7 @@ public class RemoteServerFiler {
         columns = new ArrayList<>(columns);
         columns.remove(COL_IS_DELETE);
 
-        PreparedStatement insert = createUpsertPreparedStatement(tableName, columns, connection, keywordEscapeChar, pksMap, identityTables);
+        PreparedStatement insert = createUpsertPreparedStatement(tableName, columns, connection, keywordEscapeChar, pksMap);
 
         //wrap in try/catch so we can log out the SQL that failed
         try {
@@ -690,15 +685,11 @@ public class RemoteServerFiler {
             }
 
             if (ConnectionManager.isSqlServer(connection)) {
-                boolean isIdentityTable = false;
-                if (!identityTables.contains(tableName)) {
-                    String value = checkForIdentityTable(tableName, connection);
-                    if (value != null) {
-                        identityTables.add(value);
-                    }
+                if (identityTables.get(tableName) == null) {
+                    boolean value = checkForIdentityTable(tableName, connection);
+                    identityTables.put(tableName,value);
                 }
-                isIdentityTable = identityTables.contains(tableName);
-                if (isIdentityTable) {
+                if (identityTables.get(tableName)) {
                     try {
                         connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " ON;");
                     } catch (Exception e) {
@@ -716,15 +707,11 @@ public class RemoteServerFiler {
 
         } finally {
             if (ConnectionManager.isSqlServer(connection)) {
-                boolean isIdentityTable = false;
-                if (!identityTables.contains(tableName)) {
-                    String value = checkForIdentityTable(tableName, connection);
-                    if (value != null) {
-                        identityTables.add(value);
-                    }
+                if (identityTables.get(tableName) == null) {
+                    boolean value = checkForIdentityTable(tableName, connection);
+                    identityTables.put(tableName,value);
                 }
-                isIdentityTable = identityTables.contains(tableName);
-                if (isIdentityTable) {
+                if (identityTables.get(tableName)) {
                     try {
                         connection.createStatement().execute("SET IDENTITY_INSERT " + tableName + " OFF;");
                     } catch (Exception e) {
