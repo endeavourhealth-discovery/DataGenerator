@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.endeavourhealth.common.config.ConfigManager;
 import org.endeavourhealth.core.database.rdbms.ConnectionManager;
 import org.endeavourhealth.scheduler.util.ConnectionDetails;
 import org.endeavourhealth.scheduler.util.PgpEncryptDecrypt;
@@ -109,6 +110,8 @@ public class ConceptSender {
             FileUtils.deleteDirectory(sourceDir);
         }
         FileUtils.forceMkdir(sourceDir);
+
+        ConfigManager.Initialize("ReferenceUpdater");
 
         ArrayList<String> concept = getConcept(args[11], args[9]);
         createConceptFile(sourceDir, concept, args[8]);
@@ -383,7 +386,7 @@ public class ConceptSender {
         Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
 
         //String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 order by id asc;";
-        String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > '" + date + "' order by id asc;";
+        String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > '" + date + "' order by updated asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
