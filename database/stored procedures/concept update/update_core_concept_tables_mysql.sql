@@ -1,7 +1,5 @@
 CREATE PROCEDURE update_tables_with_core_concept_id ()
 
-AS
-
 BEGIN
 
 call update_core_concept_id('<target>.encounter', <last_updated_date>);

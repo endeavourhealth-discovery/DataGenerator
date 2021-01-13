@@ -14,7 +14,7 @@ CREATE TEMPORARY TABLE qry_tmp (
       dt_last_updated DATETIME
 ) AS
 SELECT
-      snomed_code,
+      CONCAT('SN_',snomed_code) snomed_code,
       substring(bnf_chapter_code,1,6) bnf_chapter_code,
       dt_last_updated
 FROM snomed_to_bnf_chapter_lookup
@@ -28,7 +28,7 @@ SET @sql = CONCAT("
 CREATE TEMPORARY TABLE qry_tmp_2 (row_id BIGINT, id BIGINT, snomed_code varchar(20), bnf_chapter_code varchar(6), PRIMARY KEY(row_id)) AS 
 select (@row_no := @row_no + 1) AS row_id, t.id id, c.code snomed_code, q.bnf_chapter_code  
 from concept c JOIN ",tableName," t ON t.non_core_concept_id = c.dbid 
-JOIN qry_tmp q ON q.snomed_code = c.code JOIN (SELECT @row_no := 0) s  
+JOIN qry_tmp q ON q.snomed_code = c.id JOIN (SELECT @row_no := 0) s  
 WHERE ((t.bnf_reference <> q.bnf_chapter_code AND t.bnf_reference IS NOT NULL) OR t.bnf_reference IS NULL) and c.scheme = 71
 ");
 

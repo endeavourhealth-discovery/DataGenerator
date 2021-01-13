@@ -119,7 +119,11 @@ public class ConceptSender {
         ArrayList<String> conceptMap = getConceptMap(args[11], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
+        //ArrayList<String> conceptPropertyObject = getConceptProperty(args[11]);
+        //createConceptPropertyFile(sourceDir,conceptPropertyObject, args[8]);
+
         ArrayList<String> snomedToBnf = getSnomedToBNFData(args[11], args[9]);
+        //ArrayList<String> snomedToBnf = new ArrayList();
         boolean hasSnomedToBnf = snomedToBnf.size() > 0;
         if (hasSnomedToBnf) {
             createSnomedToBNFFile(sourceDir, snomedToBnf, args[8]);
@@ -186,8 +190,9 @@ public class ConceptSender {
         ArrayList<String> data = new ArrayList<>();
         Connection connection = ConnectionManager.getReferenceNonPooledConnection();
 
-        String sql = "select * from reference.snomed_to_bnf_chapter_lookup where dt_last_updated > '" + date + "' order by snomed_code asc;";
+        String sql = "select * from reference.snomed_to_bnf_chapter_lookup where dt_last_updated > ? order by snomed_code asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, date);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
         LOG.info("Fetching contents of snomed_to_bnf_chapter_lookup table.");
@@ -287,8 +292,10 @@ public class ConceptSender {
         Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
 
         //String sql = "select * from information_model.concept order by dbid asc;";
-        String sql = "select * from information_model.concept where updated > '" + date + "' order by updated asc;";
+        String sql = "select * from information_model.concept where updated > ? order by updated asc;";
+
         PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, date);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
         LOG.info("Fetching contents of concept table.");
@@ -367,7 +374,7 @@ public class ConceptSender {
 
             concepts.add(query);
             i++;
-            if (i % 10000 == 0) {
+            if (i % 5000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
@@ -385,9 +392,9 @@ public class ConceptSender {
 
         Connection connection = ConnectionManager.getInformationModelNonPooledConnection();
 
-        //String sql = "select legacy, core, updated, id from information_model.concept_map where deleted = 0 order by id asc;";
-        String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > '" + date + "' order by updated asc;";
+        String sql = "select legacy, core, updated, id, deleted from information_model.concept_map where updated > ? order by updated asc;";
         PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, date);
         ps.executeQuery();
         ResultSet resultSet = ps.getResultSet();
         LOG.info("Fetching updated contents of concept_map table.");
@@ -422,7 +429,7 @@ public class ConceptSender {
 
             conceptMap.add(query);
             i++;
-            if (i % 10000 == 0) {
+            if (i % 5000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
@@ -475,7 +482,7 @@ public class ConceptSender {
 
             conceptProperty.add(query);
             i++;
-            if (i % 10000 == 0) {
+            if (i % 5000 == 0) {
                 LOG.info("Records added: " + i);
                 System.gc();
             }
@@ -497,7 +504,8 @@ public class ConceptSender {
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_MAXIMUM);
         parameters.setIncludeRootFolder(false);
-        zipFile.createZipFileFromFolder(dataDir, parameters, true, 10485760);
+        //zipFile.createZipFileFromFolder(dataDir, parameters, true, 10485760);
+        zipFile.createZipFileFromFolder(dataDir, parameters, false, 10485760);
         return zipFile;
     }
 
