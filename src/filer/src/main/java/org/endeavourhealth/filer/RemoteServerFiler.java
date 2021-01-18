@@ -484,44 +484,70 @@ public class RemoteServerFiler {
             //always first. So we need to format this prepared statement in such a way that we can accept it
             //as the first parameter, even though syntax means it is needed last
             StringBuilder sql = new StringBuilder();
-            sql.append("DECLARE @id_tmp bigint;");
-            sql.append("SET @id_tmp = ?;");
-            sql.append("UPDATE " + tableName + " SET ");
+            if (tableName.equalsIgnoreCase("patient_address_match")) {
+                sql.append("INSERT INTO " + tableName + "(");
 
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                if (column.equals(COL_ID)) {
-                    continue;
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+                    sql.append(keywordEscapeChar + column + keywordEscapeChar);
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
                 }
 
-                sql.append(keywordEscapeChar + column + keywordEscapeChar + " = ?");
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
+                sql.append(") SELECT ");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    sql.append("?");
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
                 }
+
+                sql.append(";");
+            } else {
+
+                sql.append("DECLARE @id_tmp bigint;");
+                sql.append("SET @id_tmp = ?;");
+                sql.append("UPDATE " + tableName + " SET ");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+
+
+                    if (column.equals(COL_ID)) {
+                        continue;
+                    }
+
+                    sql.append(keywordEscapeChar + column + keywordEscapeChar + " = ?");
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
+                }
+                sql.append(" WHERE " + keywordEscapeChar + COL_ID + keywordEscapeChar + " = @id_tmp;");
+
+                //then write out SQL for an insert to run if the above update affected zero rows
+                sql.append("INSERT INTO " + tableName + "(");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+                    sql.append(keywordEscapeChar + column + keywordEscapeChar);
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
+                }
+
+                sql.append(") SELECT ");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    sql.append("?");
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
+                }
+
+                sql.append(" WHERE @@ROWCOUNT=0;");
             }
-            sql.append(" WHERE " + keywordEscapeChar + COL_ID + keywordEscapeChar + " = @id_tmp;");
-
-            //then write out SQL for an insert to run if the above update affected zero rows
-            sql.append("INSERT INTO " + tableName + "(");
-
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                sql.append(keywordEscapeChar + column + keywordEscapeChar);
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
-                }
-            }
-
-            sql.append(") SELECT ");
-
-            for (int i = 0; i < columns.size(); i++) {
-                sql.append("?");
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
-                }
-            }
-
-            sql.append(" WHERE @@ROWCOUNT=0;");
 
             return connection.prepareStatement(sql.toString());
 
@@ -692,7 +718,7 @@ public class RemoteServerFiler {
 
 
                 //if SQL Server, then we need to add the values a SECOND time because the UPSEERT syntax used needs it
-                if (ConnectionManager.isSqlServer(connection)) {
+                if (ConnectionManager.isSqlServer(connection) && !tableName.equalsIgnoreCase("patient_address_match")) {
                     for (String column: columns) {
                         addToStatement(insert, csvRecord, column, columnClasses, index);
                         index ++;
@@ -703,7 +729,7 @@ public class RemoteServerFiler {
                 insert.addBatch();
             }
 
-            if (ConnectionManager.isSqlServer(connection)) {
+            if (ConnectionManager.isSqlServer(connection) && !tableName.equalsIgnoreCase("patient_address_match")) {
                 if (identityTables.get(tableName) == null) {
                     boolean value = checkForIdentityTable(tableName, connection);
                     identityTables.put(tableName,value);
@@ -725,7 +751,7 @@ public class RemoteServerFiler {
             throw new Exception("Exception with upsert " + insert.toString(), ex);
 
         } finally {
-            if (ConnectionManager.isSqlServer(connection)) {
+            if (ConnectionManager.isSqlServer(connection) && !tableName.equalsIgnoreCase("patient_address_match")) {
                 if (identityTables.get(tableName) == null) {
                     boolean value = checkForIdentityTable(tableName, connection);
                     identityTables.put(tableName,value);
