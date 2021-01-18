@@ -465,54 +465,63 @@ public class RemoteServerFiler {
 
         if (ConnectionManager.isSqlServer(connection)) {
 
-            ArrayList<String> pks = pksMap.get(tableName);
-            if (pks == null) {
-                pks = getSQLTablePKs(tableName, connection);
-                pksMap.put(tableName, pks);
-            }
-
             /*
-            MERGE INTO organization_additional AS t USING
-                (SELECT id=?, property_id=?, value_id=?, json_value=?, value=?,name=?) AS s
-              ON t.id = s.id
-              AND t.property_id = s.property_id
-              AND t.value_id = s.value_id
-              WHEN MATCHED THEN
-                UPDATE SET id=s.id, property_id =s.property_id, value_id=s.value_id, json_value=s.json_value, value=s.value, name=s.name
-              WHEN NOT MATCHED THEN
-                INSERT (id, property_id , value_id, json_value, value, name)
-                VALUES (s.id, s.property_id, s.value_id, s.json_value, s.value, s.name);
+            SQL Server doesn't support upserts in a single statement, so we need to handle this with an attempted update
+            and then an insert if that didn't work
+
+             e.g.
+            UPDATE dbo.AccountDetails
+            SET Etc = @Etc
+            WHERE Email = @Email
+
+            INSERT dbo.AccountDetails ( Email, Etc )
+            SELECT @Email, @Etc
+            WHERE @@ROWCOUNT=0
              */
+
+            //first write out the prepared statement for the UPDATE
+            //the columns are written to the prepared statement in the order supplied, meaning ID is
+            //always first. So we need to format this prepared statement in such a way that we can accept it
+            //as the first parameter, even though syntax means it is needed last
             StringBuilder sql = new StringBuilder();
-            sql.append("MERGE INTO " + tableName + " AS t USING (SELECT ");
-            for (int i = 0; i < columns.size()-1; i++) {
+            sql.append("DECLARE @id_tmp bigint;");
+            sql.append("SET @id_tmp = ?;");
+            sql.append("UPDATE " + tableName + " SET ");
+
+            for (int i = 0; i < columns.size(); i++) {
                 String column = columns.get(i);
-                sql.append(column+"=?,");
-            }
-            sql.append(columns.get(columns.size()-1)+"=?) AS s ");
-            sql.append("ON t." + pks.get(0) + "= s." + pks.get(0) + " ");
-            for (int i = 1; i < pks.size(); i++) {
-                sql.append("AND t." + pks.get(i) + "= s." + pks.get(i) + " ");
-            }
-            sql.append("WHEN MATCHED THEN UPDATE SET ");
-            for (int i = 0; i < columns.size()-1; i++) {
-                String column = columns.get(i);
-                if (!column.equalsIgnoreCase(COL_ID)) {
-                    sql.append(column+"=s."+column+",");
+                if (column.equals(COL_ID)) {
+                    continue;
+                }
+
+                sql.append(keywordEscapeChar + column + keywordEscapeChar + " = ?");
+                if (i + 1 < columns.size()) {
+                    sql.append(", ");
                 }
             }
-            sql.append(columns.get(columns.size()-1)+"=s."+columns.get(columns.size()-1)+" ");
-            sql.append("WHEN NOT MATCHED THEN INSERT ( ");
-            for (int i = 0; i < columns.size()-1; i++) {
+            sql.append(" WHERE " + keywordEscapeChar + COL_ID + keywordEscapeChar + " = @id_tmp;");
+
+            //then write out SQL for an insert to run if the above update affected zero rows
+            sql.append("INSERT INTO " + tableName + "(");
+
+            for (int i = 0; i < columns.size(); i++) {
                 String column = columns.get(i);
-                sql.append(column+",");
+                sql.append(keywordEscapeChar + column + keywordEscapeChar);
+                if (i + 1 < columns.size()) {
+                    sql.append(", ");
+                }
             }
-            sql.append(columns.get(columns.size()-1)+") VALUES (");
-            for (int i = 0; i < columns.size()-1; i++) {
-                String column = columns.get(i);
-                sql.append("s."+column+",");
+
+            sql.append(") SELECT ");
+
+            for (int i = 0; i < columns.size(); i++) {
+                sql.append("?");
+                if (i + 1 < columns.size()) {
+                    sql.append(", ");
+                }
             }
-            sql.append("s."+columns.get(columns.size()-1)+"); ");
+
+            sql.append(" WHERE @@ROWCOUNT=0;");
 
             return connection.prepareStatement(sql.toString());
 
@@ -680,6 +689,16 @@ public class RemoteServerFiler {
                     addToStatement(insert, csvRecord, column, columnClasses, index);
                     index ++;
                 }
+
+
+                //if SQL Server, then we need to add the values a SECOND time because the UPSEERT syntax used needs it
+                if (ConnectionManager.isSqlServer(connection)) {
+                    for (String column: columns) {
+                        addToStatement(insert, csvRecord, column, columnClasses, index);
+                        index ++;
+                    }
+                }
+
                 //LOG.debug("" + insert);
                 insert.addBatch();
             }
