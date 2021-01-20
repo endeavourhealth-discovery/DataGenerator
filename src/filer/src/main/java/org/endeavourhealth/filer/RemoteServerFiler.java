@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,6 +37,19 @@ public class RemoteServerFiler {
     private static final String COL_ID = "id";
 
     private static final int UPSERT_ATTEMPTS = 10;
+
+    private static final ArrayList<String> nonUniqueIdTables =
+            new ArrayList<>(Arrays.asList(
+                    "encounter_additional",
+                    "observation_additional",
+                    "patient_additional",
+                    "patient_uprn",
+                    "patient_address_match",
+                    "abp_address_v2",
+                    "organization_additional",
+                    "property_v2",
+                    "patient_address_ralf"
+            ));
 
     public static void  file(String name, String failureDir, Properties properties,
                              String keywordEscapeChar, int batchSize, byte[] bytes,
@@ -505,6 +517,56 @@ public class RemoteServerFiler {
                 }
 
                 sql.append(";");
+            } else if (nonUniqueIdTables.contains(tableName)) {
+
+                ArrayList<String> pks = pksMap.get(tableName);
+                if (pks == null) {
+                    pks = getSQLTablePKs(tableName, connection);
+                    pksMap.put(tableName, pks);
+                }
+
+                /*
+                MERGE INTO organization_additional AS t USING
+                    (SELECT id=?, property_id=?, value_id=?, json_value=?, value=?,name=?) AS s
+                  ON t.id = s.id
+                  AND t.property_id = s.property_id
+                  AND t.value_id = s.value_id
+                  WHEN MATCHED THEN
+                    UPDATE SET id=s.id, property_id =s.property_id, value_id=s.value_id, json_value=s.json_value, value=s.value, name=s.name
+                  WHEN NOT MATCHED THEN
+                    INSERT (id, property_id , value_id, json_value, value, name)
+                    VALUES (s.id, s.property_id, s.value_id, s.json_value, s.value, s.name);
+                 */
+                sql.append("MERGE INTO " + tableName + " AS t USING (SELECT ");
+                for (int i = 0; i < columns.size()-1; i++) {
+                    String column = columns.get(i);
+                    sql.append(column+"=?,");
+                }
+                sql.append(columns.get(columns.size()-1)+"=?) AS s ");
+                sql.append("ON t." + pks.get(0) + "= s." + pks.get(0) + " ");
+                for (int i = 1; i < pks.size(); i++) {
+                    sql.append("AND t." + pks.get(i) + "= s." + pks.get(i) + " ");
+                }
+                sql.append("WHEN MATCHED THEN UPDATE SET ");
+                for (int i = 0; i < columns.size()-1; i++) {
+                    String column = columns.get(i);
+                    if (!column.equalsIgnoreCase(COL_ID)) {
+                        sql.append(column+"=s."+column+",");
+                    }
+                }
+                sql.append(columns.get(columns.size()-1)+"=s."+columns.get(columns.size()-1)+" ");
+                sql.append("WHEN NOT MATCHED THEN INSERT ( ");
+                for (int i = 0; i < columns.size()-1; i++) {
+                    String column = columns.get(i);
+                    sql.append(column+",");
+                }
+                sql.append(columns.get(columns.size()-1)+") VALUES (");
+                for (int i = 0; i < columns.size()-1; i++) {
+                    String column = columns.get(i);
+                    sql.append("s."+column+",");
+                }
+                sql.append("s."+columns.get(columns.size()-1)+"); ");
+
             } else {
 
                 sql.append("DECLARE @id_tmp bigint;");
@@ -718,7 +780,9 @@ public class RemoteServerFiler {
 
 
                 //if SQL Server, then we need to add the values a SECOND time because the UPSEERT syntax used needs it
-                if (ConnectionManager.isSqlServer(connection) && !tableName.equalsIgnoreCase("patient_address_match")) {
+                if (ConnectionManager.isSqlServer(connection) &&
+                        !tableName.equalsIgnoreCase("patient_address_match") &&
+                        !nonUniqueIdTables.contains(tableName)) {
                     for (String column: columns) {
                         addToStatement(insert, csvRecord, column, columnClasses, index);
                         index ++;
