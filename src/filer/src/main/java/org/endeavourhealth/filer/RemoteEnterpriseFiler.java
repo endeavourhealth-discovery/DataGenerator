@@ -50,8 +50,17 @@ public class RemoteEnterpriseFiler {
     private static Map<String, String> escapeCharacters = new ConcurrentHashMap<>();
     private static Map<String, Integer> batchSizes = new ConcurrentHashMap<>();
 
+    private static final ArrayList<String> nonUniqueIdTables =
+            new ArrayList<>(Arrays.asList(
+                    "patient_additional",
+                    "encounter_additional",
+                    "patient_uprn"
+            ));
+
     public static void file(String name, String failureDir, Properties properties,
-                             String keywordEscapeChar, int batchSize, byte[] bytes, Map<String, ArrayList> columnsMap) throws Exception {
+                             String keywordEscapeChar, int batchSize, byte[] bytes,
+                            Map<String, ArrayList> columnsMap, Map<String, ArrayList> pksMap,
+                            Map<String, Boolean> identityTables) throws Exception {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -78,7 +87,7 @@ public class RemoteEnterpriseFiler {
 
                 } else {
                     processCsvData(entryFileName, entryBytes, columnClassMappings, connection, keywordEscapeChar,
-                            batchSize, deletes, columnsMap);
+                            batchSize, deletes, columnsMap, pksMap, identityTables);
                 }
             }
 
@@ -192,7 +201,8 @@ public class RemoteEnterpriseFiler {
 
     private static void processCsvData(String entryFileName, byte[] csvBytes, JsonNode allColumnClassMappings,
                                        Connection connection, String keywordEscapeChar, int batchSize,
-                                       List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap) throws Exception {
+                                       List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap,
+                                       Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         String tableName = Files.getNameWithoutExtension(entryFileName);
         ArrayList<String> actualColumns = columnsMap.get(tableName);
@@ -255,12 +265,12 @@ public class RemoteEnterpriseFiler {
 
             //in testing, batches of 20000 seemed best, although there wasn't much difference between batches of 5000 up to 100000
             if (batch.size() >= batchSize) {
-                fileUpsertsWithRetry(batch, columns, columnClasses, tableName, connection, keywordEscapeChar);
+                fileUpsertsWithRetry(batch, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap, identityTables);
                 batch = new ArrayList<>();
             }
         }
         if (!batch.isEmpty()) {
-            fileUpsertsWithRetry(batch, columns, columnClasses, tableName, connection, keywordEscapeChar);
+            fileUpsertsWithRetry(batch, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap, identityTables);
         }
     }
 
@@ -412,79 +422,168 @@ public class RemoteEnterpriseFiler {
         }
     }
 
+    private static ArrayList<String> getSQLTablePKs(String tableName, Connection connection) throws Exception {
+        ArrayList<String> pks = new ArrayList<>();
+        String sql = "SELECT column_name as primary_key " +
+                "     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC " +
+                "     INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KU " +
+                "     ON TC.CONSTRAINT_TYPE = 'PRIMARY KEY' " +
+                "     AND TC.CONSTRAINT_NAME = KU.CONSTRAINT_NAME " +
+                "     AND KU.table_name='" + tableName +"' " +
+                "     ORDER BY KU.TABLE_NAME, KU.ORDINAL_POSITION;";
 
-    private static PreparedStatement createUpsertPreparedStatement(String tableName, List<String> columns, Connection connection, String keywordEscapeChar) throws Exception {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        while (resultSet.next()) {
+            pks.add(resultSet.getString("primary_key"));
+        }
+        resultSet.close();
+        ps.close();
+        return pks;
+    }
+
+    private static boolean checkForIdentityTable(String tableName, Connection connection) throws Exception {
+        int count = 0;
+        String sql = "SELECT count(*) as value " +
+                "FROM sys.identity_columns " +
+                "WHERE OBJECT_NAME(object_id) = '"+ tableName +"';";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.executeQuery();
+        ResultSet resultSet = ps.getResultSet();
+        while (resultSet.next()) {
+            count = resultSet.getInt("value");
+        }
+        resultSet.close();
+        ps.close();
+        return (count != 0);
+    }
+
+    private static PreparedStatement createUpsertPreparedStatement(String tableName, List<String> columns,
+                                                                   Connection connection, String keywordEscapeChar,
+                                                                   Map<String, ArrayList> pksMap) throws Exception {
 
         if (ConnectionManager.isSqlServer(connection)) {
 
-            //keywordEscapeChar = "";
-
-            /*
-            SQL Server doesn't support upserts in a single statement, so we need to handle this with an attempted update
-            and then an insert if that didn't work
-
-             e.g.
-            UPDATE dbo.AccountDetails
-            SET Etc = @Etc
-            WHERE Email = @Email
-
-            INSERT dbo.AccountDetails ( Email, Etc )
-            SELECT @Email, @Etc
-            WHERE @@ROWCOUNT=0
-             */
-
-            //first write out the prepared statement for the UPDATE
-            //the columns are written to the prepared statement in the order supplied, meaning ID is
-            //always first. So we need to format this prepared statement in such a way that we can accept it
-            //as the first parameter, even though syntax means it is needed last
             StringBuilder sql = new StringBuilder();
-            if ("link_distributor".equals(tableName)) {
-                sql.append("DECLARE @id_tmp varchar(255);");
-                sql.append("SET @id_tmp = ?;");
+            if (nonUniqueIdTables.contains(tableName)) {
+
+                ArrayList<String> pks = pksMap.get(tableName);
+                if (pks == null) {
+                    pks = getSQLTablePKs(tableName, connection);
+                    pksMap.put(tableName, pks);
+                }
+
+                /*
+                MERGE INTO organization_additional AS t USING
+                    (SELECT id=?, property_id=?, value_id=?, json_value=?, value=?,name=?) AS s
+                  ON t.id = s.id
+                  AND t.property_id = s.property_id
+                  AND t.value_id = s.value_id
+                  WHEN MATCHED THEN
+                    UPDATE SET id=s.id, property_id =s.property_id, value_id=s.value_id, json_value=s.json_value, value=s.value, name=s.name
+                  WHEN NOT MATCHED THEN
+                    INSERT (id, property_id , value_id, json_value, value, name)
+                    VALUES (s.id, s.property_id, s.value_id, s.json_value, s.value, s.name);
+                 */
+                sql.append("MERGE INTO " + tableName + " AS t USING (SELECT ");
+                for (int i = 0; i < columns.size() - 1; i++) {
+                    String column = columns.get(i);
+                    sql.append(column + "=?,");
+                }
+                sql.append(columns.get(columns.size() - 1) + "=?) AS s ");
+                sql.append("ON t." + pks.get(0) + "= s." + pks.get(0) + " ");
+                for (int i = 1; i < pks.size(); i++) {
+                    sql.append("AND t." + pks.get(i) + "= s." + pks.get(i) + " ");
+                }
+                sql.append("WHEN MATCHED THEN UPDATE SET ");
+                for (int i = 0; i < columns.size() - 1; i++) {
+                    String column = columns.get(i);
+                    if (!column.equalsIgnoreCase(COL_ID)) {
+                        sql.append(column + "=s." + column + ",");
+                    }
+                }
+                sql.append(columns.get(columns.size() - 1) + "=s." + columns.get(columns.size() - 1) + " ");
+                sql.append("WHEN NOT MATCHED THEN INSERT ( ");
+                for (int i = 0; i < columns.size() - 1; i++) {
+                    String column = columns.get(i);
+                    sql.append(column + ",");
+                }
+                sql.append(columns.get(columns.size() - 1) + ") VALUES (");
+                for (int i = 0; i < columns.size() - 1; i++) {
+                    String column = columns.get(i);
+                    sql.append("s." + column + ",");
+                }
+                sql.append("s." + columns.get(columns.size() - 1) + "); ");
+
             } else {
-                sql.append("DECLARE @id_tmp bigint;");
-                sql.append("SET @id_tmp = ?;");
-            }
-            sql.append("UPDATE " + tableName + " SET ");
+                //keywordEscapeChar = "";
 
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                if (column.equals(COL_ID)) {
-                    continue;
+                /*
+                SQL Server doesn't support upserts in a single statement, so we need to handle this with an attempted update
+                and then an insert if that didn't work
+
+                 e.g.
+                UPDATE dbo.AccountDetails
+                SET Etc = @Etc
+                WHERE Email = @Email
+
+                INSERT dbo.AccountDetails ( Email, Etc )
+                SELECT @Email, @Etc
+                WHERE @@ROWCOUNT=0
+                 */
+
+                //first write out the prepared statement for the UPDATE
+                //the columns are written to the prepared statement in the order supplied, meaning ID is
+                //always first. So we need to format this prepared statement in such a way that we can accept it
+                //as the first parameter, even though syntax means it is needed last
+                if ("link_distributor".equals(tableName)) {
+                    sql.append("DECLARE @id_tmp varchar(255);");
+                    sql.append("SET @id_tmp = ?;");
+                } else {
+                    sql.append("DECLARE @id_tmp bigint;");
+                    sql.append("SET @id_tmp = ?;");
+                }
+                sql.append("UPDATE " + tableName + " SET ");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+                    if (column.equals(COL_ID)) {
+                        continue;
+                    }
+
+                    sql.append(keywordEscapeChar + column + keywordEscapeChar + " = ?");
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
+                }
+                if ("link_distributor".equals(tableName)) {
+                    sql.append(" WHERE " + keywordEscapeChar + "source_skid" + keywordEscapeChar + " = @id_tmp;");
+                } else {
+                    sql.append(" WHERE " + keywordEscapeChar + COL_ID + keywordEscapeChar + " = @id_tmp;");
+                }
+                //then write out SQL for an insert to run if the above update affected zero rows
+                sql.append("INSERT INTO " + tableName + "(");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+                    sql.append(keywordEscapeChar + column + keywordEscapeChar);
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
                 }
 
-                sql.append(keywordEscapeChar + column + keywordEscapeChar + " = ?");
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
+                sql.append(") SELECT ");
+
+                for (int i = 0; i < columns.size(); i++) {
+                    sql.append("?");
+                    if (i + 1 < columns.size()) {
+                        sql.append(", ");
+                    }
                 }
+
+                sql.append(" WHERE @@ROWCOUNT=0;");
             }
-            if ("link_distributor".equals(tableName)) {
-                sql.append(" WHERE " + keywordEscapeChar + "source_skid" + keywordEscapeChar + " = @id_tmp;");
-            } else {
-                sql.append(" WHERE " + keywordEscapeChar + COL_ID + keywordEscapeChar + " = @id_tmp;");
-            }
-            //then write out SQL for an insert to run if the above update affected zero rows
-            sql.append("INSERT INTO " + tableName + "(");
-
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                sql.append(keywordEscapeChar + column + keywordEscapeChar);
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
-                }
-            }
-
-            sql.append(") SELECT ");
-
-            for (int i = 0; i < columns.size(); i++) {
-                sql.append("?");
-                if (i + 1 < columns.size()) {
-                    sql.append(", ");
-                }
-            }
-
-            sql.append(" WHERE @@ROWCOUNT=0;");
-
             return connection.prepareStatement(sql.toString());
 
         } else if (ConnectionManager.isPostgreSQL(connection)) {
@@ -577,13 +676,14 @@ public class RemoteEnterpriseFiler {
      * again should mitigate it
      */
     private static void fileUpsertsWithRetry(List<CSVRecord> csvRecords, List<String> columns, HashMap<String, Class> columnClasses,
-                                    String tableName, Connection connection, String keywordEscapeChar) throws Exception {
+                                             String tableName, Connection connection, String keywordEscapeChar,
+                                             Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         int attemptsMade = 0;
         while (true) {
 
             try {
-                fileUpserts(csvRecords, columns, columnClasses, tableName, connection, keywordEscapeChar);
+                fileUpserts(csvRecords, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap, identityTables);
 
                 //if we execute without error, break out
                 break;
@@ -633,7 +733,8 @@ public class RemoteEnterpriseFiler {
     }
 
     private static void fileUpserts(List<CSVRecord> csvRecords, List<String> columns, HashMap<String, Class> columnClasses,
-                                    String tableName, Connection connection, String keywordEscapeChar) throws Exception {
+                                    String tableName, Connection connection, String keywordEscapeChar,
+                                    Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
         if (csvRecords.isEmpty()) {
             return;
@@ -646,7 +747,7 @@ public class RemoteEnterpriseFiler {
         PreparedStatement insert = null;
 
         try {
-            insert = createUpsertPreparedStatement(tableName, columns, connection, keywordEscapeChar);
+            insert = createUpsertPreparedStatement(tableName, columns, connection, keywordEscapeChar, pksMap);
 
             int index = 1;
             if ("link_distributor".equals(tableName)) {
@@ -666,8 +767,10 @@ public class RemoteEnterpriseFiler {
                     index ++;
                 }
 
-                //if SQL Server, then we need to add the values a SECOND time because the UPSEERT syntax used needs it
-                if (ConnectionManager.isSqlServer(connection)) {
+                //if SQL Server, then we need to add the values a SECOND time because the UPSERT syntax used needs it
+                //Skip if it the table is in nonUniqueIdTables (it uses MERGE syntax)
+                if (ConnectionManager.isSqlServer(connection) &&
+                        !nonUniqueIdTables.contains(tableName)) {
                     for (String column: columns) {
                         addToStatement(insert, csvRecord, column, columnClasses, index);
                         index ++;
@@ -698,7 +801,7 @@ public class RemoteEnterpriseFiler {
                 for (CSVRecord r: csvRecords) {
                     List<CSVRecord> l = new ArrayList<>();
                     l.add(r);
-                    fileUpserts(l, columns, columnClasses, tableName, connection, keywordEscapeChar);
+                    fileUpserts(l, columns, columnClasses, tableName, connection, keywordEscapeChar, pksMap, identityTables);
                 }
             }
         } finally {

@@ -779,7 +779,8 @@ public class RemoteServerFiler {
                 }
 
 
-                //if SQL Server, then we need to add the values a SECOND time because the UPSEERT syntax used needs it
+                //if SQL Server, then we need to add the values a SECOND time because the UPSERT syntax used needs it
+                //Skip if it the table is in nonUniqueIdTables (it uses MERGE syntax)
                 if (ConnectionManager.isSqlServer(connection) &&
                         !tableName.equalsIgnoreCase("patient_address_match") &&
                         !nonUniqueIdTables.contains(tableName)) {

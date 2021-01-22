@@ -165,7 +165,7 @@ public class Main {
                     try {
                         if (enterprise) {
                             RemoteEnterpriseFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
-                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap);
+                                    properties, keywordEscapeChar, batchSize, bytes, columnsMap, pksMap, identityTables);
                         } else {
                             RemoteServerFiler.file(zip.getName().substring(24, 60), failureDir.getAbsolutePath(),
                                     properties, keywordEscapeChar, batchSize, bytes, columnsMap, pksMap, identityTables);
