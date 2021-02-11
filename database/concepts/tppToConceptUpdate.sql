@@ -152,10 +152,9 @@ BEGIN
          l.local_dbid, 
          l.snomed_dbid
    FROM tpp_local_cpo_new_tmp l
-   LEFT JOIN concept_map cm ON cm.legacy = l.local_dbid
+   LEFT JOIN concept_map cm ON cm.legacy = l.local_dbid and cm.deleted = 0
    JOIN (SELECT @row_no := 0) t 
-   WHERE cm.deleted = 0
-   AND (cm.core IS NULL OR cm.core != l.snomed_dbid);
+   WHERE cm.core IS NULL OR cm.core != l.snomed_dbid;
    SET @row_id = 0;
    -- insert new records into concept property object
    WHILE EXISTS (SELECT row_id from tpp_local_cm_insert_tmp WHERE row_id > @row_id AND row_id <= @row_id + 1000) DO
@@ -188,15 +187,15 @@ BEGIN
        SET @row_id = @row_id + 1000;
    END WHILE;
       -- create a temporary table to hold all local codes that are without a mapped snomed on the concept table
-   DROP TABLE IF EXISTS emis_local_without_snomed_tmp;
-   CREATE TABLE emis_local_without_snomed_tmp AS
+   DROP TABLE IF EXISTS tpp_local_without_snomed_tmp;
+   CREATE TABLE tpp_local_without_snomed_tmp AS
    SELECT c1.dbid AS local_dbid, 
           l.local_term,
           l.local_code,
           l.scheme,
           l.mapped_snomed_concept_id,
           l.snomed_id
-   FROM emis_local_codes_tmp l JOIN concept c1 ON c1.id = l.local_code_id AND c1.scheme = 1440863
+   FROM tpp_local_codes_tmp l JOIN concept c1 ON c1.id = l.local_code_id AND c1.scheme = 1440863
    LEFT JOIN concept c2 ON c2.id = l.snomed_id AND c2.scheme = 71
    WHERE c2.dbid IS NULL;
 END //

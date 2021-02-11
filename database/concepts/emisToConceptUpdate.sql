@@ -197,7 +197,7 @@ BEGIN
          l.local_dbid, 
          l.snomed_dbid
    FROM emis_local_cpo_new_tmp l
-   LEFT JOIN concept_map cm ON cm.legacy = l.local_dbid
+   LEFT JOIN concept_map cm ON cm.legacy = l.local_dbid and cm.deleted = 0
    JOIN (SELECT @row_no := 0) t 
    WHERE cm.core IS NULL OR cm.core != l.snomed_dbid;
 
@@ -226,7 +226,8 @@ BEGIN
          l.snomed_dbid
    FROM emis_local_cm_insert_tmp l JOIN concept_map cm ON cm.legacy = l.local_dbid
    JOIN (SELECT @row_no := 0) t 
-   WHERE cm.core != l.snomed_dbid;
+   WHERE cm.deleted = 0 
+   AND cm.core != l.snomed_dbid;
 
    SET @row_id = 0;
 
@@ -235,7 +236,7 @@ BEGIN
 
        UPDATE concept_map cm JOIN emis_local_cm_update_tmp q ON cm.legacy = q.local_dbid 
        SET deleted = 1, updated = now()
-       WHERE q.snomed_dbid != cm.core
+       WHERE q.snomed_dbid != cm.core AND cm.deleted = 0
        AND q.row_id > @row_id AND q.row_id <= @row_id + 1000;
 
        SET @row_id = @row_id + 1000;
