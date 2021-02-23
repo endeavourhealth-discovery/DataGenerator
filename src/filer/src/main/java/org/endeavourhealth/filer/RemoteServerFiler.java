@@ -761,6 +761,12 @@ public class RemoteServerFiler {
             return;
         }
 
+        //TODO: remove if block when we really do start processing patient_additional data
+        if (tableName.equalsIgnoreCase("patient_additional")) {
+            LOG.warn("Skipping upsert to patient_additional table");
+            return;
+        }
+
         //the first element in the columns list is the save mode, so remove that
         columns = new ArrayList<>(columns);
         columns.remove(COL_IS_DELETE);
