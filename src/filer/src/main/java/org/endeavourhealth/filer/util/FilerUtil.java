@@ -1,5 +1,6 @@
 package org.endeavourhealth.filer.util;
 
+import com.zaxxer.hikari.HikariDataSource;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
@@ -15,6 +16,7 @@ import org.endeavourhealth.filer.models.FilerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -29,6 +31,7 @@ import java.util.Properties;
 public class FilerUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilerUtil.class);
+    private static DataSource dataSource = null;
 
     public static Properties initialize() throws Exception {
         Properties properties = new Properties();
@@ -115,12 +118,36 @@ public class FilerUtil {
         }
     }
 
+    /*
     public static Connection getConnection(Properties properties) throws SQLException, ClassNotFoundException {
         Class.forName(properties.getProperty(FilerConstants.JDBC));
         Properties props = new Properties();
         props.setProperty("user", properties.getProperty(FilerConstants.DB_USERNAME));
         props.setProperty("password", properties.getProperty(FilerConstants.DB_PASSWORD));
         return DriverManager.getConnection(properties.getProperty(FilerConstants.URL), props);
+    }
+     */
+
+    public static Connection getConnection(Properties properties) throws SQLException {
+        if (dataSource == null) {
+            //force compile-time checking for this class, so if it accidentally gets dropped from
+            //the dependencies, it'll get picked up immediately
+            org.hibernate.hikaricp.internal.HikariCPConnectionProvider p = null;
+            HikariDataSource pool = new HikariDataSource();
+            pool.setMinimumIdle(1);
+            pool.setIdleTimeout(60000);
+            pool.setAutoCommit(false);
+            pool.setMaximumPoolSize(3); //default to keeping three connections open
+            pool.setConnectionTimeout(300000L);
+            pool.setLeakDetectionThreshold(5000L);
+            //pool.setJdbcUrl(properties.getProperty(FilerConstants.URL));
+            pool.setUsername(properties.getProperty(FilerConstants.DB_USERNAME));
+            pool.setPassword(properties.getProperty(FilerConstants.DB_PASSWORD));
+            pool.setDataSourceClassName(properties.getProperty(FilerConstants.JDBC));
+            pool.addDataSourceProperty("url", properties.getProperty(FilerConstants.URL));
+            dataSource = pool;
+        }
+        return dataSource.getConnection();
     }
 
     private static boolean decryptFile(File file, PrivateKey decryptionKey) {
