@@ -80,20 +80,24 @@ public class DecryptZip {
             ZipFile zipFile = new ZipFile(unencrypted);
             String name = unencrypted.getAbsolutePath().substring(0, (unencrypted.getAbsolutePath().length() - 4));
             File merge = new File(name + "_merge.zip");
+            boolean isMulti = false;
             try {
                 LOG.info("Creating merged zip file: " + merge.getAbsolutePath());
                 zipFile.mergeSplitFiles(merge);
-                /*
-                files = getFilesFromDirectory(unencrypted.getParent(), unencrypted.getName().substring(0, file.getName().length() - 2));
-                if (files != null && files.length != 0) {
-                    for (File zipPart : files) {
-                        FileUtils.forceDelete(zipPart);
-                    }
-                }
-                 */
+                isMulti = true;
             } catch (ZipException ex) {
                 if (ex.getMessage().equalsIgnoreCase("archive not a split zip file")) {
                     LOG.info("File is not multi-part. " + file.getName());
+                }
+            }
+            if (isMulti) {
+                System.gc();
+                files = getFilesFromDirectory(unencrypted.getParent(), unencrypted.getName().substring(0, file.getName().length() - 2));
+                if (files != null && files.length != 0) {
+                    for (File zipPart : files) {
+                        LOG.info("Deleting file: " + zipPart.getAbsolutePath());
+                        FileUtils.forceDeleteOnExit(zipPart);
+                    }
                 }
             }
         } catch (Exception e) {

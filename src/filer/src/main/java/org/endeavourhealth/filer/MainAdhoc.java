@@ -28,7 +28,7 @@ public class MainAdhoc {
 
         Properties properties = null;
         try {
-            properties = FilerUtil.initialize();
+            properties = FilerUtil.initialize("config.properties");
         } catch (Exception e) {
             LOG.error("Error in reading config.properties " + e.getMessage());
             System.exit(-1);

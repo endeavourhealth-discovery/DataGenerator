@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class FeedbackRepository {
 
@@ -35,7 +36,7 @@ public class FeedbackRepository {
         entityManager.close();
     }
 
-    public void processSuccess(Result successResult) throws Exception {
+    public void processSuccess(Result successResult, Date dtResults) throws Exception {
 
         // logger.info("Processing {}", successResult);
 
@@ -48,6 +49,7 @@ public class FeedbackRepository {
         PreparedStatement ps1 = null;
         PreparedStatement ps2 = null;
         PreparedStatement ps3 = null;
+        PreparedStatement ps4 = null;
 
         try {
             entityManager.getTransaction().begin();
@@ -55,8 +57,7 @@ public class FeedbackRepository {
             Connection connection = session.connection();
             connection.setAutoCommit(false);
 
-            java.util.Date date = new java.util.Date();
-            Timestamp timestamp = new java.sql.Timestamp(date.getTime());
+            Timestamp timestamp = new java.sql.Timestamp(dtResults.getTime());
 
             String sql1 = "update data_generator.subscriber_zip_file_uuids"
                     + " set file_filing_attempted = ?"
@@ -93,12 +94,27 @@ public class FeedbackRepository {
             // logger.info(ps3.toString());
             ps3.executeUpdate();
 
+            //update the audit table used to track the "last" message for each inbound exchange
+            //although we attempt this update for all queued message UUIDs, there are only records in this table for a subset of them
+            String sql4 = "UPDATE last_queued_message_sent"
+                    + " SET written_date = ?"
+                    + " WHERE subscriber_id = ?"
+                    + " AND queued_message_id = ?"
+                    + " AND written_date IS NULL";
+            ps4 = connection.prepareStatement(sql4);
+            ps4.clearParameters();
+            int col = 1;
+            ps4.setTimestamp(col++, timestamp);
+            ps4.setInt(col++, config.getSubscriberId());
+            ps4.setString(col++, successResultUuid.toString());
+            ps4.executeUpdate();
+
             // connection.setAutoCommit(true);
             entityManager.getTransaction().commit();
 
-
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
+
             logger.error("Cannot update success uuid {}", successResultUuid, ex);
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Cannot update success uuid " + successResultUuid, ex);
             successResult.addError(ex.getMessage());
@@ -113,13 +129,16 @@ public class FeedbackRepository {
             if (ps3 != null) {
                 ps3.close();
             }
+            if (ps4 != null) {
+                ps4.close();
+            }
 
             entityManager.close();
         }
 
     }
 
-    public void processFailure(Result failureResult) throws Exception{
+    public void processFailure(Result failureResult, Date dtResults) throws Exception{
 
         // logger.info("Processing {}", failureResult);
 

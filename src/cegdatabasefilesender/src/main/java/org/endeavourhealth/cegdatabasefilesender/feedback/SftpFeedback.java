@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 
 public class SftpFeedback {
+    private static final Logger LOG = LoggerFactory.getLogger(SftpFeedback.class);
 
     private final SubscriberFileSenderConfig config;
     private SftpConnection sftp;
@@ -75,13 +76,16 @@ public class SftpFeedback {
         for (Path path : paths) {
 
             File file = path.toFile();
-
             String destPath = unzip(file);
 
             FileResult fileResult = new FileResult(destPath);
 
             File successFile = new File(destPath + "/success.txt");
             if (successFile.exists()) {
+
+                //capture the modification date of the success file
+                Date lastModified = new Date(successFile.lastModified());
+                fileResult.setDtResults(lastModified);
 
                 try {
                     String success = new String(Files.readAllBytes(Paths.get(destPath + "/success.txt")));
@@ -96,6 +100,10 @@ public class SftpFeedback {
             File failureFile = new File(destPath + "/failure.txt");
             if (failureFile.exists()) {
 
+                //capture the modification date of the failure file (doesn't matter that we override the date from the success file)
+                Date lastModified = new Date(failureFile.lastModified());
+                fileResult.setDtResults(lastModified);
+
                 try {
                     String failure = new String(Files.readAllBytes(Paths.get(destPath + "/failure.txt")));
                     fileResult.addFailure(failure);
@@ -105,6 +113,7 @@ public class SftpFeedback {
                     SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts, "Cannot read failure.txt for " + destPath, e);
                 }
             }
+
 
             feedbackHolder.addFileResult(fileResult);
         }

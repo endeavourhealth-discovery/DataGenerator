@@ -28,6 +28,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class ConceptSender {
@@ -38,7 +41,7 @@ public class ConceptSender {
 
     public static void main(String[] args) throws Exception {
 
-        if (args == null || args.length != 12) {
+        if (args == null || args.length < 11) {
             LOG.error("Invalid number of parameters.");
 
             LOG.info("Required parameters:");
@@ -53,7 +56,7 @@ public class ConceptSender {
             LOG.info("Concepts Schema");
             LOG.info("Target Database Server");
             LOG.info("Target Schema");
-            LOG.info("Delta Date in yyyy-mm-dd format");
+            LOG.info("Delta Date in yyyy-mm-dd format (optional)");
 
             System.exit(-1);
         }
@@ -70,13 +73,25 @@ public class ConceptSender {
         LOG.info("Concepts Schema        : " + args[8]);
         LOG.info("Target Database Server : " + args[9]);
         LOG.info("Target Schema          : " + args[10]);
-        LOG.info("Delta Date             : " + args[11]);
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.applyPattern(args[11]);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            if (args.length == 12 && StringUtils.isNotEmpty(args[11])) {
+                LOG.info("Delta Date             : " + args[11]);
+                formatter.parse(args[11]);
+            } else {
+                LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+
+                ArrayList<String> list = new ArrayList<String>();
+                for (int i = 0; i < args.length; i++) {
+                    list.add(args[i]);
+                }
+                list.add(formatter.format(yesterday));
+                args = list.toArray(new String[0]);
+                LOG.info("Delta Date             : " + args[11]);
+            }
         } catch (Exception e) {
-            throw new Exception("Invalid date specified. " + args[9]);
+            throw new Exception("Invalid date specified. " + args[11]);
         }
 
         if (args[9].equalsIgnoreCase("mysql") && args[9].equalsIgnoreCase("sql_server")) {
@@ -119,16 +134,19 @@ public class ConceptSender {
         ArrayList<String> conceptMap = getConceptMap(args[11], args[9]);
         createConceptMapFile(sourceDir, conceptMap, args[8]);
 
+        //TODO: uncomment for CEG build
         //ArrayList<String> conceptPropertyObject = getConceptProperty(args[11]);
         //createConceptPropertyFile(sourceDir,conceptPropertyObject, args[8]);
 
-        ArrayList<String> snomedToBnf = getSnomedToBNFData(args[11], args[9]);
-        //ArrayList<String> snomedToBnf = new ArrayList();
+        //TODO: not yet implemented for any RSD
+        //ArrayList<String> snomedToBnf = getSnomedToBNFData(args[11], args[9]);
+        ArrayList<String> snomedToBnf = new ArrayList();
         boolean hasSnomedToBnf = snomedToBnf.size() > 0;
         if (hasSnomedToBnf) {
             createSnomedToBNFFile(sourceDir, snomedToBnf, args[8]);
         }
 
+        //TODO: not yet implemented for any CEG
         createSPFile(sourceDir, args[8], args[9], args[10], args[11], hasSnomedToBnf);
 
         ArrayList<File> zipFiles = new ArrayList<>();

@@ -2,21 +2,22 @@ package org.endeavourhealth.cegdatabasefilesender.feedback.bean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileResult {
 
-    String filepath;
-
-    List<Result> results = new ArrayList<>();
+    private String filePath;
+    private List<Result> results = new ArrayList<>();
+    private Date dtResults;
 
     public FileResult(String filepath) {
-        this.filepath = filepath;
+        this.filePath = filepath;
     }
 
-    public String getFilepath() {
-        return filepath;
+    public String getFilePath() {
+        return filePath;
     }
 
     public List<Result> getErrors() {
@@ -54,5 +55,13 @@ public class FileResult {
 
     public List<Result> getResults() {
         return results;
+    }
+
+    public Date getDtResults() {
+        return dtResults;
+    }
+
+    public void setDtResults(Date dtResults) {
+        this.dtResults = dtResults;
     }
 }

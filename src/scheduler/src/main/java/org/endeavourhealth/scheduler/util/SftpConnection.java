@@ -48,8 +48,9 @@ public class SftpConnection extends Connection {
 
         this.jSch = new JSch();
 
-        String prvKey = getConnectionDetails().getClientPrivateKey().trim();
-        String pw = getConnectionDetails().getClientPrivateKeyPassword().trim();
+        ConnectionDetails connectionDetails = getConnectionDetails();
+        String prvKey = connectionDetails.getClientPrivateKey().trim();
+        String pw = connectionDetails.getClientPrivateKeyPassword().trim();
         if (!Strings.isNullOrEmpty(prvKey)) {
             jSch.addIdentity("client-private-key", prvKey.getBytes(), null, pw.getBytes());
         }

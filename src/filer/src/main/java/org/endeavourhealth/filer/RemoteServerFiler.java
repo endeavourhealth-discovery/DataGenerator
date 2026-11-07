@@ -40,6 +40,9 @@ public class RemoteServerFiler {
 
     private static final ArrayList<String> nonUniqueIdTables =
             new ArrayList<>(Arrays.asList(
+                    "referral_request_additional",
+                    "schedule_additional",
+                    "appointment_additional",
                     "encounter_additional",
                     "observation_additional",
                     "patient_additional",
@@ -51,11 +54,13 @@ public class RemoteServerFiler {
                     "patient_address_ralf"
             ));
 
-    public static void  file(String name, String failureDir, Properties properties,
+    public static void file(String name, String failureDir, Properties properties,
                              String keywordEscapeChar, int batchSize, byte[] bytes,
                              Map<String, ArrayList> columnsMap,
                              Map<String, ArrayList> pksMap,
                              Map<String, Boolean> identityTables) throws Exception {
+
+        TimeTracker.logAction("reading_zip_file");
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ZipInputStream zis = new ZipInputStream(bais);
@@ -106,6 +111,8 @@ public class RemoteServerFiler {
             }
             connection.close();
         }
+
+
     }
 
     private static void writeZipFile(String uuid, String failureDir, byte[] bytes) {
@@ -121,6 +128,7 @@ public class RemoteServerFiler {
 
     private static void fileDeletes(List<DeleteWrapper> deletes, Connection connection) throws Exception {
 
+        TimeTracker.logAction("filing_deletes");
         String currentTable = null;
         List<CSVRecord> currentRecords = null;
         List<String> currentColumns = null;
@@ -164,7 +172,9 @@ public class RemoteServerFiler {
         }
 
         if (patientWasDeleted) {
+            TimeTracker.logAction("filing_deletes.delete_orphan_person");
             deleteLeftOverPersonRecords(connection);
+            TimeTracker.logAction("filing_deletes.patient_uprn");
             deleteLeftOverPatientUPRNRecords(connection);
         }
     }
@@ -211,6 +221,8 @@ public class RemoteServerFiler {
                                        List<DeleteWrapper> deletes, Map<String, ArrayList> columnsMap,
                                        Map<String, ArrayList> pksMap, Map<String, Boolean> identityTables) throws Exception {
 
+        TimeTracker.logAction("process_csv_data");
+
         String tableName = Files.getNameWithoutExtension(entryFileName);
         ArrayList<String> actualColumns = columnsMap.get(tableName);
         if (actualColumns == null) {
@@ -243,7 +255,7 @@ public class RemoteServerFiler {
         if (!columns.contains(COL_IS_DELETE)) {
             throw new Exception("" + entryFileName + " doesn't have an " + COL_IS_DELETE + " column");
         }
-        if (!columns.contains(COL_ID)) {
+        if (!columns.contains(COL_ID) && !tableName.equalsIgnoreCase("patient_address_match")) {
             throw new Exception("" + entryFileName + " doesn't have an " + COL_ID + " column");
         }
 
@@ -351,6 +363,7 @@ public class RemoteServerFiler {
             return;
         }
 
+        TimeTracker.logAction("filing_deletes." + tableName);
         PreparedStatement delete = connection.prepareStatement("delete from " + tableName + " where id = ?");
 
         for (CSVRecord csvRecord: csvRecords) {
@@ -761,11 +774,7 @@ public class RemoteServerFiler {
             return;
         }
 
-        //TODO: remove if block when we really do start processing patient_additional data
-        if (tableName.equalsIgnoreCase("patient_additional")) {
-            LOG.warn("Skipping upsert to patient_additional table");
-            return;
-        }
+        TimeTracker.logAction("process_csv_data.upsert_table." + tableName);
 
         //the first element in the columns list is the save mode, so remove that
         columns = new ArrayList<>(columns);

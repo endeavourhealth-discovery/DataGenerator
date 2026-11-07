@@ -27,30 +27,141 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FilerUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilerUtil.class);
     private static DataSource dataSource = null;
 
-    public static Properties initialize() throws Exception {
+    public static Properties initialize(String propertyFileName) throws Exception {
+        LOG.info("Reading configuration from " + propertyFileName
+        );
         Properties properties = new Properties();
         File jarPath = new File(FilerUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         String propertiesPath = jarPath.getParentFile().getAbsolutePath();
         try {
             //load config.properties where the jar is located
-            FileInputStream stream = new FileInputStream(propertiesPath + File.separator + "config.properties");
+            String filePath = propertiesPath + File.separator + propertyFileName;
+            FileInputStream stream = new FileInputStream(filePath);
             properties.load(stream);
+            LOG.debug("Read configuration from file system: " + filePath);
+
         } catch (Exception ex) {
             //load config.properties from classes
             try {
-                InputStream stream = FilerUtil.class.getClassLoader().getResourceAsStream("config.properties");
+                InputStream stream = FilerUtil.class.getClassLoader().getResourceAsStream(propertyFileName);
                 properties.load(stream);
+                LOG.debug("Read configuration from resources");
+
             } catch (Exception e) {
                 throw e;
             }
         }
+
         return properties;
+    }
+
+    public static Integer RegEx(String data, String regex)
+    {
+        Integer n = 0; Integer n2 = 0; Integer n3= 0;
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(data);
+
+        if (matcher.lookingAt()) {n=1;}
+
+        if (matcher.matches()) {n2=1;}
+        if (matcher.find()) {n3=1;}
+
+
+        return n;
+    }
+
+    public static void deleteLockFile(String filer) {
+        File f = getLockFile(filer);
+        //the lock file won't exist if we're running with the option to ignore it
+        if (f.exists() && !f.delete()) {
+            LOG.error("Failed to delete lock file " + f);
+        }
+    }
+
+    public static File getTempDir(String appId) throws Exception {
+
+        // IDD-5
+        String workDir = new File(FilerUtil.class.getProtectionDomain().getCodeSource().getLocation()
+                        .toURI()).getParent();
+
+        /*
+        File f = new File("/tmp/log.txt");
+        if (!f.exists()) {
+            FileWriter tabWriter = new FileWriter("/tmp/log.txt");
+            tabWriter.write(workDir+System.lineSeparator());
+
+            String tst =
+            new File(FilerUtil.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()).getParent();
+            tabWriter.write(tst+System.lineSeparator());
+
+            tabWriter.close();
+        }
+         */
+
+        File tmpDir = new File(workDir, appId + "_TMP");
+        if (!tmpDir.exists() && !tmpDir.mkdirs()) {
+            throw new Exception("Failed to create temp directory " + tmpDir);
+        } else {
+            return tmpDir;
+        }
+    }
+
+    public static File getLockFile(String filer) {
+        try {
+            File tempTopLevelPath = getTempDir("filer");
+            return new File(tempTopLevelPath, "LOCK_" + filer + ".txt");
+
+        } catch (Exception ex) {
+            LOG.error("Failed to create temp directory for lock file");
+            return null;
+        }
+    }
+
+    public static boolean checkIfLockFileExists(String filer) {
+        // don't bother checking if windows
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.indexOf("win") >= 0) {return false;}
+
+        File f = getLockFile(filer);
+        if (f.exists()) {
+            LOG.trace("Lock file " + f + " found");
+            return true;
+        }
+
+        try {
+            f.createNewFile();
+            LOG.info("Created lock file " + f);
+            return false;
+        } catch (Exception ex) {
+            LOG.error("Failed to create lock file " + f);
+            return true;
+        }
+    }
+
+    public static Integer isRunning(String processString) throws Exception
+    {
+        Integer runCount = 0;
+        // windows?
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.indexOf("win") >= 0) {return 0;}
+        String process;
+        Process p = Runtime.getRuntime().exec("ps -ewo pid,cmd:160");
+        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        while ((process = input.readLine()) != null) {
+            if (process.indexOf(processString) >= 0) {runCount=runCount+1;}
+        }
+        input.close();
+        return runCount;
     }
 
     public static void setupDirectories(File staging, File success, File failure) throws Exception {
@@ -139,7 +250,8 @@ public class FilerUtil {
             pool.setAutoCommit(false);
             pool.setMaximumPoolSize(3); //default to keeping three connections open
             pool.setConnectionTimeout(300000L);
-            pool.setLeakDetectionThreshold(5000L);
+            //pool.setLeakDetectionThreshold(5000L);
+            pool.setLeakDetectionThreshold(20000L);   //SD-1135
             //pool.setJdbcUrl(properties.getProperty(FilerConstants.URL));
             pool.setUsername(properties.getProperty(FilerConstants.DB_USERNAME));
             pool.setPassword(properties.getProperty(FilerConstants.DB_PASSWORD));

@@ -34,7 +34,7 @@ public class ConceptFiler {
 
         Properties properties = null;
         try {
-            properties = FilerUtil.initialize();
+            properties = FilerUtil.initialize("config.properties");
         } catch (Exception e) {
             LOG.error("Error in reading config.properties " + e.getMessage());
             System.exit(-1);
@@ -92,7 +92,7 @@ public class ConceptFiler {
 
             files = FilerUtil.getFilesFromDirectory(destPath, ".sql");
             for (File file : files) {
-                LOG.info("Running statements form file: " + file.getName());
+                LOG.info("Running statements from file: " + file.getName());
                 try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
                     int i = 0;
                     String statement;
@@ -123,7 +123,7 @@ public class ConceptFiler {
 
             files = FilerUtil.getFilesFromDirectory(destPath, ".setup");
             for (File file : files) {
-                LOG.info("Running statements form file: " + file.getName());
+                LOG.info("Running statements from file: " + file.getName());
                 try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
                     String statement;
                     while ((statement = br.readLine()) != null) {
@@ -143,7 +143,7 @@ public class ConceptFiler {
             ArrayList<String> spNames = new ArrayList<>();
             files = FilerUtil.getFilesFromDirectory(destPath, ".execute");
             for (File file : files) {
-                LOG.info("Running statements form file: " + file.getName());
+                LOG.info("Running statements from file: " + file.getName());
                 String schema = FilenameUtils.removeExtension(file.getName());
                 try (BufferedReader br = Files.newBufferedReader(Paths.get(file.getAbsolutePath()))) {
                     String spName;
@@ -176,6 +176,7 @@ public class ConceptFiler {
                 }
             }
             connection.commit();
+            connection.close();    //SD-1135
 
             FileUtils.deleteDirectory(conceptDir);
             FileDeleteStrategy.FORCE.deleteQuietly(conceptsFile);

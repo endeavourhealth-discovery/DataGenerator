@@ -2,11 +2,9 @@ package org.endeavourhealth.cegdatabasefilesender.feedback.bean;
 
 public class Result {
 
-    String uuid;
-
-    String errorMessage;
-
-    ResultType type;
+    private String uuid;
+    private String errorMessage;
+    private ResultType type;
 
     public Result(String uuid) {
         this();

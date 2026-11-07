@@ -2,27 +2,19 @@ package org.endeavourhealth.scheduler.json.SubscriberFileSenderDefinition;
 
 public class SubscriberFileSenderConfig {
 
-    private Integer id = null;
+    private int subscriberId;
     private SubscriberFileLocationDetails subscriberFileLocationDetails;
     private SftpConnectionDetails sftpConnectionDetails;
     //private String slackWebhook;
 
     private SubscriberFileSenderConfig() {}
 
-    private SubscriberFileSenderConfig(Integer id,
-                                       SubscriberFileLocationDetails subscriberFileLocationDetails,
-                                       SftpConnectionDetails sftpConnectionDetails) {
-        this.id = id;
-        this.subscriberFileLocationDetails = subscriberFileLocationDetails;
-        this.sftpConnectionDetails = sftpConnectionDetails;
+    public int getSubscriberId() {
+        return subscriberId;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+    public void setSubscriberId(int subscriberId) {
+        this.subscriberId = subscriberId;
     }
 
     public SubscriberFileLocationDetails getSubscriberFileLocationDetails() {

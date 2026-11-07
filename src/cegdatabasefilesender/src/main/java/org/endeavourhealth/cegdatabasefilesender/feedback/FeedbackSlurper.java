@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Date;
 // import java.nio.file.Files;
 // import java.nio.file.Path;
 
@@ -111,14 +112,16 @@ public class FeedbackSlurper implements AutoCloseable {
             logger.info("Processing file number " + resultsFilesNumber + ", out of " + numberOfResultsFiles + " files.");
             SlackHelper.sendSlackMessage(SlackHelper.Channel.RemoteFilerAlerts,"Processing file number " + resultsFilesNumber + ", out of " + numberOfResultsFiles + " files.");
 
-            for(Result result : fileResult.getResults()) {
+            Date dtResults = fileResult.getDtResults();
+            for (Result result : fileResult.getResults()) {
+
                 switch (result.getType()) {
                     case FAILURE:
-                        feedbackRepository.processFailure(result);
+                        feedbackRepository.processFailure(result, dtResults);
                         failureResults++;
                         break;
                     case SUCCESS:
-                        feedbackRepository.processSuccess(result);
+                        feedbackRepository.processSuccess(result, dtResults);
                         successResults++;
                         break;
                 }

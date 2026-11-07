@@ -95,6 +95,7 @@ public class SftpUtil {
     public List<RemoteFile> getFileList(String remotePath) throws SftpException {
 
         //an error is raised if we try to list the files without first changing into the directory
+        LOG.trace("Checking remote path " + remotePath);
         channel.cd(remotePath);
 
         //trying alternatives that work on all known SFTP servers
